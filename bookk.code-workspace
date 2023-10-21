@@ -1,0 +1,28 @@
+{
+  "folders": [
+    { "path": ".", "name": "bookk" },
+  ],
+  "extensions": {
+    "recommendations": [
+      "EditorConfig.EditorConfig",
+      "JakeBecker.elixir-ls",
+      "fabiospampinato.vscode-highlight"
+    ]
+  },
+  "settings": {
+    "editor.formatOnType": false,
+    "highlight.regexes": {
+      "((#\\s+)?(\\^\\s*)?@let-it-crash(\\!)?)": {
+        "filterFileRegex": ".exs?$",
+        "decorations": [
+          {
+            "overviewRulerColor": "#d16dcf70",
+            "backgroundColor": "#d16dcf70",
+            "color": "#ffffff69",
+            "fontWeight": "bold"
+          }
+        ]
+      }
+    }
+  }
+}

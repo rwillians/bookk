@@ -1,0 +1,10 @@
+/.elixir_ls/
+/_build/
+.fetch/
+/cover/
+/deps/
+/tmp/
+/doc/
+*.ez
+bookk-*.tar
+erl_crash.dump
