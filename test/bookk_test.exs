@@ -8,6 +8,7 @@ defmodule BookkTest do
   doctest Bookk.Account
   doctest Bookk.AccountClass
   doctest Bookk.AccountHead
+  doctest Bookk.ChartOfAccounts
   doctest Bookk.JournalEntry
   doctest Bookk.JournalEntry.Complex
   doctest Bookk.JournalEntry.Compound

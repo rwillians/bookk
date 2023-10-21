@@ -1,6 +1,10 @@
 defmodule TestChartOfAccounts do
+  @behaviour Bookk.ChartOfAccounts
+
+  @impl Bookk.ChartOfAccounts
   def ledger(:acme), do: "acme"
 
+  @impl Bookk.ChartOfAccounts
   def account(:cash) do
     %Bookk.AccountHead{
       name: "cash/CA",

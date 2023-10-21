@@ -1,7 +1,7 @@
 defmodule Bookk.JournalEntry.Complex do
   @moduledoc false
 
-  import Enum, only: [all?: 2]
+  import Enum, only: [all?: 2, map: 2]
 
   alias __MODULE__, as: ComplexJournalEntry
   alias Bookk.JournalEntry.Compound, as: CompoundJournalEntry
@@ -53,4 +53,42 @@ defmodule Bookk.JournalEntry.Complex do
 
   def empty?(%ComplexJournalEntry{entries: []}), do: true
   def empty?(%ComplexJournalEntry{entries: entries}), do: all?(entries, &CompoundJournalEntry.empty?/1)
+
+  @doc """
+  Given a complex journal entry, it returns an opposite journal entry capable of
+  reverting the effects of the given entry.
+
+  ## Examples
+
+      iex> Bookk.JournalEntry.Complex.reverse(%Bookk.JournalEntry.Complex{
+      iex>   entries: [
+      iex>     %Bookk.JournalEntry.Compound{
+      iex>       entries: [
+      iex>         fixture_account_head(:cash) |> debit(10_00),
+      iex>         fixture_account_head(:deposits) |> credit(10_00)
+      iex>       ]
+      iex>     }
+      iex>   ]
+      iex> })
+      %Bookk.JournalEntry.Complex{
+        entries: [
+          %Bookk.JournalEntry.Compound{
+            entries: [
+              fixture_account_head(:deposits) |> debit(10_00),
+              fixture_account_head(:cash) |> credit(10_00)
+            ]
+          }
+        ]
+      }
+
+  """
+  @spec reverse(t) :: t
+
+  def reverse(%ComplexJournalEntry{} = entry) do
+    entries =
+      map(entry.entries, &CompoundJournalEntry.reverse/1)
+      |> :lists.reverse()
+
+    %{entry | entries: entries}
+  end
 end

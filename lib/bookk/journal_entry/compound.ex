@@ -54,4 +54,34 @@ defmodule Bookk.JournalEntry.Compound do
 
   def empty?(%CompoundJournalEntry{entries: []}), do: true
   def empty?(%CompoundJournalEntry{entries: entries}), do: all?(entries, &SimpleJournalEntry.empty?/1)
+
+  @doc """
+  Given a compound journal entry, it returns an opposite journal entry capable
+  of reverting the effect of the given entry.
+
+  ## Examples
+
+      iex> Bookk.JournalEntry.Compound.reverse(%Bookk.JournalEntry.Compound{
+      iex>   entries: [
+      iex>     fixture_account_head(:cash) |> debit(10_00),
+      iex>     fixture_account_head(:deposits) |> credit(10_00)
+      iex>   ]
+      iex> })
+      %Bookk.JournalEntry.Compound{
+        entries: [
+          fixture_account_head(:deposits) |> debit(10_00),
+          fixture_account_head(:cash) |> credit(10_00)
+        ]
+      }
+
+  """
+  @spec reverse(t) :: t
+
+  def reverse(%CompoundJournalEntry{} = entry) do
+    entries =
+      map(entry.entries, &SimpleJournalEntry.reverse/1)
+      |> :lists.reverse()
+
+    %{entry | entries: entries}
+  end
 end

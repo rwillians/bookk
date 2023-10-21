@@ -106,4 +106,28 @@ defmodule Bookk.JournalEntry.Simple do
 
   def empty?(%SimpleJournalEntry{amount: 0}), do: true
   def empty?(%SimpleJournalEntry{}), do: false
+
+  @doc """
+  Given a simple journal entry, it return an opposite journal entry capable of
+  reverting the effects of the given entry. In double-entry bookkeeping
+  accountings that's as simple as swapping the entry's direction.
+
+  ## Examples
+
+      iex> entry = %Bookk.JournalEntry.Simple{direction: :credit, amount: 10_00}
+      iex> Bookk.JournalEntry.Simple.reverse(entry)
+      %Bookk.JournalEntry.Simple{direction: :debit, amount: 10_00}
+
+      iex> entry = %Bookk.JournalEntry.Simple{direction: :debit, amount: 10_00}
+      iex> Bookk.JournalEntry.Simple.reverse(entry)
+      %Bookk.JournalEntry.Simple{direction: :credit, amount: 10_00}
+
+  """
+  @spec reverse(t) :: t
+
+  def reverse(%SimpleJournalEntry{direction: :credit} = entry),
+    do: %{entry | direction: :debit}
+
+  def reverse(%SimpleJournalEntry{direction: :debit} = entry),
+    do: %{entry | direction: :credit}
 end

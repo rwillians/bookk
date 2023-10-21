@@ -1,6 +1,12 @@
 defmodule Bookk.Notation do
   @moduledoc false
 
+  defmacro __using__(_) do
+    quote do
+      import unquote(__MODULE__), only: [journalize: 2, journalize!: 2]
+    end
+  end
+
   @doc """
   A DSL macro for journalizing complex journal entries.
 
