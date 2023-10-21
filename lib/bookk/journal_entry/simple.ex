@@ -88,4 +88,22 @@ defmodule Bookk.JournalEntry.Simple do
       false -> %SimpleJournalEntry{direction: :debit, account_head: head, amount: amount}
     end
   end
+
+  @doc """
+  Checks whether the given simple journal entry is empty, where it is empty if
+  its amount is zero.
+
+  ## Examples
+
+      iex> Bookk.JournalEntry.Simple.empty?(%Bookk.JournalEntry.Simple{amount: 0})
+      true
+
+      iex> Bookk.JournalEntry.Simple.empty?(%Bookk.JournalEntry.Simple{amount: 1})
+      false
+
+  """
+  @spec empty?(t) :: boolean
+
+  def empty?(%SimpleJournalEntry{amount: 0}), do: true
+  def empty?(%SimpleJournalEntry{}), do: false
 end

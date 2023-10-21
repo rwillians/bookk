@@ -157,6 +157,7 @@ defmodule Bookk.Ledger do
       iex>
       iex> %Bookk.Account{balance: 50_00} = Bookk.Ledger.get_account(updated_ledger, cash)
       iex> %Bookk.Account{balance: 50_00} = Bookk.Ledger.get_account(updated_ledger, deposits)
+
   """
   @spec post(t, Bookk.JournalEntry.Compound.t()) :: t
   @spec post(t, Bookk.JournalEntry.Simple.t()) :: t
