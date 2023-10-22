@@ -10,7 +10,7 @@ defmodule BookkTest do
   doctest Bookk.AccountHead
   doctest Bookk.ChartOfAccounts
   doctest Bookk.JournalEntry
-  doctest Bookk.JournalEntry.Complex
+  doctest Bookk.JournalEntry.Interledger
   doctest Bookk.Ledger
   doctest Bookk.Notation
   doctest Bookk.Operation

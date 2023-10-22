@@ -8,7 +8,7 @@ defmodule Bookk.Notation do
   end
 
   @doc """
-  A DSL macro for journalizing complex journal entries.
+  A DSL macro for journalizing interledger journal entries.
 
   ## Examples
 
@@ -16,7 +16,7 @@ defmodule Bookk.Notation do
 
       iex> import Bookk.Notation, only: [journalize: 2]
       iex>
-      iex> %Bookk.JournalEntry.Complex{} = journal_entry =
+      iex> %Bookk.JournalEntry.Interledger{} = journal_entry =
       iex>   journalize using: TestChartOfAccounts do
       iex>     on ledger(:acme) do
       iex>       debit account(:cash), 150_00
@@ -24,12 +24,12 @@ defmodule Bookk.Notation do
       iex>     end
       iex>   end
       iex>
-      iex> assert not Bookk.JournalEntry.Complex.empty?(journal_entry)
-      iex> assert Bookk.JournalEntry.Complex.balanced?(journal_entry)
+      iex> assert not Bookk.JournalEntry.Interledger.empty?(journal_entry)
+      iex> assert Bookk.JournalEntry.Interledger.balanced?(journal_entry)
 
       iex> import Bookk.Notation, only: [journalize: 2]
       iex>
-      iex> %Bookk.JournalEntry.Complex{} = journal_entry =
+      iex> %Bookk.JournalEntry.Interledger{} = journal_entry =
       iex>   journalize using: TestChartOfAccounts do
       iex>     on ledger(:acme) do
       iex>       debit account(:cash), 150_00
@@ -38,14 +38,14 @@ defmodule Bookk.Notation do
       iex>     end
       iex>   end
       iex>
-      iex> assert not Bookk.JournalEntry.Complex.empty?(journal_entry)
-      iex> assert Bookk.JournalEntry.Complex.balanced?(journal_entry)
+      iex> assert not Bookk.JournalEntry.Interledger.empty?(journal_entry)
+      iex> assert Bookk.JournalEntry.Interledger.balanced?(journal_entry)
 
   Unbalanced entry:
 
       iex> import Bookk.Notation, only: [journalize: 2]
       iex>
-      iex> %Bookk.JournalEntry.Complex{} = journal_entry =
+      iex> %Bookk.JournalEntry.Interledger{} = journal_entry =
       iex>   journalize using: TestChartOfAccounts do
       iex>     on ledger(:acme) do
       iex>       debit account(:cash), 150_00
@@ -53,8 +53,8 @@ defmodule Bookk.Notation do
       iex>     end
       iex>   end
       iex>
-      iex> assert not Bookk.JournalEntry.Complex.empty?(journal_entry)
-      iex> assert not Bookk.JournalEntry.Complex.balanced?(journal_entry)
+      iex> assert not Bookk.JournalEntry.Interledger.empty?(journal_entry)
+      iex> assert not Bookk.JournalEntry.Interledger.balanced?(journal_entry)
 
   """
 
@@ -65,11 +65,11 @@ defmodule Bookk.Notation do
        |> Module.split()
        |> Enum.map(&String.to_atom/1)}
 
-    transform_complex(__CALLER__, coa, block)
+    transform_interledger(__CALLER__, coa, block)
   end
 
   @doc """
-  Same as `journalize/2` but it raises an error if the produced complex journal
+  Same as `journalize/2` but it raises an error if the produced interledger journal
   entry is unbalanced.
 
   ## Examples
@@ -78,7 +78,7 @@ defmodule Bookk.Notation do
 
       iex> import Bookk.Notation, only: [journalize!: 2]
       iex>
-      iex> %Bookk.JournalEntry.Complex{} = journal_entry =
+      iex> %Bookk.JournalEntry.Interledger{} = journal_entry =
       iex>   journalize! using: TestChartOfAccounts do
       iex>     on ledger(:acme) do
       iex>       debit account(:cash), 150_00
@@ -86,8 +86,8 @@ defmodule Bookk.Notation do
       iex>     end
       iex>   end
       iex>
-      iex> assert not Bookk.JournalEntry.Complex.empty?(journal_entry)
-      iex> assert Bookk.JournalEntry.Complex.balanced?(journal_entry)
+      iex> assert not Bookk.JournalEntry.Interledger.empty?(journal_entry)
+      iex> assert Bookk.JournalEntry.Interledger.balanced?(journal_entry)
 
   Unbalanced entry:
 
@@ -110,14 +110,14 @@ defmodule Bookk.Notation do
        |> Module.split()
        |> Enum.map(&String.to_atom/1)}
 
-    complex_entry = transform_complex(__CALLER__, coa, block)
+    interledger_entry = transform_interledger(__CALLER__, coa, block)
 
     {:if, [context: __CALLER__, imports: [{2, Kernel}]],
      [
-       {{:., [], [{:__aliases__, [alias: false], [Bookk, JournalEntry, Complex]}, :balanced?]}, [],
-        [complex_entry]},
+       {{:., [], [{:__aliases__, [alias: false], [Bookk, JournalEntry, Interledger]}, :balanced?]}, [],
+        [interledger_entry]},
        [
-         do: complex_entry,
+         do: interledger_entry,
          else:
            {:raise, [context: __CALLER__, imports: [{1, Kernel}, {2, Kernel}]],
             [
@@ -134,7 +134,7 @@ defmodule Bookk.Notation do
   #   PRIVATE
   #
 
-  defp transform_complex(caller, coa, block) do
+  defp transform_interledger(caller, coa, block) do
     {statements, meta} =
       case block do
         {:__block__, meta, statements} -> {statements, meta}
@@ -148,7 +148,7 @@ defmodule Bookk.Notation do
 
     {:%, meta,
      [
-       {:__aliases__, [alias: false], [Bookk, JournalEntry, Complex]},
+       {:__aliases__, [alias: false], [Bookk, JournalEntry, Interledger]},
        {:%{}, [],
         [
           entries_by_ledger:

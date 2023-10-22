@@ -1,15 +1,15 @@
-defmodule Bookk.JournalEntry.Complex do
+defmodule Bookk.JournalEntry.Interledger do
   @moduledoc false
 
   import Enum, only: [all?: 2, map: 2, to_list: 1]
   import List, only: [flatten: 1]
   import Map, only: [values: 1]
 
-  alias __MODULE__, as: ComplexEntry
+  alias __MODULE__, as: InterledgerEntry
   alias Bookk.JournalEntry, as: JournalEntry
 
   @typedoc false
-  @type t :: %Bookk.JournalEntry.Complex{
+  @type t :: %Bookk.JournalEntry.Interledger{
           entries_by_ledger: %{
             (ledger_name :: String.t()) => Bookk.JournalEntry.t()
           }
@@ -23,7 +23,7 @@ defmodule Bookk.JournalEntry.Complex do
 
   Balanced entry:
 
-      iex> complex = %Bookk.JournalEntry.Complex{
+      iex> interledger = %Bookk.JournalEntry.Interledger{
       iex>   entries_by_ledger: %{
       iex>     "acme" => [
       iex>       %Bookk.JournalEntry{
@@ -36,12 +36,12 @@ defmodule Bookk.JournalEntry.Complex do
       iex>   }
       iex> }
       iex>
-      iex> Bookk.JournalEntry.Complex.balanced?(complex)
+      iex> Bookk.JournalEntry.Interledger.balanced?(interledger)
       true
 
   Unbalanced entry:
 
-      iex> complex = %Bookk.JournalEntry.Complex{
+      iex> interledger = %Bookk.JournalEntry.Interledger{
       iex>   entries_by_ledger: %{
       iex>     "acme" => [
       iex>       %Bookk.JournalEntry{
@@ -53,17 +53,17 @@ defmodule Bookk.JournalEntry.Complex do
       iex>   }
       iex> }
       iex>
-      iex> Bookk.JournalEntry.Complex.balanced?(complex)
+      iex> Bookk.JournalEntry.Interledger.balanced?(interledger)
       false
 
   """
   @spec balanced?(t) :: boolean
 
-  def balanced?(%ComplexEntry{entries_by_ledger: %{} = entries_by_ledger})
+  def balanced?(%InterledgerEntry{entries_by_ledger: %{} = entries_by_ledger})
       when map_size(entries_by_ledger) == 0,
       do: true
 
-  def balanced?(%ComplexEntry{entries_by_ledger: %{} = entries_by_ledger}) do
+  def balanced?(%InterledgerEntry{entries_by_ledger: %{} = entries_by_ledger}) do
     values(entries_by_ledger)
     |> flatten()
     |> all?(&JournalEntry.balanced?/1)
@@ -73,10 +73,10 @@ defmodule Bookk.JournalEntry.Complex do
 
   ## Examples
 
-      iex> Bookk.JournalEntry.Complex.empty?(%Bookk.JournalEntry.Complex{})
+      iex> Bookk.JournalEntry.Interledger.empty?(%Bookk.JournalEntry.Interledger{})
       true
 
-      iex> complex = %Bookk.JournalEntry.Complex{
+      iex> interledger = %Bookk.JournalEntry.Interledger{
       iex>   entries_by_ledger: %{
       iex>     "acme" => [
       iex>       %Bookk.JournalEntry{
@@ -86,10 +86,10 @@ defmodule Bookk.JournalEntry.Complex do
       iex>   }
       iex> }
       iex>
-      iex> Bookk.JournalEntry.Complex.empty?(complex)
+      iex> Bookk.JournalEntry.Interledger.empty?(interledger)
       true
 
-      iex> complex = %Bookk.JournalEntry.Complex{
+      iex> interledger = %Bookk.JournalEntry.Interledger{
       iex>   entries_by_ledger: %{
       iex>     "acme" => [
       iex>       %Bookk.JournalEntry{
@@ -99,17 +99,17 @@ defmodule Bookk.JournalEntry.Complex do
       iex>   }
       iex> }
       iex>
-      iex> Bookk.JournalEntry.Complex.empty?(complex)
+      iex> Bookk.JournalEntry.Interledger.empty?(interledger)
       false
 
   """
   @spec empty?(t) :: boolean
 
-  def empty?(%ComplexEntry{entries_by_ledger: %{} = map})
+  def empty?(%InterledgerEntry{entries_by_ledger: %{} = map})
       when map_size(map) == 0,
       do: true
 
-  def empty?(%ComplexEntry{entries_by_ledger: %{} = entries_by_ledger}) do
+  def empty?(%InterledgerEntry{entries_by_ledger: %{} = entries_by_ledger}) do
     values(entries_by_ledger)
     |> flatten()
     |> all?(&JournalEntry.empty?/1)
@@ -119,7 +119,7 @@ defmodule Bookk.JournalEntry.Complex do
 
   ## Examples
 
-      iex> complex = %Bookk.JournalEntry.Complex{
+      iex> interledger = %Bookk.JournalEntry.Interledger{
       iex>   entries_by_ledger: %{
       iex>     "acme" => [
       iex>       %Bookk.JournalEntry{
@@ -132,8 +132,8 @@ defmodule Bookk.JournalEntry.Complex do
       iex>   }
       iex> }
       iex>
-      iex> Bookk.JournalEntry.Complex.reverse(complex)
-      %Bookk.JournalEntry.Complex{
+      iex> Bookk.JournalEntry.Interledger.reverse(interledger)
+      %Bookk.JournalEntry.Interledger{
         entries_by_ledger: %{
           "acme" => [
             %Bookk.JournalEntry{
@@ -149,7 +149,7 @@ defmodule Bookk.JournalEntry.Complex do
   """
   @spec reverse(t) :: t
 
-  def reverse(%ComplexEntry{entries_by_ledger: %{} = entries_by_ledger} = entry) do
+  def reverse(%InterledgerEntry{entries_by_ledger: %{} = entries_by_ledger} = entry) do
     enum = to_list(entries_by_ledger)
 
     entries_by_ledger =
