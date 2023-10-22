@@ -9,8 +9,8 @@ defmodule TestChartOfAccounts do
     %Bookk.AccountHead{
       name: "cash/CA",
       class: %Bookk.AccountClass{
-        sigil: "CA",
-        parent_sigil: "A",
+        id: "CA",
+        parent_id: "A",
         name: "Current Asset",
         balance_increases_with: :debit
       }
@@ -21,8 +21,8 @@ defmodule TestChartOfAccounts do
     %Bookk.AccountHead{
       name: "deposits/OE",
       class: %Bookk.AccountClass{
-        sigil: "OE",
-        parent_sigil: nil,
+        id: "OE",
+        parent_id: nil,
         name: "Owner's Equity",
         balance_increases_with: :credit
       }

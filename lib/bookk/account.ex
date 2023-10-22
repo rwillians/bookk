@@ -3,7 +3,7 @@ defmodule Bookk.Account do
 
   alias __MODULE__, as: Account
   alias Bookk.AccountHead, as: AccountHead
-  alias Bookk.JournalEntry.Simple, as: SimpleJournalEntry
+  alias Bookk.JournalEntry.Simple, as: SimpleEntry
 
   @typedoc false
   @type t :: %Bookk.Account{
@@ -96,7 +96,7 @@ defmodule Bookk.Account do
 
   def post(
         %Account{head: same, balance: balance, history: history},
-        %SimpleJournalEntry{account_head: same = head, amount: amount} = entry
+        %SimpleEntry{account_head: same = head, amount: amount} = entry
       ) do
     balance_after =
       case {head.class.balance_increases_with, entry.direction} do

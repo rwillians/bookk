@@ -3,8 +3,8 @@ defmodule Bookk.JournalEntry.Complex do
 
   import Enum, only: [all?: 2, map: 2]
 
-  alias __MODULE__, as: ComplexJournalEntry
-  alias Bookk.JournalEntry.Compound, as: CompoundJournalEntry
+  alias __MODULE__, as: ComplexEntry
+  alias Bookk.JournalEntry.Compound, as: CompoundEntry
 
   @typedoc false
   @type t :: %Bookk.JournalEntry.Complex{
@@ -19,8 +19,8 @@ defmodule Bookk.JournalEntry.Complex do
   """
   @spec balanced?(t) :: boolean
 
-  def balanced?(%ComplexJournalEntry{} = entry),
-    do: all?(entry.entries, &CompoundJournalEntry.balanced?/1)
+  def balanced?(%ComplexEntry{} = entry),
+    do: all?(entry.entries, &CompoundEntry.balanced?/1)
 
   @doc """
   Checks whether the given complex journal entry is empty, where it is empty
@@ -51,8 +51,8 @@ defmodule Bookk.JournalEntry.Complex do
   """
   @spec empty?(t) :: boolean
 
-  def empty?(%ComplexJournalEntry{entries: []}), do: true
-  def empty?(%ComplexJournalEntry{entries: entries}), do: all?(entries, &CompoundJournalEntry.empty?/1)
+  def empty?(%ComplexEntry{entries: []}), do: true
+  def empty?(%ComplexEntry{entries: entries}), do: all?(entries, &CompoundEntry.empty?/1)
 
   @doc """
   Given a complex journal entry, it returns an opposite journal entry capable of
@@ -84,9 +84,10 @@ defmodule Bookk.JournalEntry.Complex do
   """
   @spec reverse(t) :: t
 
-  def reverse(%ComplexJournalEntry{} = entry) do
+  def reverse(%ComplexEntry{} = entry) do
     entries =
-      map(entry.entries, &CompoundJournalEntry.reverse/1)
+      entry.entries
+      |> map(&CompoundEntry.reverse/1)
       |> :lists.reverse()
 
     %{entry | entries: entries}

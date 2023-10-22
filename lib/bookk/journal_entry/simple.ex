@@ -1,7 +1,7 @@
 defmodule Bookk.JournalEntry.Simple do
   @moduledoc false
 
-  alias __MODULE__, as: SimpleJournalEntry
+  alias __MODULE__, as: SimpleEntry
   alias Bookk.AccountHead, as: AccountHead
 
   @typedoc false
@@ -47,7 +47,7 @@ defmodule Bookk.JournalEntry.Simple do
       when is_integer(amount) do
     case amount < 0 do
       true -> debit(head, -amount)
-      false -> %SimpleJournalEntry{direction: :credit, account_head: head, amount: amount}
+      false -> %SimpleEntry{direction: :credit, account_head: head, amount: amount}
     end
   end
 
@@ -85,7 +85,7 @@ defmodule Bookk.JournalEntry.Simple do
       when is_integer(amount) do
     case amount < 0 do
       true -> credit(head, -amount)
-      false -> %SimpleJournalEntry{direction: :debit, account_head: head, amount: amount}
+      false -> %SimpleEntry{direction: :debit, account_head: head, amount: amount}
     end
   end
 
@@ -104,8 +104,8 @@ defmodule Bookk.JournalEntry.Simple do
   """
   @spec empty?(t) :: boolean
 
-  def empty?(%SimpleJournalEntry{amount: 0}), do: true
-  def empty?(%SimpleJournalEntry{}), do: false
+  def empty?(%SimpleEntry{amount: 0}), do: true
+  def empty?(%SimpleEntry{}), do: false
 
   @doc """
   Given a simple journal entry, it return an opposite journal entry capable of
@@ -125,9 +125,6 @@ defmodule Bookk.JournalEntry.Simple do
   """
   @spec reverse(t) :: t
 
-  def reverse(%SimpleJournalEntry{direction: :credit} = entry),
-    do: %{entry | direction: :debit}
-
-  def reverse(%SimpleJournalEntry{direction: :debit} = entry),
-    do: %{entry | direction: :credit}
+  def reverse(%SimpleEntry{direction: :credit} = entry), do: %{entry | direction: :debit}
+  def reverse(%SimpleEntry{direction: :debit} = entry), do: %{entry | direction: :credit}
 end

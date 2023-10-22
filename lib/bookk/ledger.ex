@@ -7,8 +7,8 @@ defmodule Bookk.Ledger do
   alias __MODULE__, as: Ledger
   alias Bookk.Account, as: Account
   alias Bookk.AccountHead, as: AccountHead
-  alias Bookk.JournalEntry.Compound, as: CompoundJournalEntry
-  alias Bookk.JournalEntry.Simple, as: SimpleJournalEntry
+  alias Bookk.JournalEntry.Compound, as: CompoundEntry
+  alias Bookk.JournalEntry.Simple, as: SimpleEntry
 
   @typedoc false
   @type t :: %Bookk.Ledger{
@@ -162,26 +162,21 @@ defmodule Bookk.Ledger do
   @spec post(t, Bookk.JournalEntry.Compound.t()) :: t
   @spec post(t, Bookk.JournalEntry.Simple.t()) :: t
 
-  def post(%Ledger{} = ledger, %SimpleJournalEntry{} = entry) do
+  def post(%Ledger{} = ledger, %SimpleEntry{} = entry) do
     ledger
     |> get_account(entry.account_head)
     |> Account.post(entry)
     |> put_account(ledger)
   end
 
-  def post(
-        %Ledger{name: same} = ledger,
-        %CompoundJournalEntry{ledger_name: same} = entry
-      ),
+  def post(%Ledger{name: same} = ledger, %CompoundEntry{ledger_name: same} = entry),
       do: do_post(ledger, entry.entries)
 
   defp do_post(ledger, [head | tail]), do: post(ledger, head) |> do_post(tail)
   defp do_post(ledger, []), do: ledger
 
   defp put_account(account, ledger) do
-    %{
-      ledger
-      | accounts: put(ledger.accounts, account.head.name, account)
-    }
+    accounts = put(ledger.accounts, account.head.name, account)
+    %{ledger | accounts: accounts}
   end
 end

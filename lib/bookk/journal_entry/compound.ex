@@ -3,8 +3,8 @@ defmodule Bookk.JournalEntry.Compound do
 
   import Enum, only: [all?: 2, map: 2, split_with: 2, sum: 1]
 
-  alias __MODULE__, as: CompoundJournalEntry
-  alias Bookk.JournalEntry.Simple, as: SimpleJournalEntry
+  alias __MODULE__, as: CompoundEntry
+  alias Bookk.JournalEntry.Simple, as: SimpleEntry
 
   @typedoc false
   @type t :: %Bookk.JournalEntry.Compound{
@@ -21,7 +21,7 @@ defmodule Bookk.JournalEntry.Compound do
   """
   @spec balanced?(t) :: boolean
 
-  def balanced?(%CompoundJournalEntry{} = entry) do
+  def balanced?(%CompoundEntry{} = entry) do
     {debits, credits} = split_with(entry.entries, & &1.direction == :debit)
 
     sum_debits = map(debits, & &1.amount) |> sum()
@@ -52,8 +52,8 @@ defmodule Bookk.JournalEntry.Compound do
   """
   @spec empty?(t) :: boolean
 
-  def empty?(%CompoundJournalEntry{entries: []}), do: true
-  def empty?(%CompoundJournalEntry{entries: entries}), do: all?(entries, &SimpleJournalEntry.empty?/1)
+  def empty?(%CompoundEntry{entries: []}), do: true
+  def empty?(%CompoundEntry{entries: entries}), do: all?(entries, &SimpleEntry.empty?/1)
 
   @doc """
   Given a compound journal entry, it returns an opposite journal entry capable
@@ -77,9 +77,10 @@ defmodule Bookk.JournalEntry.Compound do
   """
   @spec reverse(t) :: t
 
-  def reverse(%CompoundJournalEntry{} = entry) do
+  def reverse(%CompoundEntry{} = entry) do
     entries =
-      map(entry.entries, &SimpleJournalEntry.reverse/1)
+      entry.entries
+      |> map(&SimpleEntry.reverse/1)
       |> :lists.reverse()
 
     %{entry | entries: entries}
