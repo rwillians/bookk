@@ -109,10 +109,7 @@ defmodule Bookk.Ledger do
       iex> |> Bookk.Ledger.get_account(head)
       %Bookk.Account{
         head: fixture_account_head(:cash),
-        balance: 30_00,
-        history: [
-          {fixture_account_head(:cash) |> debit(30_00), 30_00}
-        ]
+        balance: 30_00
       }
 
   When account exists, it gets updated:
@@ -129,12 +126,7 @@ defmodule Bookk.Ledger do
       iex> |> Bookk.Ledger.get_account(head)
       %Bookk.Account{
         head: fixture_account_head(:cash),
-        balance: 100_00,
-        history: [
-          {fixture_account_head(:cash) |> debit(70_00), 100_00},
-          # ^ most recent first
-          {fixture_account_head(:cash) |> debit(30_00), 30_00}
-        ]
+        balance: 100_00
       }
 
   Can post a compound journal entry:

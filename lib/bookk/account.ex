@@ -8,11 +8,10 @@ defmodule Bookk.Account do
   @typedoc false
   @type t :: %Bookk.Account{
           head: Bookk.AccountHead.t(),
-          balance: integer,
-          history: [{Bookk.JournalEntry.Simple.t(), balance_after :: integer}, ...]
+          balance: integer
         }
 
-  defstruct [:head, balance: 0, history: []]
+  defstruct [:head, balance: 0]
 
   @doc false
   @spec new(Bookk.AccountHead.t()) :: t
@@ -45,16 +44,7 @@ defmodule Bookk.Account do
       iex> Bookk.Account.post(account, journal_entry)
       %Bookk.Account{
         head: %Bookk.AccountHead{class: %Bookk.AccountClass{balance_increases_with: :debit}},
-        balance: 25_00,
-        history: [
-          {%Bookk.JournalEntry.Simple{
-            direction: :debit,
-            account_head: %Bookk.AccountHead{
-              class: %Bookk.AccountClass{balance_increases_with: :debit}
-            },
-            amount: 25_00
-          }, 25_00}
-        ]
+        balance: 25_00
       }
 
   Subtracting balance:
@@ -68,16 +58,7 @@ defmodule Bookk.Account do
       iex> Bookk.Account.post(account, journal_entry)
       %Bookk.Account{
         head: %Bookk.AccountHead{class: %Bookk.AccountClass{balance_increases_with: :debit}},
-        balance: -25_00,
-        history: [
-          {%Bookk.JournalEntry.Simple{
-            direction: :credit,
-            account_head: %Bookk.AccountHead{
-              class: %Bookk.AccountClass{balance_increases_with: :debit}
-            },
-            amount: 25_00
-          }, -25_00}
-        ]
+        balance: -25_00
       }
 
   Mismatching account headers:
@@ -95,7 +76,7 @@ defmodule Bookk.Account do
   @spec post(t, Bookk.JournalEntry.Simple.t()) :: t
 
   def post(
-        %Account{head: same, balance: balance, history: history},
+        %Account{head: same, balance: balance},
         %SimpleEntry{account_head: same = head, amount: amount} = entry
       ) do
     balance_after =
@@ -104,12 +85,6 @@ defmodule Bookk.Account do
         {_, _} -> balance - amount
       end
 
-    %Account{
-      head: head,
-      balance: balance_after,
-      history: [{entry, balance_after} | history]
-      #         ^ prepending so that it's an O(1) op
-      #           consumers can reverse the list if they want to
-    }
+    %Account{head: head, balance: balance_after}
   end
 end
