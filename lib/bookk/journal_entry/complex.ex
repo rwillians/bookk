@@ -34,7 +34,7 @@ defmodule Bookk.JournalEntry.Complex do
       iex> Bookk.JournalEntry.Complex.empty?(%Bookk.JournalEntry.Complex{
       iex>   entries: [
       iex>     %Bookk.JournalEntry.Compound{
-      iex>       entries: [%Bookk.JournalEntry.Simple{amount: 0}]
+      iex>       entries: [%Bookk.Operation{amount: 0}]
       iex>     }
       iex>   ]
       iex> })
@@ -43,7 +43,7 @@ defmodule Bookk.JournalEntry.Complex do
       iex> Bookk.JournalEntry.Complex.empty?(%Bookk.JournalEntry.Complex{
       iex>   entries: [
       iex>     %Bookk.JournalEntry.Compound{
-      iex>       entries: [%Bookk.JournalEntry.Simple{amount: 1}]
+      iex>       entries: [%Bookk.Operation{amount: 1}]
       iex>     }
       iex>   ]
       iex> })

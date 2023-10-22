@@ -1,11 +1,11 @@
-defmodule Bookk.JournalEntry.Simple do
+defmodule Bookk.Operation do
   @moduledoc false
 
-  alias __MODULE__, as: SimpleEntry
+  alias __MODULE__, as: Op
   alias Bookk.AccountHead, as: AccountHead
 
   @typedoc false
-  @type t :: %Bookk.JournalEntry.Simple{
+  @type t :: %Bookk.Operation{
           direction: :credit | :debit,
           account_head: Bookk.AccountHead.t(),
           amount: pos_integer
@@ -23,8 +23,8 @@ defmodule Bookk.JournalEntry.Simple do
   With a positive amount:
 
       iex> head = fixture_account_head(:cash)
-      iex> Bookk.JournalEntry.Simple.credit(head, 25_00)
-      %Bookk.JournalEntry.Simple{
+      iex> Bookk.Operation.credit(head, 25_00)
+      %Bookk.Operation{
         direction: :credit,
         account_head: fixture_account_head(:cash),
         amount: 25_00
@@ -33,8 +33,8 @@ defmodule Bookk.JournalEntry.Simple do
   With a negative amount:
 
       iex> head = fixture_account_head(:cash)
-      iex> Bookk.JournalEntry.Simple.credit(head, -25_00)
-      %Bookk.JournalEntry.Simple{
+      iex> Bookk.Operation.credit(head, -25_00)
+      %Bookk.Operation{
         direction: :debit,
         account_head: fixture_account_head(:cash),
         amount: 25_00
@@ -47,7 +47,7 @@ defmodule Bookk.JournalEntry.Simple do
       when is_integer(amount) do
     case amount < 0 do
       true -> debit(head, -amount)
-      false -> %SimpleEntry{direction: :credit, account_head: head, amount: amount}
+      false -> %Op{direction: :credit, account_head: head, amount: amount}
     end
   end
 
@@ -61,8 +61,8 @@ defmodule Bookk.JournalEntry.Simple do
   With a positive amount:
 
       iex> head = fixture_account_head(:cash)
-      iex> Bookk.JournalEntry.Simple.debit(head, 25_00)
-      %Bookk.JournalEntry.Simple{
+      iex> Bookk.Operation.debit(head, 25_00)
+      %Bookk.Operation{
         direction: :debit,
         account_head: fixture_account_head(:cash),
         amount: 25_00
@@ -71,8 +71,8 @@ defmodule Bookk.JournalEntry.Simple do
   With a negative amount:
 
       iex> head = fixture_account_head(:cash)
-      iex> Bookk.JournalEntry.Simple.debit(head, -25_00)
-      %Bookk.JournalEntry.Simple{
+      iex> Bookk.Operation.debit(head, -25_00)
+      %Bookk.Operation{
         direction: :credit,
         account_head: fixture_account_head(:cash),
         amount: 25_00
@@ -85,7 +85,7 @@ defmodule Bookk.JournalEntry.Simple do
       when is_integer(amount) do
     case amount < 0 do
       true -> credit(head, -amount)
-      false -> %SimpleEntry{direction: :debit, account_head: head, amount: amount}
+      false -> %Op{direction: :debit, account_head: head, amount: amount}
     end
   end
 
@@ -95,17 +95,17 @@ defmodule Bookk.JournalEntry.Simple do
 
   ## Examples
 
-      iex> Bookk.JournalEntry.Simple.empty?(%Bookk.JournalEntry.Simple{amount: 0})
+      iex> Bookk.Operation.empty?(%Bookk.Operation{amount: 0})
       true
 
-      iex> Bookk.JournalEntry.Simple.empty?(%Bookk.JournalEntry.Simple{amount: 1})
+      iex> Bookk.Operation.empty?(%Bookk.Operation{amount: 1})
       false
 
   """
   @spec empty?(t) :: boolean
 
-  def empty?(%SimpleEntry{amount: 0}), do: true
-  def empty?(%SimpleEntry{}), do: false
+  def empty?(%Op{amount: 0}), do: true
+  def empty?(%Op{}), do: false
 
   @doc """
   Given a simple journal entry, it return an opposite journal entry capable of
@@ -114,17 +114,17 @@ defmodule Bookk.JournalEntry.Simple do
 
   ## Examples
 
-      iex> entry = %Bookk.JournalEntry.Simple{direction: :credit, amount: 10_00}
-      iex> Bookk.JournalEntry.Simple.reverse(entry)
-      %Bookk.JournalEntry.Simple{direction: :debit, amount: 10_00}
+      iex> entry = %Bookk.Operation{direction: :credit, amount: 10_00}
+      iex> Bookk.Operation.reverse(entry)
+      %Bookk.Operation{direction: :debit, amount: 10_00}
 
-      iex> entry = %Bookk.JournalEntry.Simple{direction: :debit, amount: 10_00}
-      iex> Bookk.JournalEntry.Simple.reverse(entry)
-      %Bookk.JournalEntry.Simple{direction: :credit, amount: 10_00}
+      iex> entry = %Bookk.Operation{direction: :debit, amount: 10_00}
+      iex> Bookk.Operation.reverse(entry)
+      %Bookk.Operation{direction: :credit, amount: 10_00}
 
   """
   @spec reverse(t) :: t
 
-  def reverse(%SimpleEntry{direction: :credit} = entry), do: %{entry | direction: :debit}
-  def reverse(%SimpleEntry{direction: :debit} = entry), do: %{entry | direction: :credit}
+  def reverse(%Op{direction: :credit} = entry), do: %{entry | direction: :debit}
+  def reverse(%Op{direction: :debit} = entry), do: %{entry | direction: :credit}
 end

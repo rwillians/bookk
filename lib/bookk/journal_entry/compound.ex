@@ -4,12 +4,12 @@ defmodule Bookk.JournalEntry.Compound do
   import Enum, only: [all?: 2, map: 2, split_with: 2, sum: 1]
 
   alias __MODULE__, as: CompoundEntry
-  alias Bookk.JournalEntry.Simple, as: SimpleEntry
+  alias Bookk.Operation, as: Op
 
   @typedoc false
   @type t :: %Bookk.JournalEntry.Compound{
           ledger_name: String.t(),
-          entries: [Bookk.JournalEntry.Simple.t()]
+          entries: [Bookk.Operation.t()]
         }
 
   defstruct [:ledger_name, entries: []]
@@ -40,12 +40,12 @@ defmodule Bookk.JournalEntry.Compound do
      true
 
      iex> Bookk.JournalEntry.Compound.empty?(%Bookk.JournalEntry.Compound{
-     iex>   entries: [%Bookk.JournalEntry.Simple{amount: 0}]
+     iex>   entries: [%Bookk.Operation{amount: 0}]
      iex> })
      true
 
      iex> Bookk.JournalEntry.Compound.empty?(%Bookk.JournalEntry.Compound{
-     iex>   entries: [%Bookk.JournalEntry.Simple{amount: 10_00}]
+     iex>   entries: [%Bookk.Operation{amount: 10_00}]
      iex> })
      false
 
@@ -53,7 +53,7 @@ defmodule Bookk.JournalEntry.Compound do
   @spec empty?(t) :: boolean
 
   def empty?(%CompoundEntry{entries: []}), do: true
-  def empty?(%CompoundEntry{entries: entries}), do: all?(entries, &SimpleEntry.empty?/1)
+  def empty?(%CompoundEntry{entries: entries}), do: all?(entries, &Op.empty?/1)
 
   @doc """
   Given a compound journal entry, it returns an opposite journal entry capable
@@ -80,7 +80,7 @@ defmodule Bookk.JournalEntry.Compound do
   def reverse(%CompoundEntry{} = entry) do
     entries =
       entry.entries
-      |> map(&SimpleEntry.reverse/1)
+      |> map(&Op.reverse/1)
       |> :lists.reverse()
 
     %{entry | entries: entries}

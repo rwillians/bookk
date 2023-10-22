@@ -172,7 +172,7 @@ defmodule Bookk.Notation do
   defp transform_simple(caller, coa, {direction, meta_a, [{:account, meta_b, [name]}, amount]})
        when direction in [:credit, :debit] do
     {{:., [context: caller],
-      [{:__aliases__, [alias: false], [Bookk, JournalEntry, Simple]}, direction]}, meta_a,
+      [{:__aliases__, [alias: false], [Bookk, Operation]}, direction]}, meta_a,
      [{{:., [context: caller], [coa, :account]}, meta_b, [name]}, amount]}
   end
 end

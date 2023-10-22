@@ -3,7 +3,6 @@ defmodule Bookk.JournalEntry do
 
   @typedoc false
   @type t ::
-          Bookk.JournalEntry.Simple.t()
-          | Bookk.JournalEntry.Compound.t()
+          Bookk.JournalEntry.Compound.t()
           | Bookk.JournalEntry.Complex.t()
 end
