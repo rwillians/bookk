@@ -29,14 +29,12 @@ defmodule Bookk.Ledger do
       iex> cash = fixture_account_head(:cash)
       iex> deposits = fixture_account_head(:deposits)
       iex>
-      iex> journal_entry =
-      iex>   %Bookk.JournalEntry{
-      iex>     ledger_name: "acme",
-      iex>     operations: [
-      iex>       debit(cash, 50_00),
-      iex>       credit(deposits, 50_00)
-      iex>     ]
-      iex>   }
+      iex> journal_entry = %Bookk.JournalEntry{
+      iex>   operations: [
+      iex>     debit(cash, 50_00),
+      iex>     credit(deposits, 50_00)
+      iex>   ]
+      iex> }
       iex>
       iex> Bookk.Ledger.post(ledger, journal_entry)
       iex> |> Bookk.Ledger.balanced?()
@@ -73,16 +71,15 @@ defmodule Bookk.Ledger do
 
   When the account exists in the ledger:
 
-      iex> ledger =
-      iex>   %Bookk.Ledger{
-      iex>     name: "acme",
-      iex>     accounts: %{
-      iex>       "cash/CA" => %Bookk.Account{
-      iex>         head: fixture_account_head(:cash),
-      iex>         balance: 25_00
-      iex>       }
+      iex> ledger = %Bookk.Ledger{
+      iex>   name: "acme",
+      iex>   accounts: %{
+      iex>     "cash/CA" => %Bookk.Account{
+      iex>       head: fixture_account_head(:cash),
+      iex>       balance: 25_00
       iex>     }
       iex>   }
+      iex> }
       iex>
       iex> Bookk.Ledger.get_account(ledger, fixture_account_head(:cash))
       %Bookk.Account{
@@ -126,37 +123,6 @@ defmodule Bookk.Ledger do
 
   ## Examples
 
-  When account doesn't exist then it gets created:
-
-      iex> ledger = Bookk.Ledger.new("acme")
-      iex>
-      iex> head = fixture_account_head(:cash)
-      iex> entry = debit(head, 30_00)
-      iex>
-      iex> Bookk.Ledger.post(ledger, entry)
-      iex> |> Bookk.Ledger.get_account(head)
-      %Bookk.Account{
-        head: fixture_account_head(:cash),
-        balance: 30_00
-      }
-
-  When account exists then it gets updated:
-
-      iex> ledger = Bookk.Ledger.new("acme")
-      iex>
-      iex> head = fixture_account_head(:cash)
-      iex> entry_1 = debit(head, 30_00)
-      iex> entry_2 = debit(head, 70_00)
-      iex>
-      iex> ledger
-      iex> |> Bookk.Ledger.post(entry_1)
-      iex> |> Bookk.Ledger.post(entry_2)
-      iex> |> Bookk.Ledger.get_account(head)
-      %Bookk.Account{
-        head: fixture_account_head(:cash),
-        balance: 100_00
-      }
-
   Can post a journal entry:
 
       iex> ledger = Bookk.Ledger.new("acme")
@@ -164,14 +130,12 @@ defmodule Bookk.Ledger do
       iex> cash = fixture_account_head(:cash)
       iex> deposits = fixture_account_head(:deposits)
       iex>
-      iex> journal_entry =
-      iex>   %Bookk.JournalEntry{
-      iex>     ledger_name: "acme",
-      iex>     operations: [
-      iex>       debit(cash, 50_00),
-      iex>       credit(deposits, 50_00)
-      iex>     ]
-      iex>   }
+      iex> journal_entry = %Bookk.JournalEntry{
+      iex>   operations: [
+      iex>     debit(cash, 50_00),
+      iex>     credit(deposits, 50_00)
+      iex>   ]
+      iex> }
       iex>
       iex> updated_ledger = Bookk.Ledger.post(ledger, journal_entry)
       iex>
@@ -189,6 +153,37 @@ defmodule Bookk.Ledger do
       iex>
       iex> %Bookk.Account{balance: 50_00} = Bookk.Ledger.get_account(updated_ledger, cash)
 
+  When account doesn't exist then it gets created:
+
+      iex> ledger = Bookk.Ledger.new("acme")
+      iex>
+      iex> head = fixture_account_head(:cash)
+      iex> op = debit(head, 30_00)
+      iex>
+      iex> Bookk.Ledger.post(ledger, op)
+      iex> |> Bookk.Ledger.get_account(head)
+      %Bookk.Account{
+        head: fixture_account_head(:cash),
+        balance: 30_00
+      }
+
+  When account exists then it gets updated:
+
+      iex> ledger = Bookk.Ledger.new("acme")
+      iex>
+      iex> head = fixture_account_head(:cash)
+      iex> op1 = debit(head, 30_00)
+      iex> op2 = debit(head, 70_00)
+      iex>
+      iex> ledger
+      iex> |> Bookk.Ledger.post(op1)
+      iex> |> Bookk.Ledger.post(op2)
+      iex> |> Bookk.Ledger.get_account(head)
+      %Bookk.Account{
+        head: fixture_account_head(:cash),
+        balance: 100_00
+      }
+
   """
   @spec post(t, Bookk.JournalEntry.t()) :: t
   @spec post(t, Bookk.Operation.t()) :: t
@@ -200,8 +195,8 @@ defmodule Bookk.Ledger do
     |> put_account(ledger)
   end
 
-  def post(%Ledger{name: same} = ledger, %JournalEntry{ledger_name: same} = entry),
-      do: do_post(ledger, entry.operations)
+  def post(%Ledger{} = ledger, %JournalEntry{operations: ops}),
+      do: do_post(ledger, ops)
 
   defp do_post(ledger, [head | tail]), do: post(ledger, head) |> do_post(tail)
   defp do_post(ledger, []), do: ledger

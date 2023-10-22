@@ -141,12 +141,19 @@ defmodule Bookk.Notation do
         {:on, meta, _} = statement -> {[statement], meta}
       end
 
+    entries_by_ledger =
+      Enum.map(statements, &transform_compound(caller, coa, &1))
+      |> Enum.group_by(fn {k, _v} -> k end, fn {_, v} -> v end)
+      |> Enum.map(fn {ledger, xs} -> {ledger, List.flatten(xs)} end)
+
     {:%, meta,
      [
        {:__aliases__, [alias: false], [Bookk, JournalEntry, Complex]},
        {:%{}, [],
         [
-          entries: Enum.map(statements, &transform_compound(caller, coa, &1))
+          entries_by_ledger:
+            {{:., [], [{:__aliases__, [alias: false], [Enum]}, :into]}, [],
+             [entries_by_ledger, {:%{}, [], []}]}
         ]}
      ]}
   end
@@ -158,21 +165,19 @@ defmodule Bookk.Notation do
         {direction, _, _} when direction in [:credit, :debit] -> [block]
       end
 
-    {:%, meta_a,
-     [
-       {:__aliases__, [alias: false], [Bookk, JournalEntry]},
-       {:%{}, [],
-        [
-          ledger_name: {{:., [context: caller], [coa, :ledger]}, meta_b, [name]},
-          operations: Enum.map(statements, &transform_simple(caller, coa, &1))
-        ]}
-     ]}
+    {
+      {{:., [context: caller], [coa, :ledger]}, meta_b, [name]},
+      {:%, meta_a,
+       [
+         {:__aliases__, [alias: false], [Bookk, JournalEntry]},
+         {:%{}, [], [operations: Enum.map(statements, &transform_simple(caller, coa, &1))]}
+       ]}
+    }
   end
 
   defp transform_simple(caller, coa, {direction, meta_a, [{:account, meta_b, [name]}, amount]})
        when direction in [:credit, :debit] do
-    {{:., [context: caller],
-      [{:__aliases__, [alias: false], [Bookk, Operation]}, direction]}, meta_a,
-     [{{:., [context: caller], [coa, :account]}, meta_b, [name]}, amount]}
+    {{:., [context: caller], [{:__aliases__, [alias: false], [Bookk, Operation]}, direction]},
+     meta_a, [{{:., [context: caller], [coa, :account]}, meta_b, [name]}, amount]}
   end
 end

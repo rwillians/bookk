@@ -8,18 +8,16 @@ defmodule Bookk.JournalEntry do
 
   @typedoc false
   @type t :: %Bookk.JournalEntry{
-          ledger_name: String.t(),
           operations: [Bookk.Operation.t()]
         }
 
-  defstruct [:ledger_name, operations: []]
+  defstruct operations: []
 
   @doc """
 
   ## Examples
 
       iex> Bookk.JournalEntry.balanced?(%Bookk.JournalEntry{
-      iex>   ledger_name: "acme",
       iex>   operations: [
       iex>     fixture_account_head(:cash) |> debit(10_00)
       iex>   ]
@@ -27,7 +25,6 @@ defmodule Bookk.JournalEntry do
       false
 
       iex> Bookk.JournalEntry.balanced?(%Bookk.JournalEntry{
-      iex>   ledger_name: "acme",
       iex>   operations: [
       iex>     fixture_account_head(:cash) |> debit(10_00),
       iex>     fixture_account_head(:deposits) |> credit(10_00)
@@ -36,7 +33,6 @@ defmodule Bookk.JournalEntry do
       true
 
       iex> Bookk.JournalEntry.balanced?(%Bookk.JournalEntry{
-      iex>   ledger_name: "acme",
       iex>   operations: [
       iex>     fixture_account_head(:cash) |> debit(10_00),
       iex>     fixture_account_head(:deposits) |> credit(7_00),
@@ -89,14 +85,12 @@ defmodule Bookk.JournalEntry do
   ## Examples
 
       iex> Bookk.JournalEntry.reverse(%Bookk.JournalEntry{
-      iex>   ledger_name: "acme",
       iex>   operations: [
       iex>     fixture_account_head(:cash) |> debit(10_00),
       iex>     fixture_account_head(:deposits) |> credit(10_00)
       iex>   ]
       iex> })
       %Bookk.JournalEntry{
-        ledger_name: "acme",
         operations: [
           fixture_account_head(:deposits) |> debit(10_00),
           fixture_account_head(:cash) |> credit(10_00)
