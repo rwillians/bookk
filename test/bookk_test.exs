@@ -11,7 +11,6 @@ defmodule BookkTest do
   doctest Bookk.ChartOfAccounts
   doctest Bookk.JournalEntry
   doctest Bookk.JournalEntry.Complex
-  doctest Bookk.JournalEntry.Compound
   doctest Bookk.Ledger
   doctest Bookk.Notation
   doctest Bookk.Operation

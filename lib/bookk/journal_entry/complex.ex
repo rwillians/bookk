@@ -4,27 +4,58 @@ defmodule Bookk.JournalEntry.Complex do
   import Enum, only: [all?: 2, map: 2]
 
   alias __MODULE__, as: ComplexEntry
-  alias Bookk.JournalEntry.Compound, as: CompoundEntry
+  alias Bookk.JournalEntry, as: JournalEntry
 
   @typedoc false
   @type t :: %Bookk.JournalEntry.Complex{
-          entries: [Bookk.JournalEntry.Compound.t()]
+          entries: [Bookk.JournalEntry.t()]
         }
 
   defstruct entries: []
 
   @doc """
-  Checks whether the given complex journal entry is balanced, where it is
-  balance if all of its compound journal entries are balanced.
+
+  ## Examples
+
+  Balanced entry:
+
+      iex> complex = %Bookk.JournalEntry.Complex{
+      iex>   entries: [
+      iex>     %Bookk.JournalEntry{
+      iex>       ledger_name: "acme",
+      iex>       operations: [
+      iex>         fixture_account_head(:cash) |> debit(30_00),
+      iex>         fixture_account_head(:deposits) |> credit(30_00)
+      iex>       ]
+      iex>     }
+      iex>   ]
+      iex> }
+      iex>
+      iex> Bookk.JournalEntry.Complex.balanced?(complex)
+      true
+
+  Unbalanced entry:
+
+      iex> complex = %Bookk.JournalEntry.Complex{
+      iex>   entries: [
+      iex>     %Bookk.JournalEntry{
+      iex>       operations: [
+      iex>         fixture_account_head(:cash) |> debit(30_00),
+      iex>       ]
+      iex>     }
+      iex>   ]
+      iex> }
+      iex>
+      iex> Bookk.JournalEntry.Complex.balanced?(complex)
+      false
+
   """
   @spec balanced?(t) :: boolean
 
   def balanced?(%ComplexEntry{} = entry),
-    do: all?(entry.entries, &CompoundEntry.balanced?/1)
+    do: all?(entry.entries, &JournalEntry.balanced?/1)
 
   @doc """
-  Checks whether the given complex journal entry is empty, where it is empty
-  when it has no entries or when all its entries are empty.
 
   ## Examples
 
@@ -33,8 +64,8 @@ defmodule Bookk.JournalEntry.Complex do
 
       iex> Bookk.JournalEntry.Complex.empty?(%Bookk.JournalEntry.Complex{
       iex>   entries: [
-      iex>     %Bookk.JournalEntry.Compound{
-      iex>       entries: [%Bookk.Operation{amount: 0}]
+      iex>     %Bookk.JournalEntry{
+      iex>       operations: [%Bookk.Operation{amount: 0}]
       iex>     }
       iex>   ]
       iex> })
@@ -42,28 +73,27 @@ defmodule Bookk.JournalEntry.Complex do
 
       iex> Bookk.JournalEntry.Complex.empty?(%Bookk.JournalEntry.Complex{
       iex>   entries: [
-      iex>     %Bookk.JournalEntry.Compound{
-      iex>       entries: [%Bookk.Operation{amount: 1}]
+      iex>     %Bookk.JournalEntry{
+      iex>       operations: [%Bookk.Operation{amount: 1}]
       iex>     }
       iex>   ]
       iex> })
       false
+
   """
   @spec empty?(t) :: boolean
 
   def empty?(%ComplexEntry{entries: []}), do: true
-  def empty?(%ComplexEntry{entries: entries}), do: all?(entries, &CompoundEntry.empty?/1)
+  def empty?(%ComplexEntry{entries: entries}), do: all?(entries, &JournalEntry.empty?/1)
 
   @doc """
-  Given a complex journal entry, it returns an opposite journal entry capable of
-  reverting the effects of the given entry.
 
   ## Examples
 
       iex> Bookk.JournalEntry.Complex.reverse(%Bookk.JournalEntry.Complex{
       iex>   entries: [
-      iex>     %Bookk.JournalEntry.Compound{
-      iex>       entries: [
+      iex>     %Bookk.JournalEntry{
+      iex>       operations: [
       iex>         fixture_account_head(:cash) |> debit(10_00),
       iex>         fixture_account_head(:deposits) |> credit(10_00)
       iex>       ]
@@ -72,8 +102,8 @@ defmodule Bookk.JournalEntry.Complex do
       iex> })
       %Bookk.JournalEntry.Complex{
         entries: [
-          %Bookk.JournalEntry.Compound{
-            entries: [
+          %Bookk.JournalEntry{
+            operations: [
               fixture_account_head(:deposits) |> debit(10_00),
               fixture_account_head(:cash) |> credit(10_00)
             ]
@@ -87,7 +117,7 @@ defmodule Bookk.JournalEntry.Complex do
   def reverse(%ComplexEntry{} = entry) do
     entries =
       entry.entries
-      |> map(&CompoundEntry.reverse/1)
+      |> map(&JournalEntry.reverse/1)
       |> :lists.reverse()
 
     %{entry | entries: entries}

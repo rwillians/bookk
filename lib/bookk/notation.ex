@@ -160,11 +160,11 @@ defmodule Bookk.Notation do
 
     {:%, meta_a,
      [
-       {:__aliases__, [alias: false], [Bookk, JournalEntry, Compound]},
+       {:__aliases__, [alias: false], [Bookk, JournalEntry]},
        {:%{}, [],
         [
           ledger_name: {{:., [context: caller], [coa, :ledger]}, meta_b, [name]},
-          entries: Enum.map(statements, &transform_simple(caller, coa, &1))
+          operations: Enum.map(statements, &transform_simple(caller, coa, &1))
         ]}
      ]}
   end

@@ -7,7 +7,7 @@ defmodule Bookk.Ledger do
   alias __MODULE__, as: Ledger
   alias Bookk.Account, as: Account
   alias Bookk.AccountHead, as: AccountHead
-  alias Bookk.JournalEntry.Compound, as: CompoundEntry
+  alias Bookk.JournalEntry, as: JournalEntry
   alias Bookk.Operation, as: Op
 
   @typedoc false
@@ -19,18 +19,10 @@ defmodule Bookk.Ledger do
   defstruct [:name, accounts: %{}]
 
   @doc """
-  Checks whether the given ledger is balanced by checking if the sum of balances
-  from all accounts that grows with `:debit` is equal the sum of balances from
-  all accounts that grows with `:credit`.
-
-  **Important**: a balance ledger means that it holds data integrity (it has the
-  expected pairing of debits and credits) but its data can still be poorly
-  designed such that you wouldn't be able to extract relevant information from
-  it.
 
   ## Examples
 
-  A balanced ledger:
+  Balanced ledger:
 
       iex> ledger = Bookk.Ledger.new("acme")
       iex>
@@ -38,9 +30,9 @@ defmodule Bookk.Ledger do
       iex> deposits = fixture_account_head(:deposits)
       iex>
       iex> journal_entry =
-      iex>   %Bookk.JournalEntry.Compound{
+      iex>   %Bookk.JournalEntry{
       iex>     ledger_name: "acme",
-      iex>     entries: [
+      iex>     operations: [
       iex>       debit(cash, 50_00),
       iex>       credit(deposits, 50_00)
       iex>     ]
@@ -55,18 +47,18 @@ defmodule Bookk.Ledger do
       iex> ledger = Bookk.Ledger.new("acme")
       iex>
       iex> cash = fixture_account_head(:cash)
-      iex> journal_entry = debit(cash, 50_00)
+      iex> op = debit(cash, 50_00)
       iex>
-      iex> Bookk.Ledger.post(ledger, journal_entry)
+      iex> Bookk.Ledger.post(ledger, op)
       iex> |> Bookk.Ledger.balanced?()
       false
 
   """
   @spec balanced?(Bookk.Ledger.t()) :: boolean
 
-  def balanced?(%Ledger{} = ledger) do
+  def balanced?(%Ledger{accounts: accounts}) do
     {debits, credits} =
-      values(ledger.accounts)
+      values(accounts)
       |> split_with(&(&1.head.class.balance_increases_with == :debit))
 
     sum_debits = map(debits, & &1.balance) |> sum()
@@ -75,7 +67,39 @@ defmodule Bookk.Ledger do
     sum_debits == sum_credits
   end
 
-  @doc false
+  @doc """
+
+  ## Examples
+
+  When the account exists in the ledger:
+
+      iex> ledger =
+      iex>   %Bookk.Ledger{
+      iex>     name: "acme",
+      iex>     accounts: %{
+      iex>       "cash/CA" => %Bookk.Account{
+      iex>         head: fixture_account_head(:cash),
+      iex>         balance: 25_00
+      iex>       }
+      iex>     }
+      iex>   }
+      iex>
+      iex> Bookk.Ledger.get_account(ledger, fixture_account_head(:cash))
+      %Bookk.Account{
+        head: fixture_account_head(:cash),
+        balance: 25_00
+      }
+
+  When account doesn't exist:
+
+      iex> Bookk.Ledger.new("acme")
+      iex> |> Bookk.Ledger.get_account(fixture_account_head(:cash))
+      %Bookk.Account{
+        head: fixture_account_head(:cash),
+        balance: 0
+      }
+
+  """
   @spec get_account(t, Bookk.AccountHead.t()) :: Bookk.Account.t()
 
   def get_account(%Ledger{} = ledger, %AccountHead{} = head) do
@@ -85,20 +109,24 @@ defmodule Bookk.Ledger do
     end
   end
 
-  @doc false
+  @doc """
+  Creates a new empty ledger.
+
+  ## Examples
+
+      iex> Bookk.Ledger.new("acme")
+      %Bookk.Ledger{name: "acme", accounts: %{}}
+
+  """
   @spec new(name :: String.t()) :: t
 
   def new(<<name::binary>>), do: %Ledger{name: name}
 
   @doc """
-  Posts either a simple or a compound journal entry into the given ledger,
-  upserting accounts as needed.
-
-  For more details about posting changes to accounts, see {Bookk.Account.post/2}.
 
   ## Examples
 
-  When account doesn't exist, it gets created:
+  When account doesn't exist then it gets created:
 
       iex> ledger = Bookk.Ledger.new("acme")
       iex>
@@ -112,7 +140,7 @@ defmodule Bookk.Ledger do
         balance: 30_00
       }
 
-  When account exists, it gets updated:
+  When account exists then it gets updated:
 
       iex> ledger = Bookk.Ledger.new("acme")
       iex>
@@ -129,7 +157,7 @@ defmodule Bookk.Ledger do
         balance: 100_00
       }
 
-  Can post a compound journal entry:
+  Can post a journal entry:
 
       iex> ledger = Bookk.Ledger.new("acme")
       iex>
@@ -137,9 +165,9 @@ defmodule Bookk.Ledger do
       iex> deposits = fixture_account_head(:deposits)
       iex>
       iex> journal_entry =
-      iex>   %Bookk.JournalEntry.Compound{
+      iex>   %Bookk.JournalEntry{
       iex>     ledger_name: "acme",
-      iex>     entries: [
+      iex>     operations: [
       iex>       debit(cash, 50_00),
       iex>       credit(deposits, 50_00)
       iex>     ]
@@ -150,8 +178,19 @@ defmodule Bookk.Ledger do
       iex> %Bookk.Account{balance: 50_00} = Bookk.Ledger.get_account(updated_ledger, cash)
       iex> %Bookk.Account{balance: 50_00} = Bookk.Ledger.get_account(updated_ledger, deposits)
 
+  Can post an operation:
+
+      iex> ledger = Bookk.Ledger.new("acme")
+      iex>
+      iex> cash = fixture_account_head(:cash)
+      iex> op = debit(cash, 50_00)
+      iex>
+      iex> updated_ledger = Bookk.Ledger.post(ledger, op)
+      iex>
+      iex> %Bookk.Account{balance: 50_00} = Bookk.Ledger.get_account(updated_ledger, cash)
+
   """
-  @spec post(t, Bookk.JournalEntry.Compound.t()) :: t
+  @spec post(t, Bookk.JournalEntry.t()) :: t
   @spec post(t, Bookk.Operation.t()) :: t
 
   def post(%Ledger{} = ledger, %Op{account_head: head} = op) do
@@ -161,8 +200,8 @@ defmodule Bookk.Ledger do
     |> put_account(ledger)
   end
 
-  def post(%Ledger{name: same} = ledger, %CompoundEntry{ledger_name: same} = entry),
-      do: do_post(ledger, entry.entries)
+  def post(%Ledger{name: same} = ledger, %JournalEntry{ledger_name: same} = entry),
+      do: do_post(ledger, entry.operations)
 
   defp do_post(ledger, [head | tail]), do: post(ledger, head) |> do_post(tail)
   defp do_post(ledger, []), do: ledger

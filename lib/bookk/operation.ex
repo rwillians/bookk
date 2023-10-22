@@ -1,5 +1,6 @@
 defmodule Bookk.Operation do
   @moduledoc false
+  # represents a diff on a given account's balance
 
   alias __MODULE__, as: Op
   alias Bookk.AccountHead, as: AccountHead
