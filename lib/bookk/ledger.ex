@@ -57,7 +57,7 @@ defmodule Bookk.Ledger do
   def balanced?(%Ledger{accounts: accounts}) do
     {debits, credits} =
       values(accounts)
-      |> split_with(&(&1.head.class.balance_increases_with == :debit))
+      |> split_with(&(&1.head.class.natural_balance == :debit))
 
     sum_debits = map(debits, & &1.balance) |> sum()
     sum_credits = map(credits, & &1.balance) |> sum()

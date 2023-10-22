@@ -11,7 +11,7 @@ defmodule Bookk.AccountClass do
     to the parent class' abbreviation. For example, Current Assets is a subclass
     of Assets, therefore its `parent_id` should be set to `"A"`.
   - **`name`**: The human readable name of the account class.
-  - **`balance_increases_with`** (either `:debit` or `:credit`): specifies the
+  - **`natural_balance`** (either `:debit` or `:credit`): specifies the
     direction in which accounts of this class grows their balance. For example,
     Assets accounts grows their balances with `:debit`.
 
@@ -50,8 +50,8 @@ defmodule Bookk.AccountClass do
           id: String.t(),
           parent_id: String.t() | nil,
           name: String.t(),
-          balance_increases_with: :credit | :debit
+          natural_balance: :credit | :debit
         }
 
-  defstruct [:id, :parent_id, :name, :balance_increases_with]
+  defstruct [:id, :parent_id, :name, :natural_balance]
 end

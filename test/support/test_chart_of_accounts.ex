@@ -12,7 +12,7 @@ defmodule TestChartOfAccounts do
         id: "CA",
         parent_id: "A",
         name: "Current Asset",
-        balance_increases_with: :debit
+        natural_balance: :debit
       }
     }
   end
@@ -24,7 +24,7 @@ defmodule TestChartOfAccounts do
         id: "OE",
         parent_id: nil,
         name: "Owner's Equity",
-        balance_increases_with: :credit
+        natural_balance: :credit
       }
     }
   end

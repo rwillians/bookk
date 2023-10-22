@@ -24,7 +24,7 @@ defmodule Bookk.Account do
 
   Adding balance:
 
-      iex> class = %Bookk.AccountClass{balance_increases_with: :debit}
+      iex> class = %Bookk.AccountClass{natural_balance: :debit}
       iex> head = %Bookk.AccountHead{class: class}
       iex> account = Bookk.Account.new(head)
       iex>
@@ -32,13 +32,13 @@ defmodule Bookk.Account do
       iex>
       iex> Bookk.Account.post(account, op)
       %Bookk.Account{
-        head: %Bookk.AccountHead{class: %Bookk.AccountClass{balance_increases_with: :debit}},
+        head: %Bookk.AccountHead{class: %Bookk.AccountClass{natural_balance: :debit}},
         balance: 25_00
       }
 
   Subtracting balance:
 
-      iex> class = %Bookk.AccountClass{balance_increases_with: :debit}
+      iex> class = %Bookk.AccountClass{natural_balance: :debit}
       iex> head = %Bookk.AccountHead{class: class}
       iex> account = Bookk.Account.new(head)
       iex>
@@ -46,7 +46,7 @@ defmodule Bookk.Account do
       iex>
       iex> Bookk.Account.post(account, op)
       %Bookk.Account{
-        head: %Bookk.AccountHead{class: %Bookk.AccountClass{balance_increases_with: :debit}},
+        head: %Bookk.AccountHead{class: %Bookk.AccountClass{natural_balance: :debit}},
         balance: -25_00
       }
 
@@ -69,7 +69,7 @@ defmodule Bookk.Account do
         %Op{account_head: same = head, amount: amount} = entry
       ) do
     balance_after =
-      case {head.class.balance_increases_with, entry.direction} do
+      case {head.class.natural_balance, entry.direction} do
         {same, same} -> balance + amount
         {_, _} -> balance - amount
       end
