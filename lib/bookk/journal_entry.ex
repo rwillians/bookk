@@ -17,35 +17,45 @@ defmodule Bookk.JournalEntry do
 
   ## Examples
 
-      iex> Bookk.JournalEntry.balanced?(%Bookk.JournalEntry{
-      iex>   operations: [
-      iex>     fixture_account_head(:cash) |> debit(10_00)
-      iex>   ]
-      iex> })
-      false
+  Is balanced when the sum of debits is equal the sum of credits:
 
-      iex> Bookk.JournalEntry.balanced?(%Bookk.JournalEntry{
+      iex> journal_entry = %Bookk.JournalEntry{
       iex>   operations: [
       iex>     fixture_account_head(:cash) |> debit(10_00),
       iex>     fixture_account_head(:deposits) |> credit(10_00)
       iex>   ]
-      iex> })
+      iex> }
+      iex>
+      iex> Bookk.JournalEntry.balanced?(journal_entry)
       true
 
-      iex> Bookk.JournalEntry.balanced?(%Bookk.JournalEntry{
+      iex> journal_entry = %Bookk.JournalEntry{
       iex>   operations: [
       iex>     fixture_account_head(:cash) |> debit(10_00),
       iex>     fixture_account_head(:deposits) |> credit(7_00),
       iex>     fixture_account_head(:deposits) |> credit(3_00),
       iex>   ]
-      iex> })
+      iex> }
+      iex>
+      iex> Bookk.JournalEntry.balanced?(journal_entry)
       true
+
+  Is unbalanced when the sum of debits isn't equal the sum of credits:
+
+      iex> journal_entry = %Bookk.JournalEntry{
+      iex>   operations: [
+      iex>     fixture_account_head(:cash) |> debit(10_00)
+      iex>   ]
+      iex> }
+      iex>
+      iex> Bookk.JournalEntry.balanced?(journal_entry)
+      false
 
   """
   @spec balanced?(t) :: boolean
 
   def balanced?(%JournalEntry{operations: ops}) do
-    {debits, credits} = split_with(ops, & &1.direction == :debit)
+    {debits, credits} = split_with(ops, &(&1.direction == :debit))
 
     sum_debits = map(debits, & &1.amount) |> sum()
     sum_credits = map(credits, & &1.amount) |> sum()
@@ -57,21 +67,31 @@ defmodule Bookk.JournalEntry do
 
   ## Examples
 
+  Is empty when the journal entry has no operations:
+
      iex> Bookk.JournalEntry.empty?(%Bookk.JournalEntry{})
      true
 
-     iex> Bookk.JournalEntry.empty?(%Bookk.JournalEntry{
+  Is empty when all operations in the journal entry are empty:
+
+     iex> journal_entry = %Bookk.JournalEntry{
      iex>   operations: [
      iex>     %Bookk.Operation{amount: 0}
      iex>   ]
-     iex> })
+     iex> }
+     iex>
+     iex> Bookk.JournalEntry.empty?(journal_entry)
      true
 
-     iex> Bookk.JournalEntry.empty?(%Bookk.JournalEntry{
+  Is not empty when at least one operation in the journal entry isn't empty:
+
+     iex> journal_entry = %Bookk.JournalEntry{
      iex>   operations: [
      iex>     %Bookk.Operation{amount: 10_00}
      iex>   ]
-     iex> })
+     iex> }
+     iex>
+     iex> Bookk.JournalEntry.empty?(journal_entry)
      false
 
   """
@@ -84,12 +104,16 @@ defmodule Bookk.JournalEntry do
 
   ## Examples
 
-      iex> Bookk.JournalEntry.reverse(%Bookk.JournalEntry{
+  Reverses all operations in the journal entry:
+
+      iex> journal_entry = %Bookk.JournalEntry{
       iex>   operations: [
       iex>     fixture_account_head(:cash) |> debit(10_00),
       iex>     fixture_account_head(:deposits) |> credit(10_00)
       iex>   ]
-      iex> })
+      iex> }
+      iex>
+      iex> Bookk.JournalEntry.reverse(journal_entry)
       %Bookk.JournalEntry{
         operations: [
           fixture_account_head(:deposits) |> debit(10_00),

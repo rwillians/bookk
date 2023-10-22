@@ -1,6 +1,8 @@
 defmodule Bookk.Notation do
   @moduledoc false
 
+  @doc false
+
   defmacro __using__(_) do
     quote do
       import unquote(__MODULE__), only: [journalize: 2, journalize!: 2]
@@ -8,11 +10,11 @@ defmodule Bookk.Notation do
   end
 
   @doc """
-  A DSL macro for journalizing interledger journal entries.
+  A DSL macro for expressing an interledger journal entries.
 
   ## Examples
 
-  Balanced entry:
+  Returns a balanced interledger journal entry:
 
       iex> import Bookk.Notation, only: [journalize: 2]
       iex>
@@ -27,21 +29,7 @@ defmodule Bookk.Notation do
       iex> assert not Bookk.JournalEntry.Interledger.empty?(journal_entry)
       iex> assert Bookk.JournalEntry.Interledger.balanced?(journal_entry)
 
-      iex> import Bookk.Notation, only: [journalize: 2]
-      iex>
-      iex> %Bookk.JournalEntry.Interledger{} = journal_entry =
-      iex>   journalize using: TestChartOfAccounts do
-      iex>     on ledger(:acme) do
-      iex>       debit account(:cash), 150_00
-      iex>       credit account(:deposits), 50_00
-      iex>       credit account(:deposits), 100_00
-      iex>     end
-      iex>   end
-      iex>
-      iex> assert not Bookk.JournalEntry.Interledger.empty?(journal_entry)
-      iex> assert Bookk.JournalEntry.Interledger.balanced?(journal_entry)
-
-  Unbalanced entry:
+  Returns an unbalanced interledger journal entry:
 
       iex> import Bookk.Notation, only: [journalize: 2]
       iex>
@@ -65,16 +53,16 @@ defmodule Bookk.Notation do
        |> Module.split()
        |> Enum.map(&String.to_atom/1)}
 
-    transform_interledger(__CALLER__, coa, block)
+    to_interledger_journal_entry(__CALLER__, coa, block)
   end
 
   @doc """
-  Same as `journalize/2` but it raises an error if the produced interledger journal
-  entry is unbalanced.
+  Same as `journalize/2` but it raises an error if the produced interledger
+  journal entry is unbalanced.
 
   ## Examples
 
-  Balanced entry:
+  Returns a balanced interledger journal entry:
 
       iex> import Bookk.Notation, only: [journalize!: 2]
       iex>
@@ -89,7 +77,7 @@ defmodule Bookk.Notation do
       iex> assert not Bookk.JournalEntry.Interledger.empty?(journal_entry)
       iex> assert Bookk.JournalEntry.Interledger.balanced?(journal_entry)
 
-  Unbalanced entry:
+  Raises an error when an unbalanced interledger journal entry is produced:
 
       iex> import Bookk.Notation, only: [journalize!: 2]
       iex>
@@ -110,12 +98,12 @@ defmodule Bookk.Notation do
        |> Module.split()
        |> Enum.map(&String.to_atom/1)}
 
-    interledger_entry = transform_interledger(__CALLER__, coa, block)
+    interledger_entry = to_interledger_journal_entry(__CALLER__, coa, block)
 
     {:if, [context: __CALLER__, imports: [{2, Kernel}]],
      [
-       {{:., [], [{:__aliases__, [alias: false], [Bookk, JournalEntry, Interledger]}, :balanced?]}, [],
-        [interledger_entry]},
+       {{:., [], [{:__aliases__, [alias: false], [Bookk, JournalEntry, Interledger]}, :balanced?]},
+        [], [interledger_entry]},
        [
          do: interledger_entry,
          else:
@@ -134,7 +122,7 @@ defmodule Bookk.Notation do
   #   PRIVATE
   #
 
-  defp transform_interledger(caller, coa, block) do
+  defp to_interledger_journal_entry(caller, coa, block) do
     {statements, meta} =
       case block do
         {:__block__, meta, statements} -> {statements, meta}
@@ -142,7 +130,7 @@ defmodule Bookk.Notation do
       end
 
     entries_by_ledger =
-      Enum.map(statements, &transform_compound(caller, coa, &1))
+      Enum.map(statements, &to_journal_entry(caller, coa, &1))
       |> Enum.group_by(fn {k, _v} -> k end, fn {_, v} -> v end)
       |> Enum.map(fn {ledger, xs} -> {ledger, List.flatten(xs)} end)
 
@@ -158,7 +146,7 @@ defmodule Bookk.Notation do
      ]}
   end
 
-  defp transform_compound(caller, coa, {:on, meta_a, [{:ledger, meta_b, [name]}, [do: block]]}) do
+  defp to_journal_entry(caller, coa, {:on, meta_a, [{:ledger, meta_b, [name]}, [do: block]]}) do
     statements =
       case block do
         {:__block__, _, statements} -> statements
@@ -170,12 +158,12 @@ defmodule Bookk.Notation do
       {:%, meta_a,
        [
          {:__aliases__, [alias: false], [Bookk, JournalEntry]},
-         {:%{}, [], [operations: Enum.map(statements, &transform_simple(caller, coa, &1))]}
+         {:%{}, [], [operations: Enum.map(statements, &to_operation(caller, coa, &1))]}
        ]}
     }
   end
 
-  defp transform_simple(caller, coa, {direction, meta_a, [{:account, meta_b, [name]}, amount]})
+  defp to_operation(caller, coa, {direction, meta_a, [{:account, meta_b, [name]}, amount]})
        when direction in [:credit, :debit] do
     {{:., [context: caller], [{:__aliases__, [alias: false], [Bookk, Operation]}, direction]},
      meta_a, [{{:., [context: caller], [coa, :account]}, meta_b, [name]}, amount]}

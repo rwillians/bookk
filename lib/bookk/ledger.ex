@@ -22,7 +22,14 @@ defmodule Bookk.Ledger do
 
   ## Examples
 
-  Balanced ledger:
+  Is balanced when the ledger is empty:
+
+      iex> Bookk.Ledger.new("acme")
+      iex> |> Bookk.Ledger.balanced?()
+      true
+
+  Is balanced when the sum of debit accounts balances is equal the sum of credit
+  accounts balances:
 
       iex> ledger = Bookk.Ledger.new("acme")
       iex> cash = fixture_account_head(:cash)
@@ -39,7 +46,8 @@ defmodule Bookk.Ledger do
       iex> |> Bookk.Ledger.balanced?()
       true
 
-  An unbalanced ledger:
+  Is unbalanced when the sum of debit accounts balances isn't equal the sum of
+  credit accounts balances:
 
       iex> ledger = Bookk.Ledger.new("acme")
       iex> cash = fixture_account_head(:cash)
@@ -72,7 +80,7 @@ defmodule Bookk.Ledger do
 
   ## Examples
 
-  When the account exists in the ledger:
+  Returns the account when it exists in the ledger:
 
       iex> ledger = %Bookk.Ledger{
       iex>   name: "acme",
@@ -90,7 +98,7 @@ defmodule Bookk.Ledger do
         balance: 25_00
       }
 
-  When account doesn't exist:
+  Returns an empty account when the it doesn't exist in the ledger:
 
       iex> Bookk.Ledger.new("acme")
       iex> |> Bookk.Ledger.get_account(fixture_account_head(:cash))
@@ -109,15 +117,7 @@ defmodule Bookk.Ledger do
     end
   end
 
-  @doc """
-  Creates a new empty ledger.
-
-  ## Examples
-
-      iex> Bookk.Ledger.new("acme")
-      %Bookk.Ledger{name: "acme", accounts: %{}}
-
-  """
+  @doc false
   @spec new(name :: String.t()) :: t
 
   def new(<<name::binary>>), do: %Ledger{name: name}
@@ -171,7 +171,7 @@ defmodule Bookk.Ledger do
   @spec post(t, Bookk.JournalEntry.t()) :: t
 
   def post(%Ledger{} = ledger, %JournalEntry{operations: ops}),
-      do: post_reduce(ledger, ops)
+    do: post_reduce(ledger, ops)
 
   defp post_reduce(ledger, [head | tail]), do: post_op(ledger, head) |> post_reduce(tail)
   defp post_reduce(ledger, []), do: ledger

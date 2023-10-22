@@ -14,10 +14,10 @@ defmodule Bookk.ChartOfAccounts do
   """
   @callback ledger(term) :: String.t()
 
-  @doc """
-  This function maps all possible combinations of {Bookk.AccountHead} your
-  application supports. It's recomended to use pattern matching and let it crash
-  in the event of a mismatch.
+  @doc ~S"""
+  This function maps all possible patterns of accounts that your application
+  supports. It's recomended to use pattern matching and let it crash in the
+  event of a mismatch.
 
   ## Examples
 

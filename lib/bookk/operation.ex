@@ -1,6 +1,5 @@
 defmodule Bookk.Operation do
   @moduledoc false
-  # represents a diff on a given account's balance
 
   alias __MODULE__, as: Op
   alias Bookk.AccountHead, as: AccountHead
@@ -15,13 +14,10 @@ defmodule Bookk.Operation do
   defstruct [:direction, :account_head, :amount]
 
   @doc """
-  Creates a new simple journal entry with direction `:credit`. If a negative
-  amount is given, then it will be transformed into a positive number and the
-  resulting entry will have its direction changed to `:debit`.
 
   ## Examples
 
-  With a positive amount:
+  Crediting a positive amount produces a credit operation:
 
       iex> head = fixture_account_head(:cash)
       iex> Bookk.Operation.credit(head, 25_00)
@@ -31,7 +27,7 @@ defmodule Bookk.Operation do
         amount: 25_00
       }
 
-  With a negative amount:
+  Crediting a negative amount produces a debit operation:
 
       iex> head = fixture_account_head(:cash)
       iex> Bookk.Operation.credit(head, -25_00)
@@ -53,13 +49,10 @@ defmodule Bookk.Operation do
   end
 
   @doc """
-  Creates a new simple journal entry with direction `:debit`. If a negative
-  amount is given, then it will be transformed into a positive number and the
-  resulting entry will have its direction changed to `:credit`.
 
   ## Examples
 
-  With a positive amount:
+  Debiting a positive amount produces a debit operation:
 
       iex> head = fixture_account_head(:cash)
       iex> Bookk.Operation.debit(head, 25_00)
@@ -69,7 +62,7 @@ defmodule Bookk.Operation do
         amount: 25_00
       }
 
-  With a negative amount:
+  Debiting a negative amount produces a credit operation:
 
       iex> head = fixture_account_head(:cash)
       iex> Bookk.Operation.debit(head, -25_00)
@@ -91,13 +84,15 @@ defmodule Bookk.Operation do
   end
 
   @doc """
-  Checks whether the given simple journal entry is empty, where it is empty if
-  its amount is zero.
 
   ## Examples
 
+  Is empty when amount is zero:
+
       iex> Bookk.Operation.empty?(%Bookk.Operation{amount: 0})
       true
+
+  Is not empty when amount is different than zero:
 
       iex> Bookk.Operation.empty?(%Bookk.Operation{amount: 1})
       false
@@ -109,15 +104,16 @@ defmodule Bookk.Operation do
   def empty?(%Op{}), do: false
 
   @doc """
-  Given a simple journal entry, it return an opposite journal entry capable of
-  reverting the effects of the given entry. In double-entry bookkeeping
-  accountings that's as simple as swapping the entry's direction.
 
   ## Examples
+
+  A credit operation becomes a debit operation:
 
       iex> entry = %Bookk.Operation{direction: :credit, amount: 10_00}
       iex> Bookk.Operation.reverse(entry)
       %Bookk.Operation{direction: :debit, amount: 10_00}
+
+  A debit operation becomes a credit operation:
 
       iex> entry = %Bookk.Operation{direction: :debit, amount: 10_00}
       iex> Bookk.Operation.reverse(entry)

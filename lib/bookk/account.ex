@@ -22,7 +22,8 @@ defmodule Bookk.Account do
 
   ## Examples
 
-  Adding balance:
+  When the direction of the operation matches the account's natural balance,
+  then balance is added:
 
       iex> class = %Bookk.AccountClass{natural_balance: :debit}
       iex> head = %Bookk.AccountHead{class: class}
@@ -36,7 +37,8 @@ defmodule Bookk.Account do
         balance: 25_00
       }
 
-  Subtracting balance:
+  When the direction of the operation doesn't match the account's natural
+  balance, the balance is subtracted:
 
       iex> class = %Bookk.AccountClass{natural_balance: :debit}
       iex> head = %Bookk.AccountHead{class: class}
@@ -50,7 +52,8 @@ defmodule Bookk.Account do
         balance: -25_00
       }
 
-  Mismatching account headers:
+  When the account's head doesn't match the head in the operation, then an error
+  is raised:
 
       iex> head_a = %Bookk.AccountHead{name: "a"}
       iex> head_b = %Bookk.AccountHead{name: "b"}

@@ -73,8 +73,12 @@ defmodule Bookk.JournalEntry.Interledger do
 
   ## Examples
 
+  Is empty when there's no entries:
+
       iex> Bookk.JournalEntry.Interledger.empty?(%Bookk.JournalEntry.Interledger{})
       true
+
+  Is empty when all entries are empty:
 
       iex> interledger = %Bookk.JournalEntry.Interledger{
       iex>   entries_by_ledger: %{
@@ -89,11 +93,16 @@ defmodule Bookk.JournalEntry.Interledger do
       iex> Bookk.JournalEntry.Interledger.empty?(interledger)
       true
 
+  Is not empty when at least one entry isn't empty:
+
       iex> interledger = %Bookk.JournalEntry.Interledger{
       iex>   entries_by_ledger: %{
       iex>     "acme" => [
       iex>       %Bookk.JournalEntry{
-      iex>         operations: [%Bookk.Operation{amount: 1}]
+      iex>         operations: [
+      iex>           %Bookk.Operation{amount: 0},
+      iex>           %Bookk.Operation{amount: 1},
+      iex>         ]
       iex>       }
       iex>     ]
       iex>   }
@@ -118,6 +127,8 @@ defmodule Bookk.JournalEntry.Interledger do
   @doc """
 
   ## Examples
+
+  Reverses all of its journal entries:
 
       iex> interledger = %Bookk.JournalEntry.Interledger{
       iex>   entries_by_ledger: %{
@@ -150,10 +161,8 @@ defmodule Bookk.JournalEntry.Interledger do
   @spec reverse(t) :: t
 
   def reverse(%InterledgerEntry{entries_by_ledger: %{} = entries_by_ledger} = entry) do
-    enum = to_list(entries_by_ledger)
-
     entries_by_ledger =
-      for {ledger, entries} <- enum,
+      for {ledger, entries} <- to_list(entries_by_ledger),
           into: %{},
           do: {ledger, map(entries, &JournalEntry.reverse/1) |> :lists.reverse()}
 
