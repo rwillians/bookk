@@ -104,6 +104,34 @@ defmodule Bookk.JournalEntry do
 
   ## Examples
 
+  If there're multiple operations touching the same account, they will be merged
+  into a single operation:
+
+      iex> cash = fixture_account_head(:cash)
+      iex> deposits = fixture_account_head(:deposits)
+      iex>
+      iex> Bookk.JournalEntry.new([
+      iex>   debit(cash, 80_00),
+      iex>   debit(cash, 20_00),
+      iex>   credit(deposits, 100_00)
+      iex> ])
+      %Bookk.JournalEntry{
+        operations: [
+          fixture_account_head(:cash) |> debit(100_00),
+          fixture_account_head(:deposits) |> credit(100_00)
+        ]
+      }
+
+  """
+  @spec new([Bookk.Operation.t()]) :: t
+
+  def new([]), do: %JournalEntry{}
+  def new([_ | _] = ops), do: %JournalEntry{operations: Op.uniq(ops)}
+
+  @doc """
+
+  ## Examples
+
   Reverses all operations in the journal entry:
 
       iex> journal_entry = %Bookk.JournalEntry{
