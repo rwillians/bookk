@@ -3,6 +3,7 @@ defmodule TestChartOfAccounts do
 
   @impl Bookk.ChartOfAccounts
   def ledger(:acme), do: "acme"
+  def ledger({:user, user_id}), do: "user(#{user_id})"
 
   @impl Bookk.ChartOfAccounts
   def account(:cash) do
@@ -11,7 +12,7 @@ defmodule TestChartOfAccounts do
       class: %Bookk.AccountClass{
         id: "CA",
         parent_id: "A",
-        name: "Current Asset",
+        name: "Current Assets",
         natural_balance: :debit
       }
     }
@@ -22,8 +23,18 @@ defmodule TestChartOfAccounts do
       name: "deposits/OE",
       class: %Bookk.AccountClass{
         id: "OE",
-        parent_id: nil,
         name: "Owner's Equity",
+        natural_balance: :credit
+      }
+    }
+  end
+
+  def account({:unspent_cash, {:user, user_id}}) do
+    %Bookk.AccountHead{
+      name: "unspent-cash:user(#{user_id})/L",
+      class: %Bookk.AccountClass{
+        id: "L",
+        name: "Liabilities",
         natural_balance: :credit
       }
     }

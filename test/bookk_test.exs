@@ -12,6 +12,7 @@ defmodule BookkTest do
   doctest Bookk.JournalEntry
   doctest Bookk.JournalEntry.Interledger
   doctest Bookk.Ledger
+  doctest Bookk.NaiveState
   doctest Bookk.Notation
   doctest Bookk.Operation
 end
