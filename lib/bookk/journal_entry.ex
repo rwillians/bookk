@@ -154,4 +154,25 @@ defmodule Bookk.JournalEntry do
 
   def reverse(%JournalEntry{operations: ops} = entry),
     do: %{entry | operations: map(ops, &Op.reverse/1) |> :lists.reverse()}
+
+  @doc """
+
+  ## Examples
+
+  Returns the journal entry's list of operations:
+
+      iex> Bookk.JournalEntry.new([
+      iex>   debit(fixture_account_head(:cash), 50_00),
+      iex>   credit(fixture_account_head(:deposits), 50_00)
+      iex> ])
+      iex> |> Bookk.JournalEntry.to_operations()
+      [
+        debit(fixture_account_head(:cash), 50_00),
+        credit(fixture_account_head(:deposits), 50_00)
+      ]
+
+  """
+  @spec to_operations(t) :: [Bookk.Operation.t()]
+
+  def to_operations(%JournalEntry{operations: ops}), do: ops
 end
