@@ -6,5 +6,6 @@
 /tmp/
 /doc/
 *.ez
+.DS_Store
 bookk-*.tar
 erl_crash.dump
