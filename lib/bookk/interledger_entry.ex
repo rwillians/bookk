@@ -1,5 +1,13 @@
 defmodule Bookk.InterledgerEntry do
-  @moduledoc false
+  @moduledoc """
+  TODO
+
+  ## Related
+
+  - `Bookk.Notation`;
+  - `Bookk.NaiveState`;
+  - `Bookk.JournalEntry`.
+  """
 
   import Enum, only: [all?: 2, map: 2, to_list: 1]
   import List, only: [flatten: 1]
@@ -8,7 +16,9 @@ defmodule Bookk.InterledgerEntry do
   alias __MODULE__, as: InterledgerEntry
   alias Bookk.JournalEntry, as: JournalEntry
 
-  @typedoc false
+  @typedoc """
+  TODO
+  """
   @type t :: %Bookk.InterledgerEntry{
           entries_by_ledger: %{
             (ledger_name :: String.t()) => Bookk.JournalEntry.t()
@@ -18,6 +28,7 @@ defmodule Bookk.InterledgerEntry do
   defstruct entries_by_ledger: %{}
 
   @doc """
+  TODO
 
   ## Examples
 

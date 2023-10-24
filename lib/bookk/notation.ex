@@ -1,7 +1,16 @@
 defmodule Bookk.Notation do
-  @moduledoc false
+  @moduledoc """
+  TODO
 
-  @doc false
+  ## Related
+
+  - `Bookk.InterledgerEntry`;
+  - `Bookk.NaiveState`.
+  """
+
+  @doc """
+  TODO
+  """
 
   defmacro __using__(_) do
     quote do

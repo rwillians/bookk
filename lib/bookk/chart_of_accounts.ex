@@ -1,5 +1,12 @@
 defmodule Bookk.ChartOfAccounts do
-  @moduledoc false
+  @moduledoc """
+  A Chart of Accounts (abbrv.: CoA) is a mapping of all the ledgers and accounts
+  that exist in a system.
+
+  ## Related
+
+  - `Bookk.Notation`.
+  """
 
   @doc ~S"""
   This function maps all possible patterns of ledger names your application
@@ -8,7 +15,7 @@ defmodule Bookk.ChartOfAccounts do
 
   ## Example
 
-      def ledger(:acme), do: "acme
+      def ledger(:acme), do: "acme"
       def ledger({:user, <<id::binary-size(36)>>}), do: "user(#{id})"
 
   """

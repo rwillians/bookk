@@ -1,5 +1,12 @@
 defmodule Bookk.Ledger do
-  @moduledoc false
+  @moduledoc """
+  TODO
+
+  ## Related
+
+  - `Bookk.Account`;
+  - `Bookk.JournalEntry`.
+  """
 
   import Enum, only: [map: 2, split_with: 2, sum: 1]
   import Map, only: [get: 2, put: 3, values: 1]
@@ -10,7 +17,9 @@ defmodule Bookk.Ledger do
   alias Bookk.JournalEntry, as: JournalEntry
   alias Bookk.Operation, as: Op
 
-  @typedoc false
+  @typedoc """
+  TODO
+  """
   @type t :: %Bookk.Ledger{
           name: String.t(),
           accounts: %{(name :: String.t()) => Bookk.Account.t()}
@@ -19,6 +28,7 @@ defmodule Bookk.Ledger do
   defstruct [:name, accounts: %{}]
 
   @doc """
+  TODO
 
   ## Examples
 
@@ -77,6 +87,7 @@ defmodule Bookk.Ledger do
   end
 
   @doc """
+  TODO
 
   ## Examples
 
@@ -117,12 +128,15 @@ defmodule Bookk.Ledger do
     end
   end
 
-  @doc false
+  @doc """
+  TODO
+  """
   @spec new(name :: String.t()) :: t
 
   def new(<<name::binary>>), do: %Ledger{name: name}
 
   @doc """
+  TODO
 
   ## Examples
 

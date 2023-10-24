@@ -1,5 +1,13 @@
 defmodule Bookk.NaiveState do
-  @moduledoc false
+  @moduledoc """
+  TODO
+
+  ## Related
+
+  - `Bookk.Notation`;
+  - `Bookk.InterledgerEntry`;
+  - `Bookk.Ledger`.
+  """
 
   import Enum, only: [to_list: 1]
   import Map, only: [get: 2, put: 3]
@@ -8,19 +16,24 @@ defmodule Bookk.NaiveState do
   alias Bookk.InterledgerEntry, as: InterledgerEntry
   alias Bookk.Ledger
 
-  @typedoc false
+  @typedoc """
+  TODO
+  """
   @type t :: %Bookk.NaiveState{
           ledgers: %{(name :: String.t()) => Bookk.Ledger.t()}
         }
 
   defstruct ledgers: %{}
 
-  @doc false
+  @doc """
+  TODO
+  """
   @spec empty() :: t
 
   def empty, do: %NaiveState{}
 
   @doc """
+  TODO
 
   ## Examples
 
@@ -51,6 +64,7 @@ defmodule Bookk.NaiveState do
   end
 
   @doc """
+  TODO
 
   ## Examples
 

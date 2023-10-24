@@ -1,11 +1,29 @@
 defmodule Bookk.Account do
-  @moduledoc false
+  @moduledoc """
+  An account is pretty much like a bucked. It has a single purpose: holding a
+  measurable amount of something (currency).
+
+  ## Related
+
+  - `Bookk.AccountHead`;
+  - `Bookk.Operation`;
+  - `Bookk.Ledger`.
+  """
 
   alias __MODULE__, as: Account
   alias Bookk.AccountHead, as: AccountHead
   alias Bookk.Operation, as: Op
 
-  @typedoc false
+  @typedoc """
+  The struct that describes the state of an account.
+
+  ## Fields
+
+  An account is composed of:
+  - `head`: the `Bookk.AccountHead` that identifies the account;
+  - `balance`: the amount of currency held by the account, in cents or the
+    smallest fraction supported by the currency you're using.
+  """
   @type t :: %Bookk.Account{
           head: Bookk.AccountHead.t(),
           balance: integer
@@ -19,6 +37,7 @@ defmodule Bookk.Account do
   def new(%AccountHead{} = head), do: %Account{head: head}
 
   @doc """
+  Applies the change described in a `Bookk.Operation` into the given account.
 
   ## Examples
 
@@ -69,10 +88,10 @@ defmodule Bookk.Account do
 
   def post(
         %Account{head: same, balance: balance},
-        %Op{account_head: same = head, amount: amount} = entry
+        %Op{account_head: same = head, amount: amount} = op
       ) do
     balance_after =
-      case {head.class.natural_balance, entry.direction} do
+      case {head.class.natural_balance, op.direction} do
         {same, same} -> balance + amount
         {_, _} -> balance - amount
       end

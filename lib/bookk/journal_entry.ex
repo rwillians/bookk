@@ -1,12 +1,22 @@
 defmodule Bookk.JournalEntry do
-  @moduledoc false
+  @moduledoc """
+  TODO
+
+  ## Related
+
+  - `Bookk.Ledger`;
+  - `Bookk.Operation`;
+  - `Bookk.AccountHead`.
+  """
 
   import Enum, only: [all?: 2, map: 2, split_with: 2, sum: 1]
 
   alias __MODULE__, as: JournalEntry
   alias Bookk.Operation, as: Op
 
-  @typedoc false
+  @typedoc """
+  TODO
+  """
   @type t :: %Bookk.JournalEntry{
           operations: [Bookk.Operation.t()]
         }
@@ -14,6 +24,7 @@ defmodule Bookk.JournalEntry do
   defstruct operations: []
 
   @doc """
+  TODO
 
   ## Examples
 
@@ -64,6 +75,7 @@ defmodule Bookk.JournalEntry do
   end
 
   @doc """
+  TODO
 
   ## Examples
 
@@ -101,6 +113,7 @@ defmodule Bookk.JournalEntry do
   def empty?(%JournalEntry{operations: ops}), do: all?(ops, &Op.empty?/1)
 
   @doc """
+  TODO
 
   ## Examples
 
@@ -129,6 +142,7 @@ defmodule Bookk.JournalEntry do
   def new([_ | _] = ops), do: %JournalEntry{operations: Op.uniq(ops)}
 
   @doc """
+  TODO
 
   ## Examples
 
@@ -156,6 +170,7 @@ defmodule Bookk.JournalEntry do
     do: %{entry | operations: map(ops, &Op.reverse/1) |> :lists.reverse()}
 
   @doc """
+  TODO
 
   ## Examples
 

@@ -1,5 +1,7 @@
 defmodule Bookk.UnbalancedError do
-  @moduledoc false
+  @moduledoc """
+  TODO
+  """
 
   @typedoc false
   @type t :: %Bookk.UnbalancedError{

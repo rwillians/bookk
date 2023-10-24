@@ -1,12 +1,22 @@
 defmodule Bookk.Operation do
-  @moduledoc false
+  @moduledoc """
+  TODO
+
+  ## Related
+
+  - `Bookk.JournalEntry`;
+  - `Bookk.AccountHead`;
+  - `Bookk.AccountClass`.
+  """
 
   import Enum, only: [group_by: 2, map: 2]
 
   alias __MODULE__, as: Op
   alias Bookk.AccountHead, as: AccountHead
 
-  @typedoc false
+  @typedoc """
+  TODO
+  """
   @type t :: %Bookk.Operation{
           direction: :credit | :debit,
           account_head: Bookk.AccountHead.t(),
@@ -16,6 +26,7 @@ defmodule Bookk.Operation do
   defstruct [:direction, :account_head, :amount]
 
   @doc """
+  TODO
 
   ## Examples
 
@@ -51,6 +62,7 @@ defmodule Bookk.Operation do
   end
 
   @doc """
+  TODO
 
   ## Examples
 
@@ -86,6 +98,7 @@ defmodule Bookk.Operation do
   end
 
   @doc """
+  TODO
 
   ## Examples
 
@@ -135,6 +148,7 @@ defmodule Bookk.Operation do
   def merge([first, second | tail]), do: merge([merge(first, second) | tail])
 
   @doc """
+  TODO
 
   ## Examples
 
@@ -208,13 +222,16 @@ defmodule Bookk.Operation do
     new(direction, head, amount)
   end
 
-  @doc false
+  @doc """
+  TODO
+  """
   @spec new(direction :: :credit | :debit, Bookk.AccountHead.t(), integer) :: t
 
   def new(:credit, head, amount), do: credit(head, amount)
   def new(:debit, head, amount), do: debit(head, amount)
 
   @doc """
+  TODO
 
   ## Examples
 
@@ -237,6 +254,7 @@ defmodule Bookk.Operation do
   def reverse(%Op{direction: :debit} = entry), do: %{entry | direction: :credit}
 
   @doc """
+  TODO
 
   ## Examples
 

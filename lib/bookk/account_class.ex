@@ -1,50 +1,51 @@
 defmodule Bookk.AccountClass do
-  @moduledoc false
-
-  @typedoc """
-  ## Fields
-
-  - **`id`**: it's recomended that, instead of using it with an arbitrary value,
-    you should assign it to the abbreviation of the account class. In the
-    section below you will find some of the most common classes.
-  - **`parent_id`**: If the class is a subclass, then `parent_id` should be set
-    to the parent class' abbreviation. For example, Current Assets is a subclass
-    of Assets, therefore its `parent_id` should be set to `"A"`.
-  - **`name`**: The human readable name of the account class.
-  - **`natural_balance`** (either `:debit` or `:credit`): specifies the
-    direction in which accounts of this class grows their balance. For example,
-    Assets accounts grows their balances with `:debit`.
+  @moduledoc """
+  An account class properties that are inherited by accounts and also work as a
+  way of grouping account's balances.
 
   ## Common classes
 
-  These are some of the most common classes used, they are organized as a tree
-  to represent the relationship of parent classes & children subclasses:
+  These are some of the most common used classes (IME):
 
-  > **Note**: this is how classes will be represented:
-  >
-  > (**A**) [debit] Assets
-  >    ^     ^      ^
-  >    ^     ^      ^ The name of the class or subclass.
-  >    ^     ^
-  >    ^     ^ The direction in which the classes' accounts grows their balance.
-  >    ^
-  >    ^ The class' or subclass' name abbreviation.
-  >
-  > Subclasses inherits all properties from their parents.
+  | id       | parent id | natural balance | name                     |
+  | ---      | ---       | ---             | ---                      |
+  | **`A`**  |           | `:debit`        | Assets                   |
+  | **`CA`** | **`A`**   | `:debit`        | Current Assets           |
+  | **`AR`** | **`A`**   | `:debit`        | Accounts Receivables     |
+  | **`Ac`** |           | `:credit`       | Contra Assets            |
+  | **`AD`** | **`Ac`**  | `:credit`       | Accumulated Depreciation |
+  | **`E`**  |           | `:debit`        | Expenses                 |
+  | **`OE`** |           | `:credit`       | Owner's Equity           |
+  | **`L`**  |           | `:credit`       | Liabilities              |
+  | **`AP`** | **`L`**   | `:credit`       | Accounts Payables        |
+  | **`I`**  |           | `:credit`       | Income                   |
+  | **`G`**  | **`I`**   | `:credit`       | Gains                    |
+  | **`R`**  | **`I`**   | `:credit`       | Revenue                  |
 
-  - (A) [debit] **Assets**
-    - (CA) Current Assets
-    - (AR) Accounts Receivable
-  - (Ac) [credit] **Contra Assets**
-  - (E) [debit] **Expenses**
-  - (OE) [credit] **Owner's Equity**
-  - (OEc) [debit] **Contra Owner's Equity**
-  - (L) [credit] **Liabilities**
-  - (I) [credit] **Income**
-    - (G) Gains
-    - (R) Revenue
-    - (AP) Accounts Payable
+  ## Related
 
+  - `Bookk.AccountHead`;
+  - `Bookk.Account`.
+  """
+
+  @typedoc """
+  The struct the describes an account class.
+
+  ## Fields
+
+  An account class in composed of:
+  - **`id`**: it's recomended that, instead of using it with an arbitrary value,
+    you assign it to the class' name abbreviation.
+  - **`parent_id`**: If the class is a subclass, then `parent_id` should be set
+    to the parent class' abbreviation. For example, Current Assets is a subclass
+    of Assets, therefore its `parent_id` should be set to `"A"` (where `"A"` is
+    the abbreviation of Assets account).
+  - **`name`**: The human readable name of the account class.
+  - **`natural_balance`** (either `:debit` or `:credit`): specifies the
+    direction in which accounts of this class grows their balance. For example,
+    Assets accounts grows their balances with `:debit` operations.
+
+  See section [Common classes](#module-common-classes) for examples of classes.
   """
   @type t :: %Bookk.AccountClass{
           id: String.t(),
