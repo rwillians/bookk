@@ -168,4 +168,54 @@ defmodule Bookk.InterledgerEntry do
 
     %{entry | entries_by_ledger: entries_by_ledger}
   end
+
+  @doc """
+
+  ## Examples
+
+  Returns a list of tuple where the first element is the ledger name and the
+  second element is a journal entry:
+
+      iex> user_id = "b13a81cf-ff78-414d-b5b2-042e9ecf2082"
+      iex> cash = fixture_account_head(:cash)
+      iex> deposits = fixture_account_head(:deposits)
+      iex> unspent_cash = fixture_account_head({:unspent_cash, {:user, user_id}})
+      iex>
+      iex> interledger = %Bookk.InterledgerEntry{
+      iex>   entries_by_ledger: %{
+      iex>     "acme" => [
+      iex>       Bookk.JournalEntry.new([
+      iex>         debit(cash, 50_00),
+      iex>         credit(unspent_cash, 50_00)
+      iex>       ])
+      iex>     ],
+      iex>     "user(b13a81cf-ff78-414d-b5b2-042e9ecf2082)" => [
+      iex>       Bookk.JournalEntry.new([
+      iex>         debit(cash, 50_00),
+      iex>         credit(deposits, 50_00)
+      iex>       ])
+      iex>     ]
+      iex>   }
+      iex> }
+      iex>
+      iex> Bookk.InterledgerEntry.to_journal_entries(interledger)
+      [
+        {"acme", Bookk.JournalEntry.new([
+          debit(fixture_account_head(:cash), 50_00),
+          credit(fixture_account_head({:unspent_cash, {:user, "b13a81cf-ff78-414d-b5b2-042e9ecf2082"}}), 50_00)
+        ])},
+        {"user(b13a81cf-ff78-414d-b5b2-042e9ecf2082)", Bookk.JournalEntry.new([
+          debit(fixture_account_head(:cash), 50_00),
+          credit(fixture_account_head(:deposits), 50_00)
+        ])}
+      ]
+
+  """
+  @spec to_journal_entries(t) :: [{ledger_name :: String.t(), Bookk.JournalEntry.t()}]
+
+  def to_journal_entries(%InterledgerEntry{} = interledger) do
+    for {ledger_name, entries} <- to_list(interledger.entries_by_ledger),
+        entry <- entries,
+        do: {ledger_name, entry}
+  end
 end
