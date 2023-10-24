@@ -5,7 +5,7 @@ defmodule Bookk.NaiveState do
   import Map, only: [get: 2, put: 3]
 
   alias __MODULE__, as: NaiveState
-  alias Bookk.JournalEntry.Interledger, as: InterledgerEntry
+  alias Bookk.InterledgerEntry, as: InterledgerEntry
   alias Bookk.Ledger
 
   @typedoc false
@@ -106,7 +106,7 @@ defmodule Bookk.NaiveState do
       }
 
   """
-  @spec post(t, Bookk.JournalEntry.Interledger.t()) :: t
+  @spec post(t, Bookk.InterledgerEntry.t()) :: t
 
   def post(%NaiveState{} = state, %InterledgerEntry{} = entry),
     do: post_reduce(state, to_list(entry.entries_by_ledger))

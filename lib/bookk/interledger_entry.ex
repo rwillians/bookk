@@ -1,4 +1,4 @@
-defmodule Bookk.JournalEntry.Interledger do
+defmodule Bookk.InterledgerEntry do
   @moduledoc false
 
   import Enum, only: [all?: 2, map: 2, to_list: 1]
@@ -9,7 +9,7 @@ defmodule Bookk.JournalEntry.Interledger do
   alias Bookk.JournalEntry, as: JournalEntry
 
   @typedoc false
-  @type t :: %Bookk.JournalEntry.Interledger{
+  @type t :: %Bookk.InterledgerEntry{
           entries_by_ledger: %{
             (ledger_name :: String.t()) => Bookk.JournalEntry.t()
           }
@@ -23,7 +23,7 @@ defmodule Bookk.JournalEntry.Interledger do
 
   Balanced entry:
 
-      iex> interledger = %Bookk.JournalEntry.Interledger{
+      iex> interledger = %Bookk.InterledgerEntry{
       iex>   entries_by_ledger: %{
       iex>     "acme" => [
       iex>       %Bookk.JournalEntry{
@@ -36,12 +36,12 @@ defmodule Bookk.JournalEntry.Interledger do
       iex>   }
       iex> }
       iex>
-      iex> Bookk.JournalEntry.Interledger.balanced?(interledger)
+      iex> Bookk.InterledgerEntry.balanced?(interledger)
       true
 
   Unbalanced entry:
 
-      iex> interledger = %Bookk.JournalEntry.Interledger{
+      iex> interledger = %Bookk.InterledgerEntry{
       iex>   entries_by_ledger: %{
       iex>     "acme" => [
       iex>       %Bookk.JournalEntry{
@@ -53,7 +53,7 @@ defmodule Bookk.JournalEntry.Interledger do
       iex>   }
       iex> }
       iex>
-      iex> Bookk.JournalEntry.Interledger.balanced?(interledger)
+      iex> Bookk.InterledgerEntry.balanced?(interledger)
       false
 
   """
@@ -75,12 +75,12 @@ defmodule Bookk.JournalEntry.Interledger do
 
   Is empty when there's no entries:
 
-      iex> Bookk.JournalEntry.Interledger.empty?(%Bookk.JournalEntry.Interledger{})
+      iex> Bookk.InterledgerEntry.empty?(%Bookk.InterledgerEntry{})
       true
 
   Is empty when all entries are empty:
 
-      iex> interledger = %Bookk.JournalEntry.Interledger{
+      iex> interledger = %Bookk.InterledgerEntry{
       iex>   entries_by_ledger: %{
       iex>     "acme" => [
       iex>       %Bookk.JournalEntry{
@@ -90,12 +90,12 @@ defmodule Bookk.JournalEntry.Interledger do
       iex>   }
       iex> }
       iex>
-      iex> Bookk.JournalEntry.Interledger.empty?(interledger)
+      iex> Bookk.InterledgerEntry.empty?(interledger)
       true
 
   Is not empty when at least one entry isn't empty:
 
-      iex> interledger = %Bookk.JournalEntry.Interledger{
+      iex> interledger = %Bookk.InterledgerEntry{
       iex>   entries_by_ledger: %{
       iex>     "acme" => [
       iex>       %Bookk.JournalEntry{
@@ -108,7 +108,7 @@ defmodule Bookk.JournalEntry.Interledger do
       iex>   }
       iex> }
       iex>
-      iex> Bookk.JournalEntry.Interledger.empty?(interledger)
+      iex> Bookk.InterledgerEntry.empty?(interledger)
       false
 
   """
@@ -130,7 +130,7 @@ defmodule Bookk.JournalEntry.Interledger do
 
   Reverses all of its journal entries:
 
-      iex> interledger = %Bookk.JournalEntry.Interledger{
+      iex> interledger = %Bookk.InterledgerEntry{
       iex>   entries_by_ledger: %{
       iex>     "acme" => [
       iex>       %Bookk.JournalEntry{
@@ -143,8 +143,8 @@ defmodule Bookk.JournalEntry.Interledger do
       iex>   }
       iex> }
       iex>
-      iex> Bookk.JournalEntry.Interledger.reverse(interledger)
-      %Bookk.JournalEntry.Interledger{
+      iex> Bookk.InterledgerEntry.reverse(interledger)
+      %Bookk.InterledgerEntry{
         entries_by_ledger: %{
           "acme" => [
             %Bookk.JournalEntry{

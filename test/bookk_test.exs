@@ -9,8 +9,8 @@ defmodule BookkTest do
   doctest Bookk.AccountClass
   doctest Bookk.AccountHead
   doctest Bookk.ChartOfAccounts
+  doctest Bookk.InterledgerEntry
   doctest Bookk.JournalEntry
-  doctest Bookk.JournalEntry.Interledger
   doctest Bookk.Ledger
   doctest Bookk.NaiveState
   doctest Bookk.Notation

@@ -18,7 +18,7 @@ defmodule Bookk.Notation do
 
       iex> import Bookk.Notation, only: [journalize: 2]
       iex>
-      iex> %Bookk.JournalEntry.Interledger{} = journal_entry =
+      iex> %Bookk.InterledgerEntry{} = journal_entry =
       iex>   journalize using: TestChartOfAccounts do
       iex>     on ledger(:acme) do
       iex>       debit account(:cash), 150_00
@@ -26,14 +26,14 @@ defmodule Bookk.Notation do
       iex>     end
       iex>   end
       iex>
-      iex> assert not Bookk.JournalEntry.Interledger.empty?(journal_entry)
-      iex> assert Bookk.JournalEntry.Interledger.balanced?(journal_entry)
+      iex> assert not Bookk.InterledgerEntry.empty?(journal_entry)
+      iex> assert Bookk.InterledgerEntry.balanced?(journal_entry)
 
   Returns an unbalanced interledger journal entry:
 
       iex> import Bookk.Notation, only: [journalize: 2]
       iex>
-      iex> %Bookk.JournalEntry.Interledger{} = journal_entry =
+      iex> %Bookk.InterledgerEntry{} = journal_entry =
       iex>   journalize using: TestChartOfAccounts do
       iex>     on ledger(:acme) do
       iex>       debit account(:cash), 150_00
@@ -41,8 +41,8 @@ defmodule Bookk.Notation do
       iex>     end
       iex>   end
       iex>
-      iex> assert not Bookk.JournalEntry.Interledger.empty?(journal_entry)
-      iex> assert not Bookk.JournalEntry.Interledger.balanced?(journal_entry)
+      iex> assert not Bookk.InterledgerEntry.empty?(journal_entry)
+      iex> assert not Bookk.InterledgerEntry.balanced?(journal_entry)
 
   """
 
@@ -66,7 +66,7 @@ defmodule Bookk.Notation do
 
       iex> import Bookk.Notation, only: [journalize!: 2]
       iex>
-      iex> %Bookk.JournalEntry.Interledger{} = journal_entry =
+      iex> %Bookk.InterledgerEntry{} = journal_entry =
       iex>   journalize! using: TestChartOfAccounts do
       iex>     on ledger(:acme) do
       iex>       debit account(:cash), 150_00
@@ -74,8 +74,8 @@ defmodule Bookk.Notation do
       iex>     end
       iex>   end
       iex>
-      iex> assert not Bookk.JournalEntry.Interledger.empty?(journal_entry)
-      iex> assert Bookk.JournalEntry.Interledger.balanced?(journal_entry)
+      iex> assert not Bookk.InterledgerEntry.empty?(journal_entry)
+      iex> assert Bookk.InterledgerEntry.balanced?(journal_entry)
 
   Raises an error when an unbalanced interledger journal entry is produced:
 
@@ -102,7 +102,7 @@ defmodule Bookk.Notation do
 
     {:if, [context: __CALLER__, imports: [{2, Kernel}]],
      [
-       {{:., [], [{:__aliases__, [alias: false], [Bookk, JournalEntry, Interledger]}, :balanced?]},
+       {{:., [], [{:__aliases__, [alias: false], [Bookk, InterledgerEntry]}, :balanced?]},
         [], [interledger_entry]},
        [
          do: interledger_entry,
@@ -136,7 +136,7 @@ defmodule Bookk.Notation do
 
     {:%, meta,
      [
-       {:__aliases__, [alias: false], [Bookk, JournalEntry, Interledger]},
+       {:__aliases__, [alias: false], [Bookk, InterledgerEntry]},
        {:%{}, [],
         [
           entries_by_ledger:
