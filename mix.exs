@@ -4,18 +4,29 @@ defmodule Bookk.MixProject do
   @version "0.1.0"
   @github "https://github.com/rwillians/bookk"
 
+  @description """
+  Bookk provides the building block to build ledger-based double-entry
+  bookkeeping solutions for accounting.
+  """
+
   def project do
     [
       app: :bookk,
       version: @version,
+      description: @description,
+      source_url: @github,
+      # homepage_url: @github,
       elixir: ">= 1.14.0",
       elixirc_paths: elixirc_paths(Mix.env()),
       elixirc_options: [debug_info: Mix.env() == :dev],
       build_embedded: Mix.env() not in [:dev, :test],
-      start_permanent: Mix.env() not in [:dev, :test],
       package: package(),
-      source_url: @github,
-      docs: [source_ref: "v#{@version}", main: "Bookk"],
+      docs: [
+        main: "Bookk",
+        logo: "logo.png",
+        source_ref: "v#{@version}",
+        extras: ["README.md", "LICENSE"]
+      ],
       deps: deps(),
       dialyzer: [
         plt_add_apps: [:mix],
@@ -33,7 +44,7 @@ defmodule Bookk.MixProject do
 
   defp deps do
     [
-      #
+      {:ex_doc, "~> 0.30.9", only: :dev, runtime: false}
     ]
   end
 
@@ -42,13 +53,12 @@ defmodule Bookk.MixProject do
 
   defp package do
     [
-      description: "A basic double-entry bookkeeping accounting library.",
-      files: ["lib", "mix.exs", "README.md", "LICENSE"],
+      files: ~w(lib mix.exs .formatter.exs README.md LICENSE),
       maintainers: ["Rafael Willians"],
       licenses: ["MIT"],
       links: %{
-        Changelog: "#{@github}/blob/master/CHANGELOG.md",
-        GitHub: @github
+        GitHub: @github,
+        Changelog: "#{@github}/releases"
       }
     ]
   end
