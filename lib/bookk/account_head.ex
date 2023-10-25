@@ -19,12 +19,15 @@ defmodule Bookk.AccountHead do
   An account head is composed of:
   - `name`: the accounts name (unique within a ledger);
   - `class`: a `Bookk.AccountClass` struct that describes the class to which the
-    account belongs.
+    account belongs;
+  - `meta`: a map of metadata for whatever information you find useful to hold
+    there for when you need to fetch, create or hydrate a persisted account.
   """
   @type t :: %Bookk.AccountHead{
           name: String.t(),
-          class: Bookk.AccountClass.t()
+          class: Bookk.AccountClass.t(),
+          meta: map
         }
 
-  defstruct [:name, :class]
+  defstruct [:name, :class, meta: %{}]
 end
