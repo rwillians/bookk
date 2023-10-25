@@ -1,11 +1,11 @@
 /.elixir_ls/
 /_build/
-.fetch/
 /cover/
 /deps/
 /tmp/
 /doc/
 *.ez
+.fetch
 .DS_Store
 bookk-*.tar
 erl_crash.dump
