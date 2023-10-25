@@ -31,10 +31,38 @@ defmodule Bookk.Account do
 
   defstruct [:head, balance: 0]
 
-  @doc false
-  @spec new(Bookk.AccountHead.t()) :: t
+  @doc """
+  TODO
 
-  def new(%AccountHead{} = head), do: %Account{head: head}
+  ## Examples
+
+  If no initial balance is provided in the second argument, then balance will be
+  set to zero:
+
+      iex> head = fixture_account_head(:cash)
+      iex> Bookk.Account.new(head)
+      %Bookk.Account{
+        head: fixture_account_head(:cash),
+        balance: 0
+      }
+
+  If an initial balance is provided in the second argument, then balance will be
+  set to it:
+
+      iex> head = fixture_account_head(:cash)
+      iex> Bookk.Account.new(head, 50_00)
+      %Bookk.Account{
+        head: fixture_account_head(:cash),
+        balance: 50_00
+      }
+
+  """
+  @spec new(Bookk.AccountHead.t()) :: t
+  @spec new(Bookk.AccountHead.t(), balance :: pos_integer) :: t
+
+  def new(%AccountHead{} = head, balance \\ 0)
+      when is_integer(balance),
+      do: %Account{head: head, balance: balance}
 
   @doc """
   Applies the change described in a `Bookk.Operation` into the given account.
