@@ -70,10 +70,6 @@ defmodule Bookk.InterledgerEntry do
   """
   @spec balanced?(t) :: boolean
 
-  def balanced?(%InterledgerEntry{entries_by_ledger: %{} = entries_by_ledger})
-      when map_size(entries_by_ledger) == 0,
-      do: true
-
   def balanced?(%InterledgerEntry{entries_by_ledger: %{} = entries_by_ledger}) do
     values(entries_by_ledger)
     |> flatten()
@@ -124,10 +120,6 @@ defmodule Bookk.InterledgerEntry do
 
   """
   @spec empty?(t) :: boolean
-
-  def empty?(%InterledgerEntry{entries_by_ledger: %{} = map})
-      when map_size(map) == 0,
-      do: true
 
   def empty?(%InterledgerEntry{entries_by_ledger: %{} = entries_by_ledger}) do
     values(entries_by_ledger)
