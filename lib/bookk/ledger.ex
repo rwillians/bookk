@@ -132,8 +132,17 @@ defmodule Bookk.Ledger do
   TODO
   """
   @spec new(name :: String.t()) :: t
+  @spec new(name :: String.t(), [Bookk.Account.t()]) :: t
 
-  def new(<<name::binary>>), do: %Ledger{name: name}
+  def new(<<name::binary>>, accounts \\ [])
+      when is_list(accounts) do
+    accounts_by_name =
+      accounts
+      |> Enum.map(&{&1.head.name, &1})
+      |> Enum.into(%{})
+
+    %Ledger{name: name, accounts: accounts_by_name}
+  end
 
   @doc """
   TODO
@@ -201,4 +210,21 @@ defmodule Bookk.Ledger do
     accounts = put(ledger.accounts, account.head.name, account)
     %{ledger | accounts: accounts}
   end
+end
+
+defimpl Collectable, for: Bookk.Ledger do
+  import Map, only: [put: 3]
+
+  alias Bookk.Account
+
+  def into(ledger), do: {ledger, &collector/2}
+
+  defp collector(ledger, {:cont, %Account{} = account}) do
+    %{
+      ledger
+      | accounts: put(ledger.accounts, account.head.name, account)
+    }
+  end
+
+  defp collector(ledger, :done), do: ledger
 end
