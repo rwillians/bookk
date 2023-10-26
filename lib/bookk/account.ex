@@ -121,7 +121,7 @@ defmodule Bookk.Account do
     balance_after =
       case {head.class.natural_balance, op.direction} do
         {same, same} -> balance + amount
-        {_, _} -> balance - amount
+        _ -> balance - amount
       end
 
     %Account{head: head, balance: balance_after}

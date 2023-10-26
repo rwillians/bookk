@@ -121,8 +121,11 @@ defmodule Bookk.Ledger do
   """
   @spec get_account(t, Bookk.AccountHead.t()) :: Bookk.Account.t()
 
-  def get_account(%Ledger{} = ledger, %AccountHead{} = head) do
-    case get(ledger.accounts, head.name) do
+  def get_account(
+        %Ledger{accounts: %{} = accounts},
+        %AccountHead{name: name} = head
+      ) do
+    case get(accounts, name) do
       nil -> Account.new(head)
       %Account{} = account -> account
     end
@@ -134,15 +137,12 @@ defmodule Bookk.Ledger do
   @spec new(name :: String.t()) :: t
   @spec new(name :: String.t(), [Bookk.Account.t()]) :: t
 
-  def new(<<name::binary>>, accounts \\ [])
-      when is_list(accounts) do
-    accounts_by_name =
-      accounts
-      |> Enum.map(&{&1.head.name, &1})
-      |> Enum.into(%{})
+  def new(name, accounts \\ [])
+  def new(<<name::binary>>, []), do: %Ledger{name: name}
 
-    %Ledger{name: name, accounts: accounts_by_name}
-  end
+  def new(<<name::binary>>, accounts)
+      when is_list(accounts),
+      do: Enum.into(accounts, %Ledger{name: name})
 
   @doc """
   TODO
@@ -206,9 +206,11 @@ defmodule Bookk.Ledger do
     |> put_account(ledger)
   end
 
-  defp put_account(account, ledger) do
-    accounts = put(ledger.accounts, account.head.name, account)
-    %{ledger | accounts: accounts}
+  defp put_account(
+        %Account{head: %{name: account_name}} = account,
+        %Ledger{accounts: accounts} = ledger
+      ) do
+    %{ledger | accounts: put(accounts, account_name, account)}
   end
 end
 
@@ -216,14 +218,15 @@ defimpl Collectable, for: Bookk.Ledger do
   import Map, only: [put: 3]
 
   alias Bookk.Account
+  alias Bookk.Ledger
 
   def into(ledger), do: {ledger, &collector/2}
 
-  defp collector(ledger, {:cont, %Account{} = account}) do
-    %{
-      ledger
-      | accounts: put(ledger.accounts, account.head.name, account)
-    }
+  defp collector(
+         %Ledger{accounts: accounts} = ledger,
+         {:cont, %Account{head: %{name: account_name}} = account}
+       ) do
+    %{ledger | accounts: put(accounts, account_name, account)}
   end
 
   defp collector(ledger, :done), do: ledger

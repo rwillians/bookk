@@ -56,25 +56,23 @@ defmodule Bookk.NaiveState do
   """
   @spec get_ledger(t, String.t()) :: Bookk.Ledger.t()
 
-  def get_ledger(%NaiveState{} = state, <<name::binary>>) do
-    case get(state.ledgers, name) do
+  def get_ledger(%NaiveState{ledgers: %{} = ledgers}, <<name::binary>>) do
+    case get(ledgers, name) do
       nil -> Ledger.new(name)
       %Ledger{} = ledger -> ledger
     end
   end
 
-  @doc false
+  @doc """
+  TODO
+  """
   @spec new([Bookk.Ledger.t()]) :: t
 
-  def new(ledgers)
-      when is_list(ledgers) do
-    ledgers_by_name =
-      ledgers
-      |> Enum.map(&{&1.name, &1})
-      |> Enum.into(%{})
+  def new([]), do: empty()
 
-    %NaiveState{ledgers: ledgers_by_name}
-  end
+  def new(ledgers)
+      when is_list(ledgers),
+      do: Enum.into(ledgers, empty())
 
   @doc """
   TODO
@@ -152,21 +150,28 @@ defmodule Bookk.NaiveState do
     |> put_ledger(state)
   end
 
-  defp put_ledger(ledger, state),
-    do: %NaiveState{ledgers: put(state.ledgers, ledger.name, ledger)}
+  defp put_ledger(
+         %Ledger{name: name} = ledger,
+         %NaiveState{ledgers: ledgers} = state
+       ),
+       do: %{state | ledgers: put(ledgers, name, ledger)}
 end
 
 defimpl Collectable, for: Bookk.NaiveState do
   import Map, only: [put: 3]
 
   alias Bookk.Ledger
+  alias Bookk.NaiveState
 
   def into(state), do: {state, &collector/2}
 
-  defp collector(state, {:cont, %Ledger{} = ledger}) do
+  defp collector(
+         %NaiveState{ledgers: ledgers} = state,
+         {:cont, %Ledger{name: name} = ledger}
+       ) do
     %{
       state
-      | ledgers: put(state.ledgers, ledger.name, ledger)
+      | ledgers: put(ledgers, name, ledger)
     }
   end
 
