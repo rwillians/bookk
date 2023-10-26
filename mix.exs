@@ -20,6 +20,7 @@ defmodule Bookk.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       elixirc_options: [debug_info: Mix.env() == :dev],
       build_embedded: Mix.env() not in [:dev, :test],
+      aliases: aliases(),
       package: package(),
       docs: [
         main: "Bookk",
@@ -36,14 +37,32 @@ defmodule Bookk.MixProject do
     ]
   end
 
+  def aliases do
+    [
+      "test.unit": ["test --exclude perf"],
+      "test.perf": ["test --exclude test --only perf"]
+    ]
+  end
+
   def application do
     [
       extra_applications: [:logger]
     ]
   end
 
+  def cli do
+    [
+      preferred_envs: [
+        "test.unit": :test,
+        "test.perf": :test
+      ]
+    ]
+  end
+
   defp deps do
     [
+      {:benchee, "~> 1.1.0", only: :test},
+      {:benchee_html, "~> 1.0.0", only: :test},
       {:ex_doc, "~> 0.30.9", only: :dev, runtime: false}
     ]
   end
