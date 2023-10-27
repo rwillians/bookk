@@ -32,7 +32,7 @@ defmodule Bookk.MixProject do
       ],
       deps: deps(),
       dialyzer: [
-        plt_add_apps: [:mix],
+        plt_add_apps: [:mix, :ecto],
         plt_add_deps: :apps_direct,
         plt_file: {:no_warn, "priv/plts/project.plt"}
       ]
@@ -59,9 +59,16 @@ defmodule Bookk.MixProject do
 
   defp deps do
     [
-      {:benchee, "~> 1.1.0", only: :test},
-      {:benchee_html, "~> 1.0.0", only: :test},
-      {:ex_doc, "~> 0.30.9", only: :dev, runtime: false}
+      # Performance benchmark
+      {:benchee, "~> 1.1.0", only: :test, runtime: false, optional: true},
+      {:benchee_html, "~> 1.0.0", only: :test, runtime: false, optional: true},
+
+      # Code style and analyzers
+      {:credo, "~> 1.7.0", only: [:dev, :test], runtime: false, optional: true},
+      {:dialyxir, "~> 1.4.2", only: [:dev, :test], runtime: false, optional: true},
+
+      # Docs
+      {:ex_doc, "~> 0.30.9", only: [:dev, :docs], runtime: false}
     ]
   end
 
@@ -72,6 +79,7 @@ defmodule Bookk.MixProject do
     [
       files: ~w(lib mix.exs .formatter.exs README.md LICENSE),
       maintainers: ["Rafael Willians"],
+      contributors: ["Rafael Willians"],
       licenses: ["MIT"],
       links: %{
         GitHub: @github,
