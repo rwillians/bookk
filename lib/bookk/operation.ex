@@ -254,6 +254,67 @@ defmodule Bookk.Operation do
   def reverse(%Op{direction: :debit} = entry), do: %{entry | direction: :credit}
 
   @doc """
+  Returns the operation's delta amount, which is the natural number by which the
+  account's balance will be changed. A negative integer is return in case the
+  account should be subtracted, making it safe to always add the returned
+  number to the balance.
+
+  ## Examples
+
+  Debiting an account which has a debit natural balance produces a positive
+  number:
+
+      iex> head = %Bookk.AccountHead{
+      iex>   class: %Bookk.AccountClass{natural_balance: :debit}
+      iex> }
+      iex>
+      iex> debit(head, 100_00)
+      iex> |> Bookk.Operation.to_delta_amount()
+      100_00
+
+  Debiting an account which has a credit natural balance produces a negative
+  number:
+
+      iex> head = %Bookk.AccountHead{
+      iex>   class: %Bookk.AccountClass{natural_balance: :debit}
+      iex> }
+      iex>
+      iex> credit(head, 100_00)
+      iex> |> Bookk.Operation.to_delta_amount()
+      -100_00
+
+  Crediting an account which has a credit natural balance produces a positive
+  number:
+
+      iex> head = %Bookk.AccountHead{
+      iex>   class: %Bookk.AccountClass{natural_balance: :credit}
+      iex> }
+      iex>
+      iex> credit(head, 100_00)
+      iex> |> Bookk.Operation.to_delta_amount()
+      100_00
+
+  Debiting an account which has a credit natural balance produces a negative
+  number:
+
+      iex> head = %Bookk.AccountHead{
+      iex>   class: %Bookk.AccountClass{natural_balance: :credit}
+      iex> }
+      iex>
+      iex> debit(head, 100_00)
+      iex> |> Bookk.Operation.to_delta_amount()
+      -100_00
+
+  """
+  @spec to_delta_amount(t) :: integer()
+
+  def to_delta_amount(%Op{account_head: head} = op) do
+    case {head.class.natural_balance, op.direction} do
+      {same, same} -> op.amount
+      _ -> -op.amount
+    end
+  end
+  @doc """
   TODO
 
   ## Examples

@@ -65,12 +65,11 @@ defmodule Bookk.Account do
       do: %Account{head: head, balance: balance}
 
   @doc """
-  Applies the change described in a `Bookk.Operation` into the given account.
+  Calculates de delta amount for the operation then adds it the account's
+  balance. See `Bookk.Operation.to_delta_amount/1` for more information on
+  delta amount.
 
   ## Examples
-
-  When the direction of the operation matches the account's natural balance,
-  then balance is added:
 
       iex> class = %Bookk.AccountClass{natural_balance: :debit}
       iex> head = %Bookk.AccountHead{class: class}
@@ -84,23 +83,8 @@ defmodule Bookk.Account do
         balance: 25_00
       }
 
-  When the direction of the operation doesn't match the account's natural
-  balance, the balance is subtracted:
-
-      iex> class = %Bookk.AccountClass{natural_balance: :debit}
-      iex> head = %Bookk.AccountHead{class: class}
-      iex> account = Bookk.Account.new(head)
-      iex>
-      iex> op = credit(head, 25_00)
-      iex>
-      iex> Bookk.Account.post(account, op)
-      %Bookk.Account{
-        head: %Bookk.AccountHead{class: %Bookk.AccountClass{natural_balance: :debit}},
-        balance: -25_00
-      }
-
-  When the account's head doesn't match the head in the operation, then an error
-  is raised:
+  The account's head must match the head in the operation, otherwise an error is
+  raised:
 
       iex> head_a = %Bookk.AccountHead{name: "a"}
       iex> head_b = %Bookk.AccountHead{name: "b"}
@@ -116,14 +100,11 @@ defmodule Bookk.Account do
 
   def post(
         %Account{head: same, balance: balance},
-        %Op{account_head: same = head, amount: amount} = op
+        %Op{account_head: same = head} = op
       ) do
-    balance_after =
-      case {head.class.natural_balance, op.direction} do
-        {same, same} -> balance + amount
-        _ -> balance - amount
-      end
-
-    %Account{head: head, balance: balance_after}
+    %Account{
+      head: head,
+      balance: balance + Op.to_delta_amount(op)
+    }
   end
 end
