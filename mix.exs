@@ -39,8 +39,7 @@ defmodule Bookk.MixProject do
 
   def aliases do
     [
-      "test.unit": ["test --exclude perf"],
-      "test.perf": ["test --exclude test --only perf"]
+      "test.perf": ["test test/perf.exs"]
     ]
   end
 
@@ -52,10 +51,7 @@ defmodule Bookk.MixProject do
 
   def cli do
     [
-      preferred_envs: [
-        "test.unit": :test,
-        "test.perf": :test
-      ]
+      preferred_envs: ["test.perf": :test]
     ]
   end
 

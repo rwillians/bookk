@@ -16,7 +16,6 @@ defmodule PerfTest do
     ]
   ]
 
-  @tag :perf
   @tag timeout: 120_000
   test "journalize/2 vs journalize!/2" do
     user_id = "e28f7406-c442-4594-882d-86dff3bb0ef7"
@@ -30,7 +29,6 @@ defmodule PerfTest do
     Benchee.run(cases, @opts)
   end
 
-  @tag :perf
   @tag timeout: 120_000
   test "NaiveState.post/2 & Ledger.post/2 & Account.post/2" do
     naive_state =
