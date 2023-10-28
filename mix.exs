@@ -26,6 +26,8 @@ defmodule Bookk.MixProject do
         main: "Bookk",
         logo: "logo.png",
         source_ref: "v#{@version}",
+        source_url: @github,
+        canonical: "http://hexdocs.pm/bookk",
         extras: ["README.md", "LICENSE"]
       ],
       deps: deps(),
