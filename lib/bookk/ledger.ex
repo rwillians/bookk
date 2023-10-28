@@ -1,6 +1,9 @@
 defmodule Bookk.Ledger do
   @moduledoc """
-  TODO
+  A ledger is a book that holds accounts. Traditionally, ledgers would also hold
+  the journal entries that changed the accounts but, in this library, persisting
+  those journal entries is considered off its scope -- you can persistem them on
+  your own though.
 
   ## Related
 
@@ -18,7 +21,7 @@ defmodule Bookk.Ledger do
   alias Bookk.Operation, as: Op
 
   @typedoc """
-  TODO
+  The struct that represents a ledger.
   """
   @type t :: %Bookk.Ledger{
           name: String.t(),
@@ -28,7 +31,11 @@ defmodule Bookk.Ledger do
   defstruct [:name, accounts: %{}]
 
   @doc """
-  TODO
+  Checks whether the ledger is balanced. It is considered balance whe the sum of
+  balance of its accounts that has a debit natural balance is equal the sum of
+  balance of its accounts that has a credit natural balance.
+
+  See `Bookk.AccountClass` for more information on natural balance.
 
   ## Examples
 
@@ -87,7 +94,8 @@ defmodule Bookk.Ledger do
   end
 
   @doc """
-  TODO
+  Get an account from the ledger by its `Bookk.AccountHead`. If the account
+  doesn't exist yet, then an account will be returned with empty state.
 
   ## Examples
 
@@ -132,7 +140,8 @@ defmodule Bookk.Ledger do
   end
 
   @doc """
-  TODO
+  Creates a new `Bookk.Ledger` from its name and, optionally, a list of
+  `Bookk.Account`.
   """
   @spec new(name :: String.t()) :: t
   @spec new(name :: String.t(), [Bookk.Account.t()]) :: t
@@ -145,7 +154,10 @@ defmodule Bookk.Ledger do
       do: Enum.into(accounts, %Ledger{name: name})
 
   @doc """
-  TODO
+  Posts a `Bookk.JournalEntry` to a ledger. This means that the changes to
+  accounts' balances described in the journal entry will be applied to the
+  accounts in the ledger. If a change applies to an accounts that doesn't exist
+  yet, then the account will be created.
 
   ## Examples
 

@@ -15,7 +15,7 @@ defmodule Bookk.Account do
   alias Bookk.Operation, as: Op
 
   @typedoc """
-  The struct that describes the state of an account.
+  The struct that represents the state of an account.
 
   ## Fields
 
@@ -32,7 +32,7 @@ defmodule Bookk.Account do
   defstruct [:head, balance: 0]
 
   @doc """
-  TODO
+  Creates a new account from a `Bookk.AccountHead`.
 
   ## Examples
 

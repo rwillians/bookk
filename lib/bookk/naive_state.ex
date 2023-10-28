@@ -1,6 +1,8 @@
 defmodule Bookk.NaiveState do
   @moduledoc """
-  TODO
+  State holds multiple ledgers. A NaiveState is considered "naive" because it
+  doesn't hold any information regarding the journal entries that put the state
+  into its current value.
 
   ## Related
 
@@ -17,7 +19,7 @@ defmodule Bookk.NaiveState do
   alias Bookk.Ledger
 
   @typedoc """
-  TODO
+  The struct representing a naive state.
   """
   @type t :: %Bookk.NaiveState{
           ledgers: %{(name :: String.t()) => Bookk.Ledger.t()}
@@ -26,14 +28,15 @@ defmodule Bookk.NaiveState do
   defstruct ledgers: %{}
 
   @doc """
-  TODO
+  Produces a empty naive state.
   """
   @spec empty() :: t
 
   def empty, do: %NaiveState{}
 
   @doc """
-  TODO
+  Get's a ledger from the state by its name. If the ledger doesn't exist in the
+  state yet, then a new empty ledger will be returned.
 
   ## Examples
 
@@ -64,7 +67,7 @@ defmodule Bookk.NaiveState do
   end
 
   @doc """
-  TODO
+  Produces a new state struct from a set of ledgers.
   """
   @spec new([Bookk.Ledger.t()]) :: t
 
@@ -75,7 +78,8 @@ defmodule Bookk.NaiveState do
       do: Enum.into(ledgers, empty())
 
   @doc """
-  TODO
+  Posts a `Bookk.InterledgerEntry` to the state, appling changes in balance to
+  multiple accounts accross multiple ledgers.
 
   ## Examples
 

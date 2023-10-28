@@ -1,4 +1,6 @@
 defmodule TestChartOfAccounts do
+  @moduledoc false
+
   @behaviour Bookk.ChartOfAccounts
 
   @impl Bookk.ChartOfAccounts

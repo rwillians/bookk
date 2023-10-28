@@ -1,6 +1,7 @@
 defmodule Bookk.InterledgerEntry do
   @moduledoc """
-  TODO
+  An interledger entry is a collection of Journal Entries affecting multiple
+  ledgers.
 
   ## Related
 
@@ -17,7 +18,7 @@ defmodule Bookk.InterledgerEntry do
   alias Bookk.JournalEntry, as: JournalEntry
 
   @typedoc """
-  TODO
+  The struct that represents an interledger entry.
   """
   @type t :: %Bookk.InterledgerEntry{
           entries_by_ledger: %{
@@ -28,7 +29,8 @@ defmodule Bookk.InterledgerEntry do
   defstruct entries_by_ledger: %{}
 
   @doc """
-  TODO
+  Checks whether the interledger entry is balanced. It is balance if all of its
+  journal entries are balanced.
 
   ## Examples
 

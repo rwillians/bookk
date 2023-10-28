@@ -1,15 +1,11 @@
 defmodule Bookk.Notation do
   @moduledoc """
-  TODO
+  DSL notation for journalizing interledger entries (`Bookk.InterledgerEntry`).
 
   ## Related
 
   - `Bookk.InterledgerEntry`;
   - `Bookk.NaiveState`.
-  """
-
-  @doc """
-  TODO
   """
 
   defmacro __using__(_) do

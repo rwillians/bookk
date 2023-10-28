@@ -1,6 +1,10 @@
 defmodule Bookk.Operation do
   @moduledoc """
-  TODO
+  An operation describe a change in balance to a single account (`Bookk.Account`).
+  It has a direction of either `:debit` or `:credit` which, by themselves means
+  nothing -- they are just labels --, but once combined with a account's
+  natural balance then we're able to tell if the operation is an addition or a
+  subtraction in balance.
 
   ## Related
 
@@ -15,7 +19,7 @@ defmodule Bookk.Operation do
   alias Bookk.AccountHead, as: AccountHead
 
   @typedoc """
-  TODO
+  The struct representing an operation.
   """
   @type t :: %Bookk.Operation{
           direction: :credit | :debit,
@@ -26,7 +30,7 @@ defmodule Bookk.Operation do
   defstruct [:direction, :account_head, :amount]
 
   @doc """
-  TODO
+  Creates a credit operation from a `Bookk.AccountHead` and an amount.
 
   ## Examples
 
@@ -62,7 +66,7 @@ defmodule Bookk.Operation do
   end
 
   @doc """
-  TODO
+  Creates a debit operation given a `Bookk.AccountHead` and an amount.
 
   ## Examples
 
@@ -98,7 +102,8 @@ defmodule Bookk.Operation do
   end
 
   @doc """
-  TODO
+  Checks whether an operation is empty. It is considered empty when its amount
+  is zero, meaning no changes to the account's balance.
 
   ## Examples
 
@@ -148,7 +153,7 @@ defmodule Bookk.Operation do
   def merge([first, second | tail]), do: merge([merge(first, second) | tail])
 
   @doc """
-  TODO
+  Combines two operation against the same account into one operation.
 
   ## Examples
 
@@ -223,7 +228,8 @@ defmodule Bookk.Operation do
   end
 
   @doc """
-  TODO
+  Creates a new operation. Same as `credit/2` and `debit/2` but the operation's
+  direction is provided as an atom argument.
   """
   @spec new(direction :: :credit | :debit, Bookk.AccountHead.t(), integer) :: t
 
@@ -231,7 +237,9 @@ defmodule Bookk.Operation do
   def new(:debit, head, amount), do: debit(head, amount)
 
   @doc """
-  TODO
+  Produces a opposite operation from the given operation. The opposite operation
+  is capable of reverting the effect of the given operation when posted to an
+  account.
 
   ## Examples
 
@@ -315,7 +323,10 @@ defmodule Bookk.Operation do
     end
   end
   @doc """
-  TODO
+  Takes a set of operations and returns a set of uniq operations per account.
+  The operations that affect the same account will be merged.
+
+  See `merge/1` and `merge/2` for more information on merging operations.
 
   ## Examples
 

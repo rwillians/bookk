@@ -1,6 +1,8 @@
 defmodule Bookk.JournalEntry do
   @moduledoc """
-  TODO
+  A Journal Entry is a set of operations that describe a change in balance for
+  an account. They are analogous to git commits, they represent diffs on
+  accounts' balance.
 
   ## Related
 
@@ -15,7 +17,7 @@ defmodule Bookk.JournalEntry do
   alias Bookk.Operation, as: Op
 
   @typedoc """
-  TODO
+  The struct that describe a Journal Entry.
   """
   @type t :: %Bookk.JournalEntry{
           operations: [Bookk.Operation.t()]
@@ -24,7 +26,8 @@ defmodule Bookk.JournalEntry do
   defstruct operations: []
 
   @doc """
-  TODO
+  Checks whether a journal entry is balanced. It is considered balance when the
+  sum of its debit operations is equal the sum of its credit operations.
 
   ## Examples
 
@@ -75,7 +78,7 @@ defmodule Bookk.JournalEntry do
   end
 
   @doc """
-  TODO
+  Checks whether a journal entry is empty.
 
   ## Examples
 
@@ -113,7 +116,7 @@ defmodule Bookk.JournalEntry do
   def empty?(%JournalEntry{operations: ops}), do: all?(ops, &Op.empty?/1)
 
   @doc """
-  TODO
+  Creates a new journal entry from a set of operations.
 
   ## Examples
 
@@ -142,7 +145,8 @@ defmodule Bookk.JournalEntry do
   def new([_ | _] = ops), do: %JournalEntry{operations: Op.uniq(ops)}
 
   @doc """
-  TODO
+  Creates a new journal entry that reverses all effects from the given journal
+  entry.
 
   ## Examples
 
@@ -170,7 +174,7 @@ defmodule Bookk.JournalEntry do
     do: %{entry | operations: map(ops, &Op.reverse/1) |> :lists.reverse()}
 
   @doc """
-  TODO
+  Returns the list of operations inside a journal entry.
 
   ## Examples
 

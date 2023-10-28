@@ -92,7 +92,7 @@ defmodule PerfTest do
   def gen_interledger_entries(n) do
     for _ <- 1..n do
       user_id = Enum.random(1..10_000) |> to_string() |> String.pad_leading(36, "0")
-      amount = Enum.random(10_00..1500_00)
+      amount = Enum.random(10_00..1_500_00)
 
       deposit_balance!(user_id, amount)
     end
