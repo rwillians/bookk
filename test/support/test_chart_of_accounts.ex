@@ -3,42 +3,42 @@ defmodule TestChartOfAccounts do
 
   @behaviour Bookk.ChartOfAccounts
 
+  alias Bookk.AccountClass, as: C
+  alias Bookk.AccountHead, as: Head
+
+  @classes %{
+    current_assets: %C{id: "CA", parent_id: "A", natural_balance: :debit},
+    owners_equity:  %C{id: "OE", parent_id: nil, natural_balance: :credit},
+    liabilities:    %C{id: "L",  parent_id: nil, natural_balance: :credit}
+  }
+
   @impl Bookk.ChartOfAccounts
   def ledger(:acme), do: "acme"
   def ledger({:user, user_id}), do: "user(#{user_id})"
 
   @impl Bookk.ChartOfAccounts
   def account(:cash) do
-    %Bookk.AccountHead{
+    %Head{
       name: "cash/CA",
-      class: %Bookk.AccountClass{
-        id: "CA",
-        parent_id: "A",
-        name: "Current Assets",
-        natural_balance: :debit
-      }
+      class: @classes.current_assets
     }
   end
 
   def account(:deposits) do
-    %Bookk.AccountHead{
+    %Head{
       name: "deposits/OE",
-      class: %Bookk.AccountClass{
-        id: "OE",
-        name: "Owner's Equity",
-        natural_balance: :credit
-      }
+      class: @classes.owners_equity
     }
   end
 
   def account({:unspent_cash, {:user, user_id}}) do
-    %Bookk.AccountHead{
+    %Head{
       name: "unspent-cash:user(#{user_id})/L",
-      class: %Bookk.AccountClass{
-        id: "L",
-        name: "Liabilities",
-        natural_balance: :credit
-      }
+      class: @classes.liabilities
     }
   end
+
+  @impl Bookk.ChartOfAccounts
+  def account_id(<<_, _>> = ledger_name, %Head{} = account_head),
+    do: ledger_name <> ":" <> account_head.name
 end

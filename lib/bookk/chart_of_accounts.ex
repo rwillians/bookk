@@ -35,4 +35,16 @@ defmodule Bookk.ChartOfAccounts do
 
   """
   @callback account(term) :: Bookk.AccountHead.t()
+
+  @doc """
+  Returns the account id for a given account head on a given ledger.
+
+  ## Examples
+
+      ledger_name = "acme"
+      account_head = %Bookk.AccountHead{name: "cash/CA"}
+      account_id(ledger_name, account_head) # `"acme:cash/CA"`
+
+  """
+  @callback account_id(ledger_name :: String.t(), Bookk.AccountHead.t()) :: String.t()
 end
