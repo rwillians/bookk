@@ -44,17 +44,17 @@ defmodule ChartOfAccounts do
   }
 
   @impl Bookk.ChartOfAccounts
-  def ledger(:cumbuca), do: "cumbuca"
+  def ledger(:acme), do: "acme"
   def ledger({:user, <<id::binary>>}), do: "user(#{id})"
 
   @impl Bookk.ChartOfAccounts
   def account(:cash), do: %H{name: "cash/CA", class: @classes.CA}
   def account(:deposits), do: %H{name: "deposits/OE", class: @classes.OE}
-  def account({:unspent_cash, {:user, id}}), do: %H{name: "unspent-cash:user(#{id})/L", class: @classes.L}
-  def account({:deposit_expenses, provider}), do: %H{name: "deposit-expenses:#{provider}/E", class: @classes.E}
+  def account({:unspent_cash, {:user, <<id::binary>>}}), do: %H{name: "unspent-cash:user(#{id})/L", class: @classes.L}
+  def account({:deposit_expenses, <<provider::binary>>}), do: %H{name: "deposit-expenses:#{provider}/E", class: @classes.E}
 
   @impl Bookk.ChartOfAccounts
-  def account_id(ledger_name, %Bookk.AccountHead{} = head), do: ledger_name <> ":" <> head.name
+  def account_id(ledger_name, %H{} = account_head), do: ledger_name <> ":" <> account_head.name
 end
 ```
 
