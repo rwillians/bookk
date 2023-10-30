@@ -1,0 +1,59 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        version:
+          - { elixir: '1.15.x', otp: '26.x' }
+
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - run: |
+          tag_version=${GITHUB_REF##*/v}
+          project_version=$(cat mix.exs | grep '@version ' | cut -d '"' -f2)
+
+          echo "Tag version:      ${tag_version}"
+          echo "Project version:  ${project_version}"
+
+          if [ "$tag_version" != "$project_version" ]; then
+            echo "Tag version (${tag_version}) does not match project version (${project_version})"
+            exit 1
+          fi
+
+      - uses: erlef/setup-beam@61e01a43a562a89bfc54c7f9a378ff67b03e4a21 # v1.16.0
+        with:
+          otp-version: ${{ matrix.version.otp }}
+          elixir-version: ${{ matrix.version.elixir }}
+
+      - uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
+        with:
+          path: deps
+          key: ${{ runner.os }}-mix-${{ hashFiles('mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-
+
+      - uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
+        with:
+          path: _build
+          key: ${{ runner.os }}-build-${{ hashFiles('mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
+      - run: mix deps.get
+      - run: mix deps.compile
+      - run: mix compile --warnings-as-errors
+      - run: mix credo
+      - run: mix test
+
+      - run: |
+          mix hex.config api_key ${{ secrets.HEX_API_KEY }}
+          mix hex.publish --yes --replace
