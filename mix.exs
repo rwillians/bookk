@@ -64,6 +64,7 @@ defmodule Bookk.MixProject do
 
       # Linter
       {:credo, "~> 1.7.0", only: [:dev, :test], runtime: false, optional: true},
+      {:dialyxir, "~> 1.4.2", only: [:dev, :test], runtime: false, optional: true},
 
       # Docs
       {:ex_doc, "~> 0.30.9", only: [:dev, :docs], runtime: false}

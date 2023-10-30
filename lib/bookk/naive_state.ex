@@ -1,6 +1,6 @@
 defmodule Bookk.NaiveState do
   @moduledoc """
-  State holds multiple ledgers. A NaiveState is considered "naive" because it
+  A state struct that holds multiple ledgers. It's considered "naive" because it
   doesn't hold any information regarding the journal entries that put the state
   into its current value.
 
@@ -20,12 +20,17 @@ defmodule Bookk.NaiveState do
 
   @typedoc """
   The struct representing a naive state.
+
+  ## Fields
+
+  - `ledgers_by_name`: the ledgers known by the state, grouped by their
+    name.
   """
   @type t :: %Bookk.NaiveState{
-          ledgers: %{(name :: String.t()) => Bookk.Ledger.t()}
+          ledgers_by_name: %{(name :: String.t()) => Bookk.Ledger.t()}
         }
 
-  defstruct ledgers: %{}
+  defstruct ledgers_by_name: %{}
 
   @doc """
   Produces a empty naive state.
@@ -48,19 +53,30 @@ defmodule Bookk.NaiveState do
   Returns the ledger when it exists in state:
 
       iex> state = %Bookk.NaiveState{
-      iex>   ledgers: %{
-      iex>     "foo" => %Bookk.Ledger{accounts: %{"cash" => %Bookk.Account{}}}
+      iex>   ledgers_by_name: %{
+      iex>     "foo" => %Bookk.Ledger{
+      iex>       accounts_by_name: %{
+      iex>         "cash" => %Bookk.Account{}
+      iex>       }
+      iex>     }
       iex>   }
       iex> }
       iex>
       iex> Bookk.NaiveState.get_ledger(state, "foo")
-      %Bookk.Ledger{accounts: %{"cash" => %Bookk.Account{}}}
+      %Bookk.Ledger{
+        accounts_by_name: %{
+          "cash" => %Bookk.Account{}
+        }
+      }
 
   """
   @spec get_ledger(t, String.t()) :: Bookk.Ledger.t()
 
-  def get_ledger(%NaiveState{ledgers: %{} = ledgers}, <<name::binary>>) do
-    case get(ledgers, name) do
+  def get_ledger(
+        %NaiveState{ledgers_by_name: %{} = ledgers_by_name},
+        <<name::binary>>
+      ) do
+    case get(ledgers_by_name, name) do
       nil -> Ledger.new(name)
       %Ledger{} = ledger -> ledger
     end
@@ -104,10 +120,10 @@ defmodule Bookk.NaiveState do
       iex> Bookk.NaiveState.empty()
       iex> |> Bookk.NaiveState.post(journal_entry)
       %Bookk.NaiveState{
-        ledgers: %{
+        ledgers_by_name: %{
           "acme" => %Bookk.Ledger{
             name: "acme",
-            accounts: %{
+            accounts_by_name: %{
               fixture_account_head(:cash).name => %Bookk.Account{
                 head: fixture_account_head(:cash),
                 balance: 500_00
@@ -120,7 +136,7 @@ defmodule Bookk.NaiveState do
           },
           "user(123)" => %Bookk.Ledger{
             name: "user(123)",
-            accounts: %{
+            accounts_by_name: %{
               fixture_account_head(:cash).name => %Bookk.Account{
                 head: fixture_account_head(:cash),
                 balance: 500_00
@@ -140,12 +156,12 @@ defmodule Bookk.NaiveState do
   def post(%NaiveState{} = state, %InterledgerEntry{} = entry),
     do: post_reduce(state, to_list(entry.entries_by_ledger))
 
-  defp post_reduce(state, [{ledger_name, [journal_entry | x_tail]} = _x | xs_tail]) do
-    do_post(state, ledger_name, journal_entry)
-    |> post_reduce([{ledger_name, x_tail} | xs_tail])
+  defp post_reduce(state, [{y_ledger_name, [y_journal_entry | y_tail]} | x_tail]) do
+    do_post(state, y_ledger_name, y_journal_entry)
+    |> post_reduce([{y_ledger_name, y_tail} | x_tail])
   end
 
-  defp post_reduce(state, [{_, []} | xs_tail]), do: post_reduce(state, xs_tail)
+  defp post_reduce(state, [{_, []} | x_tail]), do: post_reduce(state, x_tail)
   defp post_reduce(state, []), do: state
 
   defp do_post(state, ledger_name, journal_entry) do
@@ -156,9 +172,9 @@ defmodule Bookk.NaiveState do
 
   defp put_ledger(
          %Ledger{name: name} = ledger,
-         %NaiveState{ledgers: ledgers} = state
+         %NaiveState{ledgers_by_name: ledgers_by_name} = state
        ),
-       do: %{state | ledgers: put(ledgers, name, ledger)}
+       do: %{state | ledgers_by_name: put(ledgers_by_name, name, ledger)}
 end
 
 defimpl Collectable, for: Bookk.NaiveState do
@@ -167,15 +183,16 @@ defimpl Collectable, for: Bookk.NaiveState do
   alias Bookk.Ledger
   alias Bookk.NaiveState
 
+  @impl Collectable
   def into(state), do: {state, &collector/2}
 
   defp collector(
-         %NaiveState{ledgers: ledgers} = state,
+         %NaiveState{ledgers_by_name: ledgers_by_name} = state,
          {:cont, %Ledger{name: name} = ledger}
        ) do
     %{
       state
-      | ledgers: put(ledgers, name, ledger)
+      | ledgers_by_name: put(ledgers_by_name, name, ledger)
     }
   end
 

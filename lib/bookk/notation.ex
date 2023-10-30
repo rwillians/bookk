@@ -1,9 +1,14 @@
+# credo:disable-for-this-file Credo.Check.Refactor.ABCSize
+#
+#   c'est la vie
+#
 defmodule Bookk.Notation do
   @moduledoc """
-  DSL notation for journalizing interledger entries (`Bookk.InterledgerEntry`).
+  DSL notation for describing an interledger entries (`Bookk.InterledgerEntry`).
 
   ## Related
 
+  - `Bookk.ChartOfAccounts`;
   - `Bookk.InterledgerEntry`;
   - `Bookk.NaiveState`.
   """
@@ -15,7 +20,7 @@ defmodule Bookk.Notation do
   end
 
   @doc """
-  A DSL macro for expressing an interledger journal entries.
+  DSL notation for describing an interledger entries (`Bookk.InterledgerEntry`).
 
   ## Examples
 
@@ -51,7 +56,7 @@ defmodule Bookk.Notation do
 
   """
 
-  defmacro journalize([{:using, chart_of_accounts_mod} | _] = _opts, do: block) do
+  defmacro journalize([{:using, chart_of_accounts_mod} | _], do: block) do
     coa =
       {:__aliases__, [],
        Macro.expand(chart_of_accounts_mod, __CALLER__)
@@ -62,7 +67,7 @@ defmodule Bookk.Notation do
   end
 
   @doc """
-  Same as `journalize/2` but it raises an error if the produced interledger
+  Same as `journalize/2` but it raises an error if the resulting interledger
   journal entry is unbalanced.
 
   ## Examples
@@ -96,7 +101,7 @@ defmodule Bookk.Notation do
 
   """
 
-  defmacro journalize!([{:using, chart_of_accounts_mod} | _] = _opts, do: block) do
+  defmacro journalize!([{:using, chart_of_accounts_mod} | _], do: block) do
     coa =
       {:__aliases__, [],
        Macro.expand(chart_of_accounts_mod, __CALLER__)
@@ -107,8 +112,8 @@ defmodule Bookk.Notation do
 
     {:if, [context: __CALLER__, imports: [{2, Kernel}]],
      [
-       {{:., [], [{:__aliases__, [alias: false], [Bookk, InterledgerEntry]}, :balanced?]},
-        [], [interledger_entry]},
+       {{:., [], [{:__aliases__, [alias: false], [Bookk, InterledgerEntry]}, :balanced?]}, [],
+        [interledger_entry]},
        [
          do: interledger_entry,
          else:
@@ -160,9 +165,11 @@ defmodule Bookk.Notation do
 
     {
       {{:., [context: caller], [coa, :ledger]}, meta_b, [name]},
-      {{:., [context: caller], [{:__aliases__, [alias: false], [Bookk, JournalEntry]}, :new]}, meta_a, [
-        Enum.map(statements, &to_operation(caller, coa, &1))
-      ]}
+      {{:., [context: caller], [{:__aliases__, [alias: false], [Bookk, JournalEntry]}, :new]},
+       meta_a,
+       [
+         Enum.map(statements, &to_operation(caller, coa, &1))
+       ]}
     }
   end
 

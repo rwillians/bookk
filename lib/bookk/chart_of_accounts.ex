@@ -1,11 +1,13 @@
 defmodule Bookk.ChartOfAccounts do
   @moduledoc """
-  A Chart of Accounts (abbrv.: CoA) is a mapping of all the ledgers and accounts
-  that exist in a system.
+  A Chart of Accounts (abbrv.: CoA) is a mapping of all the ledgers and all
+  accounts that can exist in your system.
 
   ## Related
 
-  - `Bookk.Notation`.
+  - `Bookk.Notation`;
+  - `Bookk.AccountClass`;
+  - `Bookk.AccountHead`.
   """
 
   @doc ~S"""
@@ -43,7 +45,8 @@ defmodule Bookk.ChartOfAccounts do
 
       ledger_name = "acme"
       account_head = %Bookk.AccountHead{name: "cash/CA"}
-      account_id(ledger_name, account_head) # `"acme:cash/CA"`
+      account_id(ledger_name, account_head)
+      # `"acme:cash/CA"`
 
   """
   @callback account_id(ledger_name :: String.t(), Bookk.AccountHead.t()) :: String.t()

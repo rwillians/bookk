@@ -22,13 +22,19 @@ defmodule Bookk.Ledger do
 
   @typedoc """
   The struct that represents a ledger.
+
+  ## Fields
+
+  - `name`: the name of the ledger;
+  - `accounts_by_name`: a map of the accounts known by the ledger, grouped by
+    their name.
   """
   @type t :: %Bookk.Ledger{
           name: String.t(),
-          accounts: %{(name :: String.t()) => Bookk.Account.t()}
+          accounts_by_name: %{(name :: String.t()) => Bookk.Account.t()}
         }
 
-  defstruct [:name, accounts: %{}]
+  defstruct [:name, accounts_by_name: %{}]
 
   @doc """
   Checks whether the ledger is balanced. It is considered balance whe the sum of
@@ -82,9 +88,9 @@ defmodule Bookk.Ledger do
   """
   @spec balanced?(Bookk.Ledger.t()) :: boolean
 
-  def balanced?(%Ledger{accounts: accounts}) do
+  def balanced?(%Ledger{accounts_by_name: accounts_by_name}) do
     {debits, credits} =
-      values(accounts)
+      values(accounts_by_name)
       |> split_with(&(&1.head.class.natural_balance == :debit))
 
     sum_debits = map(debits, & &1.balance) |> sum()
@@ -103,7 +109,7 @@ defmodule Bookk.Ledger do
 
       iex> ledger = %Bookk.Ledger{
       iex>   name: "acme",
-      iex>   accounts: %{
+      iex>   accounts_by_name: %{
       iex>     "cash/CA" => %Bookk.Account{
       iex>       head: fixture_account_head(:cash),
       iex>       balance: 25_00
@@ -130,10 +136,10 @@ defmodule Bookk.Ledger do
   @spec get_account(t, Bookk.AccountHead.t()) :: Bookk.Account.t()
 
   def get_account(
-        %Ledger{accounts: %{} = accounts},
+        %Ledger{accounts_by_name: %{} = accounts_by_name},
         %AccountHead{name: name} = head
       ) do
-    case get(accounts, name) do
+    case get(accounts_by_name, name) do
       nil -> Account.new(head)
       %Account{} = account -> account
     end
@@ -154,10 +160,10 @@ defmodule Bookk.Ledger do
       do: Enum.into(accounts, %Ledger{name: name})
 
   @doc """
-  Posts a `Bookk.JournalEntry` to a ledger. This means that the changes to
-  accounts' balances described in the journal entry will be applied to the
-  accounts in the ledger. If a change applies to an accounts that doesn't exist
-  yet, then the account will be created.
+  Posts a `Bookk.JournalEntry` to a ledger. This means that the balance change
+  described in each operation of the journal entry will be applied to their
+  respective accounts of the ledger. If there's a change to an account that
+  doesn't exist yet, then the account is first created.
 
   ## Examples
 
@@ -220,9 +226,12 @@ defmodule Bookk.Ledger do
 
   defp put_account(
         %Account{head: %{name: account_name}} = account,
-        %Ledger{accounts: accounts} = ledger
+        %Ledger{accounts_by_name: accounts_by_name} = ledger
       ) do
-    %{ledger | accounts: put(accounts, account_name, account)}
+    %{
+      ledger
+      | accounts_by_name: put(accounts_by_name, account_name, account)
+    }
   end
 end
 
@@ -232,13 +241,17 @@ defimpl Collectable, for: Bookk.Ledger do
   alias Bookk.Account
   alias Bookk.Ledger
 
+  @impl Collectable
   def into(ledger), do: {ledger, &collector/2}
 
   defp collector(
-         %Ledger{accounts: accounts} = ledger,
+         %Ledger{accounts_by_name: accounts_by_name} = ledger,
          {:cont, %Account{head: %{name: account_name}} = account}
        ) do
-    %{ledger | accounts: put(accounts, account_name, account)}
+    %{
+      ledger
+      | accounts_by_name: put(accounts_by_name, account_name, account)
+    }
   end
 
   defp collector(ledger, :done), do: ledger

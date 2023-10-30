@@ -1,11 +1,8 @@
 # Bookk
 
-> **Warning**
-> Not ready for production, this is a work in progress.
+Bookk is a simple library that provides building blocks for operating double-entry bookkeeping accounting ledgers.
 
-**TODO: Add description**
-
-See full documentation at [hexdocs](#).
+See full documentation at [hexdocs](https://hexdocs.pm/bookk).
 
 
 ## Installation
@@ -55,6 +52,9 @@ defmodule ChartOfAccounts do
   def account(:deposits), do: %H{name: "deposits/OE", class: @classes.OE}
   def account({:unspent_cash, {:user, id}}), do: %H{name: "unspent-cash:user(#{id})/L", class: @classes.L}
   def account({:deposit_expenses, provider}), do: %H{name: "deposit-expenses:#{provider}/E", class: @classes.E}
+
+  @impl Bookk.ChartOfAccounts
+  def account_id(ledger_name, %Bookk.AccountHead{} = head), do: ledger_name <> ":" <> head.name
 end
 ```
 
@@ -71,10 +71,9 @@ interledger_entry =
     end
   end
 
-state = Bookk.NaiveState.empty()
-updated_state = Bookk.NaiveState.post(state, interledger_entry)
-
-Bookk.inspect(updated_state)
+updated_state =
+  Bookk.NaiveState.empty()
+  |> Bookk.NaiveState.post(interledger_entry)
 ```
 
 ### User deposited balance (multiple ledgers)
@@ -95,8 +94,7 @@ interledger_entry =
     end
   end
 
-state = Bookk.NaiveState.empty()
-updated_state = Bookk.NaiveState.post(state, interledger_entry)
-
-Bookk.inspect(updated_state)
+updated_state =
+  Bookk.NaiveState.empty()
+  |> Bookk.NaiveState.post(interledger_entry)
 ```

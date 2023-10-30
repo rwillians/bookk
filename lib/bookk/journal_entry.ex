@@ -1,8 +1,9 @@
 defmodule Bookk.JournalEntry do
   @moduledoc """
-  A Journal Entry is a set of operations that describe a change in balance for
-  an account. They are analogous to git commits, they represent diffs on
-  accounts' balance.
+  A Journal Entry is a set of operations that must be transacted under
+  the same accounting transaction. Those operations describe a change in
+  balance for an account. Operations are analogous to git commits, they
+  represent a diff on a account's balance.
 
   ## Related
 
@@ -18,6 +19,10 @@ defmodule Bookk.JournalEntry do
 
   @typedoc """
   The struct that describe a Journal Entry.
+
+  ## Fields
+
+  - `operations`: the list of operations included in the journal entry.
   """
   @type t :: %Bookk.JournalEntry{
           operations: [Bookk.Operation.t()]

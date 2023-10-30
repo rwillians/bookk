@@ -5,7 +5,7 @@ defmodule Bookk.AccountClass do
 
   ## Common classes
 
-  These are some of the most common used classes (IME):
+  Here are some of the most common used classes for reference:
 
   | id       | parent id | natural balance | name                     |
   | ---      | ---       | ---             | ---                      |
@@ -29,7 +29,7 @@ defmodule Bookk.AccountClass do
   """
 
   @typedoc """
-  The struct the describes an account class.
+  The struct that describes an account class.
 
   ## Fields
 

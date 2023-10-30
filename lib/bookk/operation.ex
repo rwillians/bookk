@@ -1,10 +1,7 @@
 defmodule Bookk.Operation do
   @moduledoc """
-  An operation describe a change in balance to a single account (`Bookk.Account`).
-  It has a direction of either `:debit` or `:credit` which, by themselves means
-  nothing -- they are just labels --, but once combined with a account's
-  natural balance then we're able to tell if the operation is an addition or a
-  subtraction in balance.
+  An operation describe a change in balance on a single account
+  (`Bookk.Account`).
 
   ## Related
 
@@ -20,6 +17,18 @@ defmodule Bookk.Operation do
 
   @typedoc """
   The struct representing an operation.
+
+  ## Fields
+
+  - `direction` (either `:debit` or `:credit`): by itself it means nothing -- it's
+    just a lable -- but, once combined with the account's natural balance
+    (`account_head.class.natural_balance`), then we're able to tell if the
+    operation will result in an addition or a subtraction of balance;
+  - `account_head`: a `Bookk.AccountHead` struct used to either identify or
+    created the affected account in the ledger where the operation is posted;
+  - `amount`: the [positive] amount by which the account's balance will be
+    changed. Whether the change will be an addition or a subtraction, that
+    depends on `direction` and the account's natural balance.
   """
   @type t :: %Bookk.Operation{
           direction: :credit | :debit,
@@ -124,7 +133,8 @@ defmodule Bookk.Operation do
   def empty?(%Op{}), do: false
 
   @doc """
-  Same as {Bookk.Operation.merge/2} but it takes a non-empty list of operations.
+  Same as {Bookk.Operation.merge/2} but it takes a non-empty list of operations,
+  all to the same account (same `account_head`).
 
   ## Examples
 
@@ -216,6 +226,7 @@ defmodule Bookk.Operation do
   """
   @spec merge(t, t) :: t
 
+  # credo:disable-for-lines:10 Credo.Check.Refactor.ABCSize
   def merge(%Op{account_head: same} = a, %Op{account_head: same = head} = b) do
     {direction, amount} =
       case {a.direction, b.direction, head.class.natural_balance} do
@@ -262,10 +273,12 @@ defmodule Bookk.Operation do
   def reverse(%Op{direction: :debit} = entry), do: %{entry | direction: :credit}
 
   @doc """
-  Returns the operation's delta amount, which is the natural number by which the
-  account's balance will be changed. A negative integer is return in case the
-  account should be subtracted, making it safe to always add the returned
-  number to the balance.
+  Returns the operation's delta amount, which is the real number (positive or
+  negative integer) by which the account's balance will be changed.
+
+  A negative integer is return in case the account should be subtracted, making
+  this value safe to always be used with an addition operation against the
+  account's balance.
 
   ## Examples
 
@@ -322,6 +335,7 @@ defmodule Bookk.Operation do
       _ -> -op.amount
     end
   end
+
   @doc """
   Takes a set of operations and returns a set of uniq operations per account.
   The operations that affect the same account will be merged.
