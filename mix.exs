@@ -23,7 +23,7 @@ defmodule Bookk.MixProject do
       aliases: aliases(),
       package: package(),
       docs: [
-        main: "Bookk",
+        main: "README",
         logo: "logo.png",
         source_ref: "v#{@version}",
         source_url: @github,
