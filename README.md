@@ -1,6 +1,4 @@
-<p align="center">
-  <img height="150" src="https://github.com/rwillians/bookk/assets/5093551/88f9db20-27ed-4c36-8994-e995d55d387e">
-</p>
+# Bookk
 
 Bookk is a simple library that provides building blocks for operating journal entries and manipulating double-entry bookkeeping accounting ledgers.
 
