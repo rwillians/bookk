@@ -5,8 +5,8 @@ defmodule Bookk.MixProject do
   @github "https://github.com/rwillians/bookk"
 
   @description """
-  Bookk provides the building block to build ledger-based double-entry
-  bookkeeping solutions for accounting.
+  Bookk is a simple library that provides building blocks for operating journal
+  entries and manipulating double-entry bookkeeping accounting ledgers.
   """
 
   def project do
