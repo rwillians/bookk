@@ -1,7 +1,7 @@
 defmodule Bookk.MixProject do
   use Mix.Project
 
-  @version "0.1.1"
+  @version "0.1.2"
   @github "https://github.com/rwillians/bookk"
 
   @description """
@@ -15,7 +15,7 @@ defmodule Bookk.MixProject do
       version: @version,
       description: @description,
       source_url: @github,
-      # homepage_url: @github,
+      homepage_url: @github,
       elixir: ">= 1.14.0",
       elixirc_paths: elixirc_paths(Mix.env()),
       elixirc_options: [debug_info: Mix.env() == :dev],
@@ -23,11 +23,11 @@ defmodule Bookk.MixProject do
       aliases: aliases(),
       package: package(),
       docs: [
-        main: "README",
-        logo: "logo.png",
+        main: "readme",
+        logo: "assets/hex-logo.png",
         source_ref: "v#{@version}",
         source_url: @github,
-        canonical: "http://hexdocs.pm/bookk",
+        canonical: "http://hexdocs.pm/bookk/",
         extras: ["README.md", "LICENSE"]
       ],
       deps: deps(),
