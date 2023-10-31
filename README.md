@@ -44,6 +44,9 @@ end
 
 ## Examples
 
+> **Warning**
+> The snipets in this section are meant to be taken as a pseudocode, they haven't been tested yet.
+
 ### Chart of Accounts
 
 ```elixir
