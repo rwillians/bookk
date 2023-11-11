@@ -80,7 +80,7 @@ defmodule ACME.ChartOfAccounts do
   def account({:unspent_cash, {:user, <<id::binary>>}}), do: %H{name: "unspent-cash:user(#{id})/L", class: @classes.L}
   def account({:deposit_expenses, <<provider::binary>>}), do: %H{name: "deposit-expenses:#{provider}/E", class: @classes.E}
 
-  @impl Bookk.ChartOfAccounts
+  @doc false
   def account_id(ledger_name, %H{} = account_head), do: ledger_name <> ":" <> account_head.name
 end
 ```

@@ -1,7 +1,7 @@
 defmodule Bookk.AccountClass do
   @moduledoc """
-  An account class properties that are inherited by accounts and also work as a
-  way of grouping account's balances.
+  An account class has properties that are inherited by accounts and
+  serves as a way of grouping account's balances.
 
   ## Common classes
 
@@ -34,18 +34,21 @@ defmodule Bookk.AccountClass do
   ## Fields
 
   An account class in composed of:
-  - **`id`**: it's recomended that, instead of using it with an arbitrary value,
-    you assign it to the class' name abbreviation.
-  - **`parent_id`**: If the class is a subclass, then `parent_id` should be set
-    to the parent class' abbreviation. For example, Current Assets is a subclass
-    of Assets, therefore its `parent_id` should be set to `"A"` (where `"A"` is
-    the abbreviation of Assets account).
-  - **`name`**: The human readable name of the account class.
-  - **`natural_balance`** (either `:debit` or `:credit`): specifies the
-    direction in which accounts of this class grows their balance. For example,
-    Assets accounts grows their balances with `:debit` operations.
+  - **`id`**: it's recomended that, instead of using it with an
+    arbitrary value, you assign it to the class' name abbreviation;
+  - **`parent_id`**: If the class is a subclass, then `parent_id`
+    should be set to the parent class' abbreviation. For example,
+    Current Assets is a subclass of Assets, therefore its `parent_id`
+    should be set to `"A"` (where `"A"` is the abbreviation of
+    Assets);
+  - **`name`**: The human readable name of the account class;
+  - **`natural_balance`** (either `:debit` or `:credit`): specifies
+    the direction in which accounts of this class grows their balance.
+    For example, Assets accounts grows their balances with `:debit`
+    operations.
 
-  See section [Common classes](#module-common-classes) for examples of classes.
+  See section [Common classes](#module-common-classes) for examples of
+  classes.
   """
   @type t :: %Bookk.AccountClass{
           id: String.t(),

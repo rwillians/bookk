@@ -1,8 +1,8 @@
 defmodule Bookk.NaiveState do
   @moduledoc """
-  A state struct that holds multiple ledgers. It's considered "naive" because it
-  doesn't hold any information regarding the journal entries that put the state
-  into its current value.
+  A state struct that holds multiple ledgers. It's considered "naive"
+  because it doesn't hold any information regarding the journal
+  entries that put the state into its current value.
 
   ## Related
 
@@ -23,8 +23,8 @@ defmodule Bookk.NaiveState do
 
   ## Fields
 
-  - `ledgers_by_name`: the ledgers known by the state, grouped by their
-    name.
+  - `ledgers_by_name`: the ledgers known by the state, grouped by
+    their name.
   """
   @type t :: %Bookk.NaiveState{
           ledgers_by_name: %{(name :: String.t()) => Bookk.Ledger.t()}
@@ -40,12 +40,13 @@ defmodule Bookk.NaiveState do
   def empty, do: %NaiveState{}
 
   @doc """
-  Get's a ledger from the state by its name. If the ledger doesn't exist in the
-  state yet, then a new empty ledger will be returned.
+  Get's a ledger from the state by its name. If the ledger doesn't
+  exist in the state yet, then a new empty ledger will be returned.
 
   ## Examples
 
-  Returns an empty ledger when requested ledger doesn't exist in state:
+  Returns an empty ledger when requested ledger doesn't exist in
+  state:
 
       iex> Bookk.NaiveState.get_ledger(%Bookk.NaiveState{}, "acme")
       %Bookk.Ledger{name: "acme"}
@@ -94,8 +95,8 @@ defmodule Bookk.NaiveState do
       do: Enum.into(ledgers, empty())
 
   @doc """
-  Posts a `Bookk.InterledgerEntry` to the state, appling changes in balance to
-  multiple accounts accross multiple ledgers.
+  Posts a `Bookk.InterledgerEntry` to the state, appling changes in
+  balance to multiple accounts accross multiple ledgers.
 
   ## Examples
 

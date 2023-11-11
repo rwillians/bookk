@@ -1,10 +1,11 @@
 # credo:disable-for-this-file Credo.Check.Refactor.ABCSize
 #
-#   c'est la vie
+#   NOTE: C'est la vie
 #
 defmodule Bookk.Notation do
   @moduledoc """
-  DSL notation for describing an interledger entries (`Bookk.InterledgerEntry`).
+  DSL notation for describing an interledger entries
+  (`Bookk.InterledgerEntry`).
 
   ## Related
 
@@ -20,7 +21,8 @@ defmodule Bookk.Notation do
   end
 
   @doc """
-  DSL notation for describing an interledger entries (`Bookk.InterledgerEntry`).
+  DSL notation for describing an interledger entries
+  (`Bookk.InterledgerEntry`).
 
   ## Examples
 
@@ -67,8 +69,8 @@ defmodule Bookk.Notation do
   end
 
   @doc """
-  Same as `journalize/2` but it raises an error if the resulting interledger
-  journal entry is unbalanced.
+  Same as `journalize/2` but it raises an error if the resulting
+  interledger journal entry is unbalanced.
 
   ## Examples
 
@@ -87,7 +89,8 @@ defmodule Bookk.Notation do
       iex> assert not Bookk.InterledgerEntry.empty?(journal_entry)
       iex> assert Bookk.InterledgerEntry.balanced?(journal_entry)
 
-  Raises an error when an unbalanced interledger journal entry is produced:
+  Raises an error when an unbalanced interledger journal entry is
+  produced:
 
       iex> import Bookk.Notation, only: [journalize!: 2]
       iex>

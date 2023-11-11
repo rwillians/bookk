@@ -1,9 +1,9 @@
 defmodule Bookk.Ledger do
   @moduledoc """
-  A ledger is a book that holds accounts. Traditionally, ledgers would also hold
-  the journal entries that changed the accounts but, in this library, persisting
-  those journal entries is considered off its scope -- you can persistem them on
-  your own though.
+  A ledger is a book that holds accounts. Traditionally, ledgers would
+  also hold the journal entries that changed the accounts but, in this
+  library, persisting those journal entries is considered off scope.
+  You may persist state the way the best fits your needs.
 
   ## Related
 
@@ -26,8 +26,8 @@ defmodule Bookk.Ledger do
   ## Fields
 
   - `name`: the name of the ledger;
-  - `accounts_by_name`: a map of the accounts known by the ledger, grouped by
-    their name.
+  - `accounts_by_name`: a map of the accounts known by the ledger,
+    grouped by their name.
   """
   @type t :: %Bookk.Ledger{
           name: String.t(),
@@ -37,9 +37,12 @@ defmodule Bookk.Ledger do
   defstruct [:name, accounts_by_name: %{}]
 
   @doc """
-  Checks whether the ledger is balanced. It is considered balance whe the sum of
-  balance of its accounts that has a debit natural balance is equal the sum of
-  balance of its accounts that has a credit natural balance.
+  Checks whether the ledger is balanced.
+
+  A ledger is considered balance when the some of balance from its
+  debit accounts is equal the sum of balance from its credit accounts.
+  You know if an account is a "debit account" or a "credit account" by
+  the natural balance of its class.
 
   See `Bookk.AccountClass` for more information on natural balance.
 
@@ -51,8 +54,8 @@ defmodule Bookk.Ledger do
       iex> |> Bookk.Ledger.balanced?()
       true
 
-  Is balanced when the sum of debit accounts balances is equal the sum of credit
-  accounts balances:
+  Is balanced when the sum of debit accounts balances is equal the sum
+  of credit accounts balances:
 
       iex> ledger = Bookk.Ledger.new("acme")
       iex> cash = fixture_account_head(:cash)
@@ -69,8 +72,8 @@ defmodule Bookk.Ledger do
       iex> |> Bookk.Ledger.balanced?()
       true
 
-  Is unbalanced when the sum of debit accounts balances isn't equal the sum of
-  credit accounts balances:
+  Is unbalanced when the sum of debit accounts balances isn't equal
+  the sum of credit accounts balances:
 
       iex> ledger = Bookk.Ledger.new("acme")
       iex> cash = fixture_account_head(:cash)
@@ -100,8 +103,9 @@ defmodule Bookk.Ledger do
   end
 
   @doc """
-  Get an account from the ledger by its `Bookk.AccountHead`. If the account
-  doesn't exist yet, then an account will be returned with empty state.
+  Get an account from the ledger by its `Bookk.AccountHead`. If the
+  account doesn't exist yet, then an account will be returned with
+  empty state.
 
   ## Examples
 
@@ -146,8 +150,8 @@ defmodule Bookk.Ledger do
   end
 
   @doc """
-  Creates a new `Bookk.Ledger` from its name and, optionally, a list of
-  `Bookk.Account`.
+  Creates a new `Bookk.Ledger` from its name and, optionally, a list
+  of `Bookk.Account`.
   """
   @spec new(name :: String.t()) :: t
   @spec new(name :: String.t(), [Bookk.Account.t()]) :: t
@@ -160,10 +164,11 @@ defmodule Bookk.Ledger do
       do: Enum.into(accounts, %Ledger{name: name})
 
   @doc """
-  Posts a `Bookk.JournalEntry` to a ledger. This means that the balance change
-  described in each operation of the journal entry will be applied to their
-  respective accounts of the ledger. If there's a change to an account that
-  doesn't exist yet, then the account is first created.
+  Posts a `Bookk.JournalEntry` to a ledger. This means that the
+  balance change described in each operation of the journal entry will
+  be applied to their respective accounts of the ledger. If there's a
+  change to an account that doesn't exist yet, then the account is
+  first created.
 
   ## Examples
 

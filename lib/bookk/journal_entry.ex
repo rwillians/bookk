@@ -1,9 +1,9 @@
 defmodule Bookk.JournalEntry do
   @moduledoc """
   A Journal Entry is a set of operations that must be transacted under
-  the same accounting transaction. Those operations describe a change in
-  balance for an account. Operations are analogous to git commits, they
-  represent a diff on a account's balance.
+  the same accounting transaction. Those operations describe a change
+  in balance for an account. Operations are analogous to git commits,
+  they represent a diff on a account's balance.
 
   ## Related
 
@@ -31,8 +31,9 @@ defmodule Bookk.JournalEntry do
   defstruct operations: []
 
   @doc """
-  Checks whether a journal entry is balanced. It is considered balance when the
-  sum of its debit operations is equal the sum of its credit operations.
+  Checks whether a journal entry is balanced. It is considered balance
+  when the sum of its debit operations is equal the sum of its credit
+  operations.
 
   ## Examples
 
@@ -103,7 +104,8 @@ defmodule Bookk.JournalEntry do
      iex> Bookk.JournalEntry.empty?(journal_entry)
      true
 
-  Is not empty when at least one operation in the journal entry isn't empty:
+  Is not empty when at least one operation in the journal entry isn't
+  empty:
 
      iex> journal_entry = %Bookk.JournalEntry{
      iex>   operations: [
@@ -125,8 +127,8 @@ defmodule Bookk.JournalEntry do
 
   ## Examples
 
-  If there're multiple operations touching the same account, they will be merged
-  into a single operation:
+  If there're multiple operations touching the same account, they will
+  be merged into a single operation:
 
       iex> cash = fixture_account_head(:cash)
       iex> deposits = fixture_account_head(:deposits)
@@ -150,8 +152,8 @@ defmodule Bookk.JournalEntry do
   def new([_ | _] = ops), do: %JournalEntry{operations: Op.uniq(ops)}
 
   @doc """
-  Creates a new journal entry that reverses all effects from the given journal
-  entry.
+  Creates a new journal entry that reverses all effects from the given
+  journal entry.
 
   ## Examples
 

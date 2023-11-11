@@ -20,15 +20,18 @@ defmodule Bookk.Operation do
 
   ## Fields
 
-  - `direction` (either `:debit` or `:credit`): by itself it means nothing -- it's
-    just a lable -- but, once combined with the account's natural balance
-    (`account_head.class.natural_balance`), then we're able to tell if the
-    operation will result in an addition or a subtraction of balance;
-  - `account_head`: a `Bookk.AccountHead` struct used to either identify or
-    created the affected account in the ledger where the operation is posted;
-  - `amount`: the [positive] amount by which the account's balance will be
-    changed. Whether the change will be an addition or a subtraction, that
-    depends on `direction` and the account's natural balance.
+  - `direction` (either `:debit` or `:credit`): by itself it means
+    nothing -- it's just a lable -- but, once combined with the
+    account's natural balance (`account_head.class.natural_balance`),
+    then we're able to tell if the operation will result in an
+    addition or a subtraction of balance;
+  - `account_head`: a `Bookk.AccountHead` struct used to either
+    update or create the affected account in the ledger where the
+    operation was posted;
+  - `amount`: the [positive] amount by which the account's balance
+    will be changed. Whether the change will be an addition or a
+    subtraction, that depends on `direction` and the account class'
+    natural balance.
   """
   @type t :: %Bookk.Operation{
           direction: :credit | :debit,
@@ -111,8 +114,8 @@ defmodule Bookk.Operation do
   end
 
   @doc """
-  Checks whether an operation is empty. It is considered empty when its amount
-  is zero, meaning no changes to the account's balance.
+  Checks whether an operation is empty. It is considered empty when
+  its amount is zero, meaning no changes to the account's balance.
 
   ## Examples
 
@@ -133,8 +136,8 @@ defmodule Bookk.Operation do
   def empty?(%Op{}), do: false
 
   @doc """
-  Same as {Bookk.Operation.merge/2} but it takes a non-empty list of operations,
-  all to the same account (same `account_head`).
+  Same as {Bookk.Operation.merge/2} but it takes a non-empty list of
+  operations, all to the same account (same `account_head`).
 
   ## Examples
 
@@ -167,8 +170,9 @@ defmodule Bookk.Operation do
 
   ## Examples
 
-  When the two operations have the same direction, the resulting operation has
-  the same direction and the sum of the two amounts as its amount:
+  When the two operations have the same direction, the resulting
+  operation has the same direction and the sum of the two amounts as
+  its amount:
 
       iex> head = fixture_account_head(:cash)
       iex>
@@ -182,10 +186,11 @@ defmodule Bookk.Operation do
         amount: 100_00
       }
 
-  When the two operations have different direction, the account's natural
-  balance will define the resulting direction. As for the resulting amount,
-  the operation that matches the natural balance direction will have its amount
-  subtracted by the other operation's amount:
+  When the two operations have different direction, the account's
+  natural balance will define the resulting direction. As for the
+  resulting amount, the operation that matches the natural balance
+  direction will have its amount subtracted by the other operation's
+  amount:
 
       iex> head = fixture_account_head(:cash)
       iex>
@@ -199,8 +204,9 @@ defmodule Bookk.Operation do
         amount: 40_00
       }
 
-  If the resulting balance is a negative number, then the resulting direction
-  will be switched and the amount will be transformed into a positive number:
+  If the resulting balance is a negative number, then the resulting
+  direction will be switched and the amount will be transformed into a
+  positive number:
 
       iex> head = fixture_account_head(:cash)
       iex>
@@ -214,8 +220,8 @@ defmodule Bookk.Operation do
         amount: 40_00
       }
 
-  If the operations' account heads aren't the same in both operations, then an
-  error will be raised:
+  If the operations' account heads aren't the same in both operations,
+  then an error will be raised:
 
       iex> a = debit(fixture_account_head(:cash), 10_00)
       iex> b = credit(fixture_account_head(:deposits), 10_00)
@@ -239,8 +245,8 @@ defmodule Bookk.Operation do
   end
 
   @doc """
-  Creates a new operation. Same as `credit/2` and `debit/2` but the operation's
-  direction is provided as an atom argument.
+  Creates a new operation. Same as `credit/2` and `debit/2` but the
+  operation's direction is provided as an atom argument.
   """
   @spec new(direction :: :credit | :debit, Bookk.AccountHead.t(), integer) :: t
 
@@ -248,9 +254,9 @@ defmodule Bookk.Operation do
   def new(:debit, head, amount), do: debit(head, amount)
 
   @doc """
-  Produces a opposite operation from the given operation. The opposite operation
-  is capable of reverting the effect of the given operation when posted to an
-  account.
+  Produces a opposite operation from the given operation. The opposite
+  operation is capable of reverting the effect of the given operation
+  when posted to an account.
 
   ## Examples
 
@@ -273,17 +279,18 @@ defmodule Bookk.Operation do
   def reverse(%Op{direction: :debit} = entry), do: %{entry | direction: :credit}
 
   @doc """
-  Returns the operation's delta amount, which is the real number (positive or
-  negative integer) by which the account's balance will be changed.
+  Returns the operation's delta amount, which is the real number
+  (positive or negative integer) by which the account's balance will
+  be changed.
 
-  A negative integer is return in case the account should be subtracted, making
-  this value safe to always be used with an addition operation against the
-  account's balance.
+  A negative integer is return in case the account should be
+  subtracted, making this value safe to always be used with an
+  addition operation against the account's balance.
 
   ## Examples
 
-  Debiting an account which has a debit natural balance produces a positive
-  number:
+  Debiting an account which has a debit natural balance produces a
+  positive number:
 
       iex> head = %Bookk.AccountHead{
       iex>   class: %Bookk.AccountClass{natural_balance: :debit}
@@ -293,8 +300,8 @@ defmodule Bookk.Operation do
       iex> |> Bookk.Operation.to_delta_amount()
       100_00
 
-  Debiting an account which has a credit natural balance produces a negative
-  number:
+  Debiting an account which has a credit natural balance produces a
+  negative number:
 
       iex> head = %Bookk.AccountHead{
       iex>   class: %Bookk.AccountClass{natural_balance: :debit}
@@ -304,8 +311,8 @@ defmodule Bookk.Operation do
       iex> |> Bookk.Operation.to_delta_amount()
       -100_00
 
-  Crediting an account which has a credit natural balance produces a positive
-  number:
+  Crediting an account which has a credit natural balance produces a
+  positive number:
 
       iex> head = %Bookk.AccountHead{
       iex>   class: %Bookk.AccountClass{natural_balance: :credit}
@@ -315,8 +322,8 @@ defmodule Bookk.Operation do
       iex> |> Bookk.Operation.to_delta_amount()
       100_00
 
-  Debiting an account which has a credit natural balance produces a negative
-  number:
+  Debiting an account which has a credit natural balance produces a
+  negative number:
 
       iex> head = %Bookk.AccountHead{
       iex>   class: %Bookk.AccountClass{natural_balance: :credit}
@@ -337,16 +344,17 @@ defmodule Bookk.Operation do
   end
 
   @doc """
-  Takes a set of operations and returns a set of uniq operations per account.
-  The operations that affect the same account will be merged.
+  Takes a set of operations and returns a set of uniq operations per
+  account. The operations that affect the same account will be merged.
 
-  See `merge/1` and `merge/2` for more information on merging operations.
+  See `merge/1` and `merge/2` for more information on merging
+  operations.
 
   ## Examples
 
-  When there's more than one operation touching the same account, those
-  operations are merged together so that the resulting list contains one a
-  single operation thouching each account:
+  When there's more than one operation touching the same account,
+  those operations are merged together so that the resulting list
+  contains one a single operation thouching each account:
 
       iex> cash = fixture_account_head(:cash)
       iex> deposits = fixture_account_head(:deposits)

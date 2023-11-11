@@ -1,9 +1,9 @@
 defmodule Bookk.InterledgerEntry do
   @moduledoc """
-  An interledger entry is a collection of journal entries affecting multiple
-  ledgers that must be transacted under the same accounting transaction. It's
-  somewhat analogous to an `Ecto.Multi` or a git commit that affect multiple
-  files.
+  An interledger entry is a collection of journal entries affecting
+  multiple ledgers that must be transacted under the same accounting
+  transaction. It's somewhat analogous to an `Ecto.Multi` holding
+  multiple operations or a git commit that affect multiple files.
 
   ## Related
 
@@ -25,9 +25,9 @@ defmodule Bookk.InterledgerEntry do
   ## Fields
 
   An interledger entry is composed of:
-  - `entries_by_ledger`: the map of journal entries that are included in the
-    interledger entry, grouped by the name of the ledger against which they
-    should be posted.
+  - `entries_by_ledger`: the map of journal entries that are included
+    in the interledger entry, grouped by the name of the ledger
+    against which they should be posted.
   """
   @type t :: %Bookk.InterledgerEntry{
           entries_by_ledger: %{
@@ -38,8 +38,8 @@ defmodule Bookk.InterledgerEntry do
   defstruct entries_by_ledger: %{}
 
   @doc """
-  Checks whether the interledger entry is balanced. It is balance if all of its
-  journal entries are balanced.
+  Checks whether the interledger entry is balanced. It is balance if
+  all of its journal entries are balanced.
 
   ## Examples
 
@@ -88,10 +88,11 @@ defmodule Bookk.InterledgerEntry do
   end
 
   @doc """
-  Checks whether an interledger entry is empty. It is empty when it has now
-  journal entries or when all its journal entries are empty.
+  Checks whether an interledger entry is empty. It is empty when it
+  has now journal entries or when all its journal entries are empty.
 
-  See `Bookk.JournalEntry.empty?/1` to learn more about empty journal entries.
+  See `Bookk.JournalEntry.empty?/1` to learn more about empty journal
+  entries.
 
   ## Examples
 
@@ -143,9 +144,9 @@ defmodule Bookk.InterledgerEntry do
   end
 
   @doc """
-  Produces a new interledger entry that is equaly opposite of the given
-  interledger entry, meaning its capable of reverting all the changes that the
-  given entry causes.
+  Produces a new interledger entry that is equaly opposite of the
+  given interledger entry, meaning its capable of reverting all the
+  changes that the given entry causes.
 
   ## Examples
 
@@ -191,15 +192,15 @@ defmodule Bookk.InterledgerEntry do
   end
 
   @doc """
-  Given an interledger entry, it returns all its journal entries in the form
-  of a list of tuples where the first element is the ledger's name and the
-  second element is a list of journal entries that are meant to be posted to
-  such ledger.
+  Given an interledger entry, it returns all its journal entries in
+  the form of a list of tuples where the first element is the ledger's
+  name and the second element is a list of journal entries that are
+  meant to be posted to such ledger.
 
   ## Examples
 
-  Returns a list of tuple where the first element is the ledger name and the
-  second element is a journal entry:
+  Returns a list of tuple where the first element is the ledger name
+  and the second element is a journal entry:
 
       iex> user_id = "b13a81cf-ff78-414d-b5b2-042e9ecf2082"
       iex> cash = fixture_account_head(:cash)

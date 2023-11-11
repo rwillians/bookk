@@ -37,8 +37,4 @@ defmodule TestChartOfAccounts do
       class: @classes.liabilities
     }
   end
-
-  @impl Bookk.ChartOfAccounts
-  def account_id(<<_, _>> = ledger_name, %Head{} = account_head),
-    do: ledger_name <> ":" <> account_head.name
 end

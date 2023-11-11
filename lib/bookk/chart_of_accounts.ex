@@ -1,7 +1,21 @@
 defmodule Bookk.ChartOfAccounts do
   @moduledoc """
-  A Chart of Accounts (abbrv.: CoA) is a mapping of all the ledgers and all
-  accounts that can exist in your system.
+  A Chart of Accounts (abbrv.: CoA) is a mapping of all the accounts
+  and all the ledgers that can exist in your system. But instead of
+  hard-coding them, you define patterns for accounts and ledgers
+  supported by your application using functions and pattern matching.
+
+  For example, if your application allows ledgers to have an account
+  for exampenses from paying salary to an employee, you could define a
+  function with a signature the like the one below:
+
+      def account({:salary, {:employee, employee_id}})
+
+  And if your application, following the previous example, allows for
+  every employee to have their own ledger, you could define a function
+  with a signature like the one below:
+
+      def ledger({:employee, employee_id})
 
   ## Related
 
@@ -11,9 +25,9 @@ defmodule Bookk.ChartOfAccounts do
   """
 
   @doc ~S"""
-  This function maps all possible patterns of ledger names your application
-  supports. It's recomended to use pattern matching and let it crash in the
-  event of a mismatch.
+  This function maps all possible patterns of ledger names your
+  application supports. It's recomended to use pattern matching and
+  let it crash in the event of a mismatch.
 
   ## Example
 
@@ -24,9 +38,9 @@ defmodule Bookk.ChartOfAccounts do
   @callback ledger(term) :: String.t()
 
   @doc ~S"""
-  This function maps all possible patterns of accounts that your application
-  supports. It's recomended to use pattern matching and let it crash in the
-  event of a mismatch.
+  This function maps all possible patterns of accounts that your
+  application supports. It's recomended to use pattern matching and
+  let it crash in the event of a mismatch.
 
   ## Examples
 
