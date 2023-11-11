@@ -90,31 +90,31 @@ defmodule Bookk.JournalEntry do
 
   Is empty when the journal entry has no operations:
 
-     iex> Bookk.JournalEntry.empty?(%Bookk.JournalEntry{})
-     true
+      iex> Bookk.JournalEntry.empty?(%Bookk.JournalEntry{})
+      true
 
   Is empty when all operations in the journal entry are empty:
 
-     iex> journal_entry = %Bookk.JournalEntry{
-     iex>   operations: [
-     iex>     %Bookk.Operation{amount: 0}
-     iex>   ]
-     iex> }
-     iex>
-     iex> Bookk.JournalEntry.empty?(journal_entry)
-     true
+      iex> journal_entry = %Bookk.JournalEntry{
+      iex>   operations: [
+      iex>     %Bookk.Operation{amount: 0}
+      iex>   ]
+      iex> }
+      iex>
+      iex> Bookk.JournalEntry.empty?(journal_entry)
+      true
 
   Is not empty when at least one operation in the journal entry isn't
   empty:
 
-     iex> journal_entry = %Bookk.JournalEntry{
-     iex>   operations: [
-     iex>     %Bookk.Operation{amount: 10_00}
-     iex>   ]
-     iex> }
-     iex>
-     iex> Bookk.JournalEntry.empty?(journal_entry)
-     false
+      iex> journal_entry = %Bookk.JournalEntry{
+      iex>   operations: [
+      iex>     %Bookk.Operation{amount: 10_00}
+      iex>   ]
+      iex> }
+      iex>
+      iex> Bookk.JournalEntry.empty?(journal_entry)
+      false
 
   """
   @spec empty?(t) :: boolean
