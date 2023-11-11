@@ -1,7 +1,7 @@
 defmodule Bookk.MixProject do
   use Mix.Project
 
-  @version "0.1.2"
+  @version "0.1.3"
   @github "https://github.com/rwillians/bookk"
 
   @description """
