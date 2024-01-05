@@ -26,7 +26,7 @@ Bookk's DSL)_
 
 Persisting state, such as accounts balances and log of transactions per accounts is considered off scope for this library at the moment — and honestly, might never becomes part of its scope — but you can still do it own your own. An example of how to persist state using `Ecto` is provided in section **Examples** at [Persist State using Ecto](#persist-state-using-ecto).
 
-Visit page **API Reference** for a brief introduction to double-entry bookkeeping concepts implemented by this library.
+Visit the [API Reference](https://hexdocs.pm/bookk/api-reference.html) page for a brief introduction to double-entry bookkeeping concepts implemented by this library.
 
 
 ## Installation
