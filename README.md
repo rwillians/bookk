@@ -4,7 +4,7 @@ Bookk is a simple library that provides building blocks for operating journal en
 
 See full documentation at [hexdocs](https://hexdocs.pm/bookk).
 
-This library aims to decrease the friction between domain specialists (mainly accountants) and developers by providing a DSL that enables developers to write code for journal entries with a syntax that's familiar to specialists. That way, it should be easy for specialists to review code for journal entries and, likewise, it whould be easy for developers to implement journal entries based on instructions provided by specialists.
+This library aims to decrease the friction between domain specialists (mainly accountants) and developers by providing a DSL that enables developers to write code for journal entries with a syntax that's familiar to specialists. That way, it should be easy for specialists to review code for journal entries and, likewise, it should be easy for developers to implement journal entries based on instructions provided by specialists.
 
 ```elixir
 def to_interledger_entry(%Deposit{} = tx) do
