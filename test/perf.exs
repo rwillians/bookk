@@ -58,7 +58,7 @@ defmodule PerfTest do
   #
 
   defp deposit_balance(user_id, amount) do
-    journalize! using: TestChartOfAccounts do
+    journalize using: TestChartOfAccounts do
       on ledger(:acme) do
         debit account(:cash), amount
         credit account({:unspent_cash, {:user, user_id}}), amount
