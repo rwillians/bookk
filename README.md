@@ -135,9 +135,9 @@ updated_state =
 
 This section demostrantes how state can be persisted to a database using `Ecto` instead of posting (apply side-effects) to the in-memory structs provided by the library (such as `Bookk.Ledger` and `Bookk.NaiveState`).
 
-First, we'll need two models.
+In this example, we'll use two models.
 
-1.  **Account**, which holds the account's balance:
+1.  **Account**, which holds the up-to-date balance for an account:
 
     ```elixir
     defmodule Account do
@@ -165,7 +165,7 @@ First, we'll need two models.
     end
     ```
 
-2.  **AccountTransaction**, which serves as a log of changes to an accounts:
+2.  **AccountTransaction**, which serves as a log of changes to an account:
 
     ```elixir
     defmodule AccountTransaction do
