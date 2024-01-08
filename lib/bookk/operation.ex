@@ -1,7 +1,8 @@
 defmodule Bookk.Operation do
   @moduledoc """
   An operation describe a change in balance on a single account
-  (`Bookk.Account`).
+  (`Bookk.Account`). An operation is analogous to a git diff on
+  a file, they represent a diff on an account's balance.
 
   ## Related
 
