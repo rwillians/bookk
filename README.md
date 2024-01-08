@@ -270,7 +270,7 @@ defmodule Accounting do
           do: op_to_multi(op, leder_name, tx.id, now)
 
     multis
-    |> Enum.reduce(Ecto.Multi.new(), &Ecto.Multi.append(&2, &1))
+    |> Enum.reduce(Ecto.Multi.new(), &Ecto.Multi.append/2)
     |> ACME.Repo.transaction()
   end
 
