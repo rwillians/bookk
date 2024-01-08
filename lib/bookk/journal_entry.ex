@@ -2,8 +2,7 @@ defmodule Bookk.JournalEntry do
   @moduledoc """
   A Journal Entry is a set of operations that must be transacted under
   the same accounting transaction. Those operations describe a change
-  in balance for an account. Operations are analogous to git commits,
-  they represent a diff on a account's balance.
+  in balance for an account.
 
   ## Related
 
