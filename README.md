@@ -239,7 +239,7 @@ defimpl Transactionable, for: DepositTransaction do
     journalize! using: ACME.ChartOfAccounts do
       on ledger(:acme) do
         debit account(:cash), tx.amount
-        credit account({:unspent_cash, {:user, tx.user_id}})
+        credit account({:unspent_cash, {:user, tx.user_id}}), tx.amount
       end
 
       on ledger({:user, tx.user_id}) do
