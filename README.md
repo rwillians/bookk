@@ -4,6 +4,8 @@ Bookk is a simple library that provides building blocks for operating journal en
 
 See full documentation at [hexdocs](https://hexdocs.pm/bookk).
 
+For an introduction to Double-Entry Bookkeeping Accounting, see [this article](https://dev.to/rwillians/double-entry-bookkeeping-101-for-software-engineers-bk4).
+
 This library aims to decrease the friction between domain specialists (mainly accountants) and developers by providing a DSL that enables developers to write code for journal entries with a syntax that's familiar to specialists. That way, it should be easy for specialists to review code for journal entries and, likewise, it should be easy for developers to implement journal entries based on instructions provided by specialists.
 
 ```elixir
