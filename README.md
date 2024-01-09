@@ -279,7 +279,7 @@ defmodule Accounting do
     multis =
       for {ledger_name, journal_entry} <- Bookk.InterledgerEntry.to_journal_entries(interledger_entry),
           op <- Bookk.JournalEntry.to_operations(journal_entry),
-          do: op_to_multi(op, leder_name, tx.id, now)
+          do: op_to_multi(op, ledger_name, tx.id, now)
 
     multis
     |> Enum.reduce(Ecto.Multi.new(), &Ecto.Multi.append(&2, &1))
