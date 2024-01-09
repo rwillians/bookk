@@ -96,11 +96,16 @@ Here's demonstrated how to journalize (create a journal entry template, if you m
 ```elixir
 import Bookk.Notation, only: [journalize!: 2]
 
+user_id = "785627e6-bf43-41dd-a8a8-3fdc5f761489"
+deposited_amount = 100_00
+#                  ^ in cents or smalles unit that the
+#                    currency you're using supports
+
 interledger_entry =
   journalize! using: ACME.ChartOfAccounts do
-    on ledger(:acme) do
+    on ledger({:user, user_id) do
       debit account(:cash), deposited_amount
-      credit account({:unspent_cash, {:user, user_id}}), deposited_amount
+      credit account(:deposits), deposited_amount
     end
   end
 
@@ -113,6 +118,11 @@ updated_state =
 
 ```elixir
 import Bookk.Notation, only: [journalize!: 2]
+
+user_id = "785627e6-bf43-41dd-a8a8-3fdc5f761489"
+deposited_amount = 100_00
+#                  ^ in cents or smalles unit that the
+#                    currency you're using supports
 
 interledger_entry =
   journalize! using: ACME.ChartOfAccounts do
@@ -137,7 +147,7 @@ updated_state =
 
 This section demostrantes how state can be persisted to a database using `Ecto` instead of posting (apply side-effects) to the in-memory structs provided by the library (such as `Bookk.Ledger` and `Bookk.NaiveState`).
 
-In this example, we'll use two models.
+In this example, we'll use two models and a protocol that defines how structs can be transformed into an interledger entry.
 
 1.  **Account**, which holds the up-to-date balance for an account:
 
