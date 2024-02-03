@@ -5,19 +5,42 @@
   "extensions": {
     "recommendations": [
       "EditorConfig.EditorConfig",
-      "JakeBecker.elixir-ls",
-      "fabiospampinato.vscode-highlight"
+      "fabiospampinato.vscode-highlight",
+      "JakeBecker.elixir-ls"
     ]
   },
   "settings": {
     "editor.formatOnType": false,
+    "elixirLS.dialyzerEnabled": false,
     "highlight.regexes": {
-      "((#\\s+)?(\\^\\s*)?@let-it-crash(\\!)?)": {
-        "filterFileRegex": ".exs?$",
+      "((#\\s*)?@let-it-crash)": {
+        "filterFileRegex": ".ex$",
         "decorations": [
           {
-            "overviewRulerColor": "#d16dcf70",
-            "backgroundColor": "#d16dcf70",
+            "overviewRulerColor": "#ff00fb4b",
+            "backgroundColor": "#ff00fb4b",
+            "color": "#ffffff69",
+            "fontWeight": "bold"
+          }
+        ]
+      },
+      "((#\\s*)?@(warning|to-be-refactored))": {
+        "filterFileRegex": ".ex$",
+        "decorations": [
+          {
+            "overviewRulerColor": "#f9e0005b",
+            "backgroundColor": "#f9e0005b",
+            "color": "#ffffff69",
+            "fontWeight": "bold"
+          }
+        ]
+      },
+      "((#\\s*)?@todo.*)": {
+        "filterFileRegex": ".ex$",
+        "decorations": [
+          {
+            "overviewRulerColor": "#c3f9005b",
+            "backgroundColor": "#c3f9005b",
             "color": "#ffffff69",
             "fontWeight": "bold"
           }
