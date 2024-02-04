@@ -4,8 +4,8 @@
 [![Hex.pm](https://img.shields.io/hexpm/dt/bookk.svg)](https://hex.pm/packages/bookk)
 [![Hex.pm](https://img.shields.io/hexpm/l/bookk.svg)](https://hex.pm/packages/bookk)
 
-Bookk is a simple library that provides building blocks manipulating
-ledgers using double-entry bookkeeping.
+Bookk is a simple library that provides building blocks for
+manipulating ledgers using double-entry bookkeeping.
 
 ```elixir
 @doc """
@@ -43,9 +43,10 @@ provided by specialists.
 
 Persisting state, such as accounts balances and log of transactions
 per accounts is considered off scope for this library at the moment —
-and honestly, might never becomes part of its scope — but it should be
-relatively easy for you to do it on your own. An example of how to
-persist state using `Ecto` is provided at [Persist State using Ecto](#persist-state-using-ecto).
+and honestly, might never becomes part of its scope do to how complex
+some distributed use cases can get — but it should be relatively easy
+for you to do it on your own. An example of how to persist state using
+`Ecto` is provided at [Persist State using Ecto](#persist-state-using-ecto).
 
 Visit the [API Reference](https://hexdocs.pm/bookk/api-reference.html) page for a brief introduction to double-entry bookkeeping concepts implemented by this library.
 
@@ -54,11 +55,10 @@ Visit the [API Reference](https://hexdocs.pm/bookk/api-reference.html) page for 
 
 * [Installation](#installation)
 * [Status of the project](#status-of-the-project)
-* [Chart of Accounts](#chart-of-accounts)
-* [Interledger Entries](#interledger-entries)
-* [DSL](#dsl)
-* [Persist state using Ecto](#persist-state-using-ecto)
-* [Guides](#guides)
+* [Examples](#examples)
+  * [Chart of Accounts](#chart-of-accounts)
+  * [Interledger Entry DSL](#interledger-entry-dsl)
+  * [Persist state using Ecto](#persist-state-using-ecto)
 
 
 ## Installation
@@ -83,34 +83,24 @@ the library is already usable for testing and learning purposes.
 
 **Milestones to v1.0.0**
 - [x] Can update an Account using either a Credit or a Debit operation;
-- [x] Can update a Ledger using a Journal Entry. Affected accounts
-      that don't exist gets created;
-- [x] Can update a State (in-memory) using an Interledger Entry.
-      Affected ledgers that don't exist gets created;
+- [x] Can update a Ledger using a Journal Entry. Affected accounts that don't exist gets created;
+- [x] Can update a State (in-memory) using an Interledger Entry. Affected ledgers that don't exist gets created;
 - [x] Has DSL for writing interledger entries;
 - [ ] Wait for feedback on the API and DSL;
 
 
-## Chart of Accounts
+## Examples
+
+### Chart of Accounts
 
 **TODO**
 
 
-## Interledger Entries
+### Interledger Entries DSL
 
 **TODO**
 
 
-## DSL
-
-**TODO**
-
-
-## Persist state using Ecto
-
-**TODO**
-
-
-## Guides
+### Persist state using Ecto
 
 **TODO**
