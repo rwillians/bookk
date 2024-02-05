@@ -28,13 +28,13 @@ defmodule Bookk.Account do
   specifically to track that missing amount, for example one or more
   accounts that tracks debt.
 
-  So instead of doing this:
+  ❌ So instead of doing this:
 
   | class   | name | balance   |
   | Asset   | Cash | -$1000.00 |
   | Expense | Rent |  $1000.00 |
 
-  You should prefer this:
+  ✅ You should prefer this:
 
   | class     | name             | balance  |
   | Asset     | Cash             |       $0 |
@@ -48,25 +48,27 @@ defmodule Bookk.Account do
   - See `Bookk.AccountClass` to learn more about account's natural
     balance.
   """
+  @moduledoc since: "0.2.0"
 
   alias __MODULE__
   alias Bookk.Operation
 
   @typedoc """
-  The struct representing an account.
+  A struct representing an account's state.
 
-  ## Properties
+  ## Fields
 
-  - `head` - The head of the account, which is a struct that contains
-    all the information we need to either find or create an account
-    within a ledger.
+  - `head` - A `Bookk.AccountHead` struct, which contains all the
+    information we need to either find or create an account within a
+    ledger.
   - `balance` - An integer representing the amount of money that the
     account holds. This number should be in the smallest fraction of
-    the currency you're using, for example cents in the case of USD.
+    the currency you're using, for example "cents" in the case of USD.
     The amount may be a negative number, but it's not recommended
     because it's often a sign that you're missing some accounts in
     your design. See `Bookk.Account` for more information.
   """
+  @typedoc since: "0.2.0"
   @type t :: %Bookk.Account{
           head: Bookk.AccountHead.t(),
           balance: integer
@@ -130,14 +132,18 @@ defmodule Bookk.Account do
         }
 
   """
+  @doc since: "0.2.0"
   @spec post(account, operation) :: account
         when account: Bookk.Account.t(),
              operation: Bookk.Operation.t()
 
   def post(%Account{} = account, %Operation{} = operation) do
-    case {account.head.class.natural_balance, operation.direction} do
-      {same, same} -> %{account | balance: account.balance + operation.amount}
-      {_, _} -> %{account | balance: account.balance - operation.amount}
-    end
+    new_balance =
+      case {account.head.class.natural_balance, operation.direction} do
+        {same, same} -> account.balance + operation.amount
+        {_a, _b} -> account.balance - operation.amount
+      end
+
+    %{account | balance: new_balance}
   end
 end

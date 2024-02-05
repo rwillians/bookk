@@ -7,33 +7,61 @@ defmodule Bookk.Ledger do
   > The proper way to create accounts in a ledger is by posting
   > journal entries to it. See `post/2`.
   """
+  @moduledoc since: "0.2.0"
 
   alias __MODULE__
   alias Bookk.Account
   alias Bookk.AccountHead
   alias Bookk.JournalEntry
 
+  @typedoc """
+  A struct representing a ledger's state, where accounts are indexed
+  by their name.
+  """
+  @typedoc since: "0.2.0"
   @opaque t :: %Bookk.Ledger{
           name: String.t(),
-          accounts: %{(account_name :: String.t()) => Bookk.Account.t()}
+          accounts_by_name: %{(account_name :: String.t()) => Bookk.Account.t()}
         }
 
   defstruct name: nil,
-            accounts: %{}
+            accounts_by_name: %{}
 
   @doc """
   Creates a ledger from a set of accounts.
 
-  Duplicated accounts will be overwritten by the last account with the
-  same name, so be sure your accounts are unique.
+      iex> Bookk.Ledger.new([
+      iex>   %Bookk.Account{head: %Bookk.AccountHead{name: "cash"}, balance: 10_00}
+      iex> ])
+      %Bookk.Ledger{
+        accounts_by_name: %{
+          "cash" => %Bookk.Account{head: %Bookk.AccountHead{name: "cash"}, balance: 10_00}
+        }
+      }
+
+  > ### Warning {: .warning}
+  > Duplicated accounts will be overwritten by the last account with
+  > the same name, so be sure your accounts are unique.
+
+      iex> Bookk.Ledger.new([
+      iex>   %Bookk.Account{head: %Bookk.AccountHead{name: "cash"}, balance: 10_00},
+      iex>   %Bookk.Account{head: %Bookk.AccountHead{name: "cash"}, balance: 30_00}
+      iex> ])
+      %Bookk.Ledger{
+        accounts_by_name: %{
+          "cash" => %Bookk.Account{head: %Bookk.AccountHead{name: "cash"}, balance: 30_00}
+        }
+      }
+
   """
+  @doc since: "0.2.0"
   @spec new([account]) :: ledger
         when account: Bookk.Account.t(),
              ledger: t
 
   def new(accounts \\ []) when is_list(accounts) do
     %Ledger{
-      accounts: Enum.into(accounts, %{}, &({&1.head.name, &1}))
+      accounts_by_name: Enum.into(accounts, %{}, &({&1.head.name, &1}))
     }
   end
 
@@ -41,13 +69,14 @@ defmodule Bookk.Ledger do
   Get an account from a ledger from its account head. If the account
   doesn't exist within the ledger, then an empty account is returned.
   """
+  @doc since: "0.2.0"
   @spec get_account(ledger, account_head) :: account
         when ledger: t,
              account_head: Bookk.AccountHead.t(),
              account: Bookk.Account.t()
 
   def get_account(%Ledger{} = ledger, %AccountHead{} = account_head) do
-    case Map.get(ledger.accounts, account_head.name) do
+    case Map.get(ledger.accounts_by_name, account_head.name) do
       nil -> %Account{head: account_head}
       account -> account
     end
@@ -58,18 +87,19 @@ defmodule Bookk.Ledger do
   affected accounts. Accounts that don't exist in the ledger yet get
   created.
   """
+  @doc since: "0.2.0"
   @spec post(ledger, journal_entry) :: ledger
         when ledger: t,
              journal_entry: Bookk.JournalEntry.t()
 
   def post(%Ledger{} = ledger, %JournalEntry{} = journal_entry) do
     updated_accounts =
-      for operation <- journal_entry.operations,
+      for operation <- JournalEntry.prune(journal_entry.operations),
           account = get_account(ledger, operation.account_head),
           do: {account.head.name, Account.post(account, operation)}
 
     %Ledger{
-      accounts: Enum.into(updated_accounts, ledger.accounts)
+      accounts_by_name: Enum.into(updated_accounts, ledger.accounts_by_name)
     }
   end
 end

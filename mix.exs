@@ -1,7 +1,7 @@
 defmodule Bookk.MixProject do
   use Mix.Project
 
-  @version "0.1.3"
+  @version "0.2.0"
   @github "https://github.com/rwillians/bookk"
 
   @description """
@@ -23,12 +23,22 @@ defmodule Bookk.MixProject do
       aliases: aliases(),
       package: package(),
       docs: [
-        main: "readme",
+        main: "README",
         logo: "assets/hex-logo.png",
         source_ref: "v#{@version}",
         source_url: @github,
         canonical: "http://hexdocs.pm/bookk/",
-        extras: ["README.md", "LICENSE"]
+        extras: [
+          "LICENSE",
+          "README.md",
+          "pages/guides/create-a-chart-of-accounts.md",
+          "pages/guides/create-an-interledger-entry.md",
+          "pages/guides/posting-to-in-memory-state.md",
+          "pages/guides/persisting-state-using-ecto.md"
+        ],
+        groups_for_extras: [
+          "Guides": ~r"pages/guides/"
+        ]
       ],
       deps: deps(),
       dialyzer: [

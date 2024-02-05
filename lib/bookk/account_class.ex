@@ -65,7 +65,23 @@ defmodule Bookk.AccountClass do
   > a professional accountant to learn more and help design the
   > accounts & classes that better fit your needs.
   """
+  @moduledoc since: "0.2.0"
 
+  @typedoc """
+  A struct that describes an account class.
+
+  ## Fields
+
+  - `sigil` - A 2-to-3 letter sigil that identifies the class. For
+    example, `"A"` for the Asset class and `"E"` for the Expense
+    class.
+  - `parent_sigil` - If a subclass, then it's set to the parent class'
+    sigil; otherwise, it's set to `nil`.
+  - `name` - The name of the class.
+  - `natural_balance` - Either `:credit` or `:debit`, it specifies
+    the direction with which its accounts grows their balance.
+  """
+  @typedoc since: "0.2.0"
   @type t :: %Bookk.AccountClass{
           sigil: String.t(),
           parent_sigil: String.t() | nil,
