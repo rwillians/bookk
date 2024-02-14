@@ -15,6 +15,7 @@ defmodule Bookk.Operation do
   @moduledoc since: "0.1.0"
 
   alias __MODULE__
+  alias Bookk.AccountClass
   alias Bookk.AccountHead
 
   @doc """
@@ -223,12 +224,52 @@ defmodule Bookk.Operation do
     account_name = operation.account_head.name
 
     amount =
-      @one_billion - operation.amount
+      (@one_billion - operation.amount)
       |> Integer.to_string()
       |> String.pad_leading(10, "0")
 
     "#{direction_priority}#{account_name}#{amount}"
   end
+
+  @doc """
+  Returns either a positive or a negative number representing the
+  delta change in the account's balance, where positive means an
+  increase in balance and negative means a decrease in balance.
+
+      iex> asset = %Bookk.AccountClass{natural_balance: :debit}
+      iex> account_head = %Bookk.AccountHead{name: "cash", class: asset}
+      iex>
+      iex> operation = Bookk.Operation.debit(account_head, 20_00)
+      iex>
+      iex> Bookk.Operation.to_delta_amount(operation)
+      20_00
+
+      iex> asset = %Bookk.AccountClass{natural_balance: :debit}
+      iex> account_head = %Bookk.AccountHead{name: "cash", class: asset}
+      iex>
+      iex> operation = Bookk.Operation.credit(account_head, 20_00)
+      iex>
+      iex> Bookk.Operation.to_delta_amount(operation)
+      -20_00
+
+  When the operation type is the same as the account's natural
+  balance, then the account's balance is increasing, meaning the
+  result will be a positive number. Otherwise, the account's balance
+  will decrease, resulting in a negative number.
+  """
+  @doc since: "0.1.0"
+  @spec to_delta_amount(operation) :: integer
+        when operation: t
+
+  def to_delta_amount(
+        %Operation{
+          direction: dir,
+          account_head: %AccountHead{class: %AccountClass{natural_balance: dir}}
+        } = operation
+      ),
+      do: operation.amount
+
+  def to_delta_amount(%Operation{} = operation), do: -operation.amount
 
   @doc """
   Takes a set of operations where there might be multiple operations
