@@ -9,11 +9,13 @@ defmodule Bookk.Notation do
   - See `Bookk.InterledgerEntry` to learn more about interledger entry;
   - See `Bookk.ChartOfAccounts` to learn more about chart of accounts;
   """
+  @moduledoc since: "0.1.0"
 
   @doc """
   Using this module will import `journalize/2` and `journalize!/2`
   macros.
   """
+  @doc since: "0.1.0"
   defmacro __using__(_) do
     quote do
       import unquote(__MODULE__), only: [journalize: 2, journalize!: 2]
@@ -54,6 +56,7 @@ defmodule Bookk.Notation do
       iex> assert not Bookk.InterledgerEntry.balanced?(interledger_entry)
 
   """
+  @doc since: "0.1.0"
   defmacro journalize([{:using, chart_of_accounts_mod} | _], do: block) do
     coa =
       {:__aliases__, [],
@@ -79,6 +82,7 @@ defmodule Bookk.Notation do
       ** (Bookk.UnbalancedError) `journalize!/2` produced an unbalanced journal entry
 
   """
+  @doc since: "0.1.0"
   defmacro journalize!([{:using, chart_of_accounts_mod} | _], do: block) do
     coa =
       {:__aliases__, [],

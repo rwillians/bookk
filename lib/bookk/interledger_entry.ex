@@ -100,6 +100,7 @@ defmodule Bookk.InterledgerEntry do
       false
 
   """
+  @doc since: "0.1.0"
   @spec balanced?(interledger_entry) :: boolean
         when interledger_entry: t
 
@@ -219,7 +220,7 @@ defmodule Bookk.InterledgerEntry do
   Consult `Bookk.JournalEntry.prune/1` to see how merged journal
   entries get pruned.
   """
-  @doc since: "0.1.0"
+  @doc since: "1.0.0"
   @spec prune(interledger_entry) :: interledger_entry
         when interledger_entry: t
 
@@ -235,4 +236,35 @@ defmodule Bookk.InterledgerEntry do
       journal_entries_by_ledger: journal_entries_by_ledger
     }
   end
+
+  @doc """
+  Returns the set of journal entries with the name of the affected
+  ledger.
+
+      iex> interledger_entry = %Bookk.InterledgerEntry{
+      iex>   journal_entries_by_ledger: [
+      iex>     {"ledger_a", %Bookk.JournalEntry{operations: [debit(%Bookk.AccountHead{name: "foo"}, 10_00)]}},
+      iex>     {"ledger_a", %Bookk.JournalEntry{operations: [debit(%Bookk.AccountHead{name: "foo"}, 20_00)]}},
+      iex>     {"ledger_b", %Bookk.JournalEntry{operations: [credit(%Bookk.AccountHead{name: "bar"}, 50_00)]}}
+      iex>   ]
+      iex> }
+      iex>
+      iex> Bookk.InterledgerEntry.to_journal_entries(interledger_entry)
+      [
+        {"ledger_a", %Bookk.JournalEntry{operations: [debit(%Bookk.AccountHead{name: "foo"}, 10_00)]}},
+        {"ledger_a", %Bookk.JournalEntry{operations: [debit(%Bookk.AccountHead{name: "foo"}, 20_00)]}},
+        {"ledger_b", %Bookk.JournalEntry{operations: [credit(%Bookk.AccountHead{name: "bar"}, 50_00)]}}
+      ]
+
+  If you want a single journal entry per ledger, consider using
+  `prune/1` before `to_journal_entries/1`.
+  """
+  @doc since: "0.1.0"
+  @spec to_journal_entries(interledger_entry) :: [{ledger_name, journal_entry}]
+        when interledger_entry: t,
+             ledger_name: String.t(),
+             journal_entry: Bookk.JournalEntry.t()
+
+  def to_journal_entries(%InterledgerEntry{} = interledger_entry),
+    do: interledger_entry.journal_entries_by_ledger
 end

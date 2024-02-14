@@ -49,20 +49,4 @@ defmodule Bookk.ChartOfAccounts do
   """
   @doc since: "0.1.0"
   @callback account(term) :: Bookk.AccountHead.t()
-
-  @doc """
-  Using this module will add the `Bookk.ChartOfAccount` behaviour to
-  your module and alias the following modules:
-  - `Bookk.AccountClass` as `Class`; and
-  - `Bookk.AccountHead` as `Head`;
-  """
-  @doc since: "1.0.0"
-  defmacro __using__(_) do
-    quote do
-      @behaviour unquote(__MODULE__)
-
-      alias Bookk.AccountClass, as: Class
-      alias Bookk.AccountHead, as: Head
-    end
-  end
 end

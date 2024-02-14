@@ -183,7 +183,7 @@ defmodule Bookk.JournalEntry do
   The operations also gets sorted, see the sorting priority at
   `Bookk.Operation.sort/1`.
   """
-  @doc since: "0.1.0"
+  @doc since: "1.0.0"
   @spec prune(journal_entry) :: journal_entry
         when journal_entry: t
 
@@ -195,4 +195,34 @@ defmodule Bookk.JournalEntry do
         |> Operation.sort()
     }
   end
+
+  @doc """
+  Returns the set of operations that make up a journal entry.
+
+      iex> cash_head = %Bookk.AccountHead{name: "cash"}
+      iex> contributions_head = %Bookk.AccountHead{name: "contributions"}
+      iex>
+      iex> journal_entry = Bookk.JournalEntry.new([
+      iex>   Bookk.Operation.debit(cash_head, 10_00),
+      iex>   Bookk.Operation.debit(cash_head, 20_00),
+      iex>   Bookk.Operation.credit(contributions_head, 50_00)
+      iex> ])
+      iex>
+      iex> Bookk.JournalEntry.to_operations(journal_entry)
+      [
+        Bookk.Operation.debit(cash_head, 10_00),
+        Bookk.Operation.debit(cash_head, 20_00),
+        Bookk.Operation.credit(contributions_head, 50_00)
+      ]
+
+  If you want a list of operations where there's only one operation
+  per account, consider using `prune/1` before `to_operations/1`.
+  """
+  @doc since: "0.1.0"
+  @spec to_operations(journal_entry) :: [operation]
+        when journal_entry: t,
+             operation: Bookk.Operation.t()
+
+  def to_operations(%JournalEntry{} = journal_entry),
+    do: journal_entry.operations
 end
