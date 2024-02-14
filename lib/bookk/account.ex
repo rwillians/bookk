@@ -48,7 +48,7 @@ defmodule Bookk.Account do
   - See `Bookk.AccountClass` to learn more about account's natural
     balance.
   """
-  @moduledoc since: "0.2.0"
+  @moduledoc since: "0.1.0"
 
   alias __MODULE__
   alias Bookk.Operation
@@ -68,7 +68,7 @@ defmodule Bookk.Account do
     because it's often a sign that you're missing some accounts in
     your design. See `Bookk.Account` for more information.
   """
-  @typedoc since: "0.2.0"
+  @typedoc since: "0.1.0"
   @type t :: %Bookk.Account{
           head: Bookk.AccountHead.t(),
           balance: integer
@@ -132,7 +132,7 @@ defmodule Bookk.Account do
         }
 
   """
-  @doc since: "0.2.0"
+  @doc since: "0.1.0"
   @spec post(account, operation) :: account
         when account: Bookk.Account.t(),
              operation: Bookk.Operation.t()

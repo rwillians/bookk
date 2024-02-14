@@ -65,7 +65,7 @@ defmodule Bookk.AccountClass do
   > a professional accountant to learn more and help design the
   > accounts & classes that better fit your needs.
   """
-  @moduledoc since: "0.2.0"
+  @moduledoc since: "0.1.0"
 
   @typedoc """
   A struct that describes an account class.
@@ -81,7 +81,7 @@ defmodule Bookk.AccountClass do
   - `natural_balance` - Either `:credit` or `:debit`, it specifies
     the direction with which its accounts grows their balance.
   """
-  @typedoc since: "0.2.0"
+  @typedoc since: "0.1.0"
   @type t :: %Bookk.AccountClass{
           sigil: String.t(),
           parent_sigil: String.t() | nil,

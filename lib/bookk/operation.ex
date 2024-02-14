@@ -12,7 +12,7 @@ defmodule Bookk.Operation do
   See `Bookk.Account.post/2` for more information on increasing and
   decreasing accounts balances.
   """
-  @moduledoc since: "0.2.0"
+  @moduledoc since: "0.1.0"
 
   alias __MODULE__
   alias Bookk.AccountHead
@@ -20,7 +20,7 @@ defmodule Bookk.Operation do
   @doc """
   A struct describing an operation in an account.
   """
-  @typedoc since: "0.2.0"
+  @typedoc since: "0.1.0"
   @opaque t :: %Bookk.Operation{
             direction: :credit | :debit,
             account_head: Bookk.AccountHead.t(),
@@ -34,7 +34,7 @@ defmodule Bookk.Operation do
   that should be affected and the amount by which the account should
   be affected.
   """
-  @doc since: "0.2.0"
+  @doc since: "0.1.0"
   @spec new(direction, account_head, amount) :: operation
         when direction: :credit | :debit,
              account_head: Bookk.AccountHead.t(),
@@ -56,7 +56,7 @@ defmodule Bookk.Operation do
   @doc """
   Alias to `new/3`.
   """
-  @doc since: "0.2.0"
+  @doc since: "0.1.0"
   @spec credit(account_head, amount) :: operation
         when account_head: Bookk.AccountHead.t(),
              amount: integer,
@@ -67,7 +67,7 @@ defmodule Bookk.Operation do
   @doc """
   Alias to `new/3`.
   """
-  @doc since: "0.2.0"
+  @doc since: "0.1.0"
   @spec debit(account_head, amount) :: operation
         when account_head: Bookk.AccountHead.t(),
              amount: integer,
@@ -89,7 +89,7 @@ defmodule Bookk.Operation do
       false
 
   """
-  @doc since: "0.2.0"
+  @doc since: "0.1.0"
   @spec empty?(operation) :: boolean
         when operation: t
 
@@ -123,7 +123,7 @@ defmodule Bookk.Operation do
   want to merge only the operations that are affecting the same
   account, then use `uniq/1`.
   """
-  @doc since: "0.2.0"
+  @doc since: "0.1.0"
   @spec merge([operation, ...]) :: operation
         when operation: t
 
@@ -186,7 +186,7 @@ defmodule Bookk.Operation do
       ** (FunctionClauseError) no function clause matching in Bookk.Operation.merge/2
 
   """
-  @doc since: "0.2.0"
+  @doc since: "0.1.0"
   @spec merge(operation, operation) :: operation
         when operation: t
 
@@ -208,7 +208,7 @@ defmodule Bookk.Operation do
   - account name ascending;
   - operation amount descending;
   """
-  @doc since: "0.2.0"
+  @doc since: "0.1.0"
   @spec sort([operation]) :: [operation]
         when operation: t
 
@@ -235,7 +235,7 @@ defmodule Bookk.Operation do
   affecting the same account and returns a new set of operations where
   there's only one operation per account, merged using `merge/1`.
   """
-  @doc since: "0.2.0"
+  @doc since: "0.1.0"
   @spec uniq([operation]) :: [operation]
         when operation: t
 

@@ -7,7 +7,7 @@ defmodule Bookk.AccountHead do
   - See `Bookk.Ledger` to learn more about ledgers;
   - See `Bookk.AccountClass` to learn more about account classes;
   """
-  @moduledoc since: "0.2.0"
+  @moduledoc since: "0.1.0"
 
   @typedoc """
   A struct that describes the identifier of an account. It contains
@@ -21,7 +21,7 @@ defmodule Bookk.AccountHead do
   - `class` - A `Bookk.AccountClass` struct, which contains properties
     that are inherited by the account, such as its natural balance.
   """
-  @typedoc since: "0.2.0"
+  @typedoc since: "0.1.0"
   @type t :: %Bookk.AccountHead{
           name: String.t(),
           class: Bookk.AccountClass.t()

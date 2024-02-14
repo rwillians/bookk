@@ -8,7 +8,7 @@ defmodule Bookk.JournalEntry do
   - See `Bookk.Account` to learn more about accounts;
   - See `Bookk.Ledger` to learn more about ledgers.
   """
-  @moduledoc since: "0.2.0"
+  @moduledoc since: "0.1.0"
 
   alias __MODULE__
   alias Bookk.Operation
@@ -16,7 +16,7 @@ defmodule Bookk.JournalEntry do
   @typedoc """
   A struct describing a journal entry.
   """
-  @typedoc since: "0.2.0"
+  @typedoc since: "0.1.0"
   @opaque t :: %Bookk.JournalEntry{
           operations: [Bookk.Operation.t()]
         }
@@ -30,7 +30,7 @@ defmodule Bookk.JournalEntry do
   For recording a transaction that affects accounts from multiple
   ledger, see `Bookk.InterledgerEntry.new/1`.
   """
-  @doc since: "0.2.0"
+  @doc since: "0.1.0"
   @spec new([operation]) :: journal_entry
         when operation: Bookk.Operation.t(),
              journal_entry: t
@@ -66,7 +66,7 @@ defmodule Bookk.JournalEntry do
       false
 
   """
-  @doc since: "0.2.0"
+  @doc since: "0.1.0"
   @spec balanced?(journal_entry) :: boolean
         when journal_entry: t
 
@@ -93,7 +93,7 @@ defmodule Bookk.JournalEntry do
       false
 
   """
-  @doc since: "0.2.0"
+  @doc since: "0.1.0"
   @spec empty?(journal_entry) :: boolean
         when journal_entry: t
 
@@ -120,7 +120,7 @@ defmodule Bookk.JournalEntry do
   >     Bookk.JournalEntry.merge([a, b, c])
   >     |> Bookk.JournalEntry.prune()
   """
-  @doc since: "0.2.0"
+  @doc since: "0.1.0"
   @spec merge([journal_entry, ...]) :: journal_entry
         when journal_entry: t
 
@@ -148,7 +148,7 @@ defmodule Bookk.JournalEntry do
   >     Bookk.JournalEntry.merge(a, b)
   >     |> Bookk.JournalEntry.prune()
   """
-  @doc since: "0.2.0"
+  @doc since: "0.1.0"
   @spec merge(journal_entry, journal_entry) :: journal_entry
         when journal_entry: t
 
@@ -183,7 +183,7 @@ defmodule Bookk.JournalEntry do
   The operations also gets sorted, see the sorting priority at
   `Bookk.Operation.sort/1`.
   """
-  @doc since: "0.2.0"
+  @doc since: "0.1.0"
   @spec prune(journal_entry) :: journal_entry
         when journal_entry: t
 

@@ -7,7 +7,7 @@ defmodule Bookk.Ledger do
   > The proper way to create accounts in a ledger is by posting
   > journal entries to it. See `post/2`.
   """
-  @moduledoc since: "0.2.0"
+  @moduledoc since: "0.1.0"
 
   alias __MODULE__
   alias Bookk.Account
@@ -18,7 +18,7 @@ defmodule Bookk.Ledger do
   A struct representing a ledger's state, where accounts are indexed
   by their name.
   """
-  @typedoc since: "0.2.0"
+  @typedoc since: "0.1.0"
   @opaque t :: %Bookk.Ledger{
           name: String.t(),
           accounts_by_name: %{(account_name :: String.t()) => Bookk.Account.t()}
@@ -54,7 +54,7 @@ defmodule Bookk.Ledger do
       }
 
   """
-  @doc since: "0.2.0"
+  @doc since: "0.1.0"
   @spec new([account]) :: ledger
         when account: Bookk.Account.t(),
              ledger: t
@@ -69,7 +69,7 @@ defmodule Bookk.Ledger do
   Get an account from a ledger from its account head. If the account
   doesn't exist within the ledger, then an empty account is returned.
   """
-  @doc since: "0.2.0"
+  @doc since: "0.1.0"
   @spec get_account(ledger, account_head) :: account
         when ledger: t,
              account_head: Bookk.AccountHead.t(),
@@ -87,7 +87,7 @@ defmodule Bookk.Ledger do
   affected accounts. Accounts that don't exist in the ledger yet get
   created.
   """
-  @doc since: "0.2.0"
+  @doc since: "0.1.0"
   @spec post(ledger, journal_entry) :: ledger
         when ledger: t,
              journal_entry: Bookk.JournalEntry.t()

@@ -9,7 +9,7 @@ defmodule Bookk.InterledgerEntry do
   - See `Bookk.Operation` to learn more about operations;
   - See `Bookk.NaiveState` to learn more about in-memory state.
   """
-  @moduledoc since: "0.2.0"
+  @moduledoc since: "0.1.0"
 
   alias __MODULE__
   alias Bookk.JournalEntry
@@ -17,7 +17,7 @@ defmodule Bookk.InterledgerEntry do
   @typedoc """
   A struct describing an interledger entry.
   """
-  @typedoc since: "0.2.0"
+  @typedoc since: "0.1.0"
   @opaque t :: %Bookk.InterledgerEntry{
           journal_entries_by_ledger: [
             {ledger_name :: String.t(), journal_entry :: Bookk.JournalEntry.t()}
@@ -42,7 +42,7 @@ defmodule Bookk.InterledgerEntry do
       ** (FunctionClauseError) no function clause matching in Bookk.InterledgerEntry.prepend/2
 
   """
-  @doc since: "0.2.0"
+  @doc since: "0.1.0"
   @spec new([{ledger_name, journal_entry}]) :: interledger_entry
         when ledger_name: String.t(),
              journal_entry: Bookk.JournalEntry.t(),
@@ -121,7 +121,7 @@ defmodule Bookk.InterledgerEntry do
       false
 
   """
-  @doc since: "0.2.0"
+  @doc since: "0.1.0"
   @spec empty?(interledger_entry) :: boolean
         when interledger_entry: t
 
@@ -146,7 +146,7 @@ defmodule Bookk.InterledgerEntry do
   >     Bookk.InterledgerEntry.merge([a, b, c])
   >     |> Bookk.InterledgerEntry.prune()
   """
-  @doc since: "0.2.0"
+  @doc since: "0.1.0"
   @spec merge([interledger_entry]) :: interledger_entry
         when interledger_entry: t
 
@@ -181,7 +181,7 @@ defmodule Bookk.InterledgerEntry do
   >     Bookk.InterledgerEntry.merge([a, b, c])
   >     |> Bookk.InterledgerEntry.prune()
   """
-  @doc since: "0.2.0"
+  @doc since: "0.1.0"
   @spec merge(interledger_entry, interledger_entry) :: interledger_entry
         when interledger_entry: t
 
@@ -219,7 +219,7 @@ defmodule Bookk.InterledgerEntry do
   Consult `Bookk.JournalEntry.prune/1` to see how merged journal
   entries get pruned.
   """
-  @doc since: "0.2.0"
+  @doc since: "0.1.0"
   @spec prune(interledger_entry) :: interledger_entry
         when interledger_entry: t
 

@@ -22,7 +22,7 @@ defmodule Bookk.ChartOfAccounts do
   - See `Bookk.Notation.journalize/2` to learn how a chart of accounts
     is used.
   """
-  @moduledoc since: "0.2.0"
+  @moduledoc since: "0.1.0"
 
   @doc ~S"""
   This function maps all possible patterns of ledger names your
@@ -33,7 +33,7 @@ defmodule Bookk.ChartOfAccounts do
       def ledger({:user, <<id::binary-size(36)>>}), do: "user(#{id})"
 
   """
-  @doc since: "0.2.0"
+  @doc since: "0.1.0"
   @callback ledger(term) :: String.t()
 
   @doc ~S"""
@@ -47,6 +47,6 @@ defmodule Bookk.ChartOfAccounts do
       def account({:receivables, {:user, id}}), do: %Bookk.AccountHead{...}
 
   """
-  @doc since: "0.2.0"
+  @doc since: "0.1.0"
   @callback account(term) :: Bookk.AccountHead.t()
 end
