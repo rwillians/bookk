@@ -51,4 +51,14 @@ defmodule Bookk.ChartOfAccounts do
 
   """
   @callback account(term) :: Bookk.AccountHead.t()
+
+  @doc """
+  By using this module, you are declaring that your module implements
+  the `Bookk.ChartOfAccounts` behaviour.
+  """
+  defmacro __using__(_) do
+    quote do
+      @behaviour unquote(__MODULE__)
+    end
+  end
 end
