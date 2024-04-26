@@ -23,10 +23,12 @@ def to_interledger_entry(%Deposit{} = tx) do
   end
 end
 ```
-_(A journal entry from a deposit operation affecting two ledgers written with
+_(A journal entry for a deposit operation affecting two ledgers written with
 Bookk's DSL)_
 
-Persisting state, such as accounts balances and log of transactions per accounts is considered off scope for this library at the moment — and honestly, might never becomes part of its scope — but you can still do it own your own. An example of how to persist state using `Ecto` is provided in section **Examples** at [Persist State using Ecto](#persist-state-using-ecto).
+Persisting state, such as accounts balances and log of transactions, is considered off scope for this library. and honestly, it might never be part of its scope due to how peculiar the tequirements of each system can be.
+
+A basic example of how to persist state using `Ecto` is provided in section **Examples** at [Persist State using Ecto](#persist-state-using-ecto).
 
 Visit the [API Reference](https://hexdocs.pm/bookk/api-reference.html) page for a brief introduction to double-entry bookkeeping concepts implemented by this library.
 
@@ -53,23 +55,23 @@ end
 
 ```elixir
 defmodule ACME.ChartOfAccounts do
-  @behaviour Bookk.ChartOfAccounts
+  use Bookk.ChartOfAccounts
 
   alias Bookk.AccountClass, as: C
   alias Bookk.AccountHead, as: H
 
   # some of the most common account classes
   @classes %{
-     A: %C{id:  "A", parent_id: nil, natural_balance:  :debit, name: "Assets"},
-    CA: %C{id: "CA", parent_id: "A", natural_balance:  :debit, name: "Current Assets"},
-    AR: %C{id: "AR", parent_id: "A", natural_balance:  :debit, name: "Accounts Receivables"},
-     E: %C{id:  "E", parent_id: nil, natural_balance:  :debit, name: "Expenses"},
-    OE: %C{id: "OE", parent_id: nil, natural_balance: :credit, name: "Owner's Equity"},
-     L: %C{id:  "L", parent_id: nil, natural_balance: :credit, name: "Liabilities"},
-    AP: %C{id: "AP", parent_id: "L", natural_balance: :credit, name: "Accounts Payables"},
-     I: %C{id:  "I", parent_id: nil, natural_balance: :credit, name: "Income"},
-     G: %C{id:  "G", parent_id: "I", natural_balance: :credit, name: "Gains"},
-     R: %C{id:  "R", parent_id: "I", natural_balance: :credit, name: "Revenue"}
+     "A" => %C{id:  "A", parent_id: nil, natural_balance:  :debit, name: "Assets"},
+    "CA" => %C{id: "CA", parent_id: "A", natural_balance:  :debit, name: "Current Assets"},
+    "AR" => %C{id: "AR", parent_id: "A", natural_balance:  :debit, name: "Accounts Receivables"},
+     "E" => %C{id:  "E", parent_id: nil, natural_balance:  :debit, name: "Expenses"},
+    "OE" => %C{id: "OE", parent_id: nil, natural_balance: :credit, name: "Owner's Equity"},
+     "L" => %C{id:  "L", parent_id: nil, natural_balance: :credit, name: "Liabilities"},
+    "AP" => %C{id: "AP", parent_id: "L", natural_balance: :credit, name: "Accounts Payables"},
+     "I" => %C{id:  "I", parent_id: nil, natural_balance: :credit, name: "Income"},
+     "G" => %C{id:  "G", parent_id: "I", natural_balance: :credit, name: "Gains"},
+     "R" => %C{id:  "R", parent_id: "I", natural_balance: :credit, name: "Revenue"}
   }
 
   @impl Bookk.ChartOfAccounts
@@ -77,13 +79,17 @@ defmodule ACME.ChartOfAccounts do
   def ledger({:user, <<id::binary>>}), do: "user(#{id})"
 
   @impl Bookk.ChartOfAccounts
-  def account(:cash), do: %H{name: "cash/CA", class: @classes.CA}
-  def account(:deposits), do: %H{name: "deposits/OE", class: @classes.OE}
-  def account({:unspent_cash, {:user, <<id::binary>>}}), do: %H{name: "unspent-cash:user(#{id})/L", class: @classes.L}
-  def account({:deposit_expenses, <<provider::binary>>}), do: %H{name: "deposit-expenses:#{provider}/E", class: @classes.E}
+  def account(:cash), do: %H{name: "cash", class: @classes["CA"]}
+  def account(:deposits), do: %H{name: "deposits", class: @classes["OE"]}
+  def account({:unspent_cash, {:user, <<id::binary>>}}), do: %H{name: "unspent-cash:user(#{id})", class: @classes["L"]}
+  def account({:deposit_expenses, <<provider::binary>>}), do: %H{name: "deposit-expenses:#{provider}", class: @classes["E"]}
 
-  @doc false
-  def account_id(ledger_name, %H{} = account_head), do: ledger_name <> ":" <> account_head.name
+  @doc """
+  Given a ledger name and an AccountHead, it returns the account's
+  deterministic id.
+  """
+  def account_id(ledger_name, %H{} = account_head),
+    do: "#{ledger_name}:#{account_head.name}/#{account_head.class.id}"
 end
 ```
 
@@ -98,8 +104,8 @@ import Bookk.Notation, only: [journalize!: 2]
 
 user_id = "785627e6-bf43-41dd-a8a8-3fdc5f761489"
 deposited_amount = 100_00
-#                  ^ in cents or smalles unit that the
-#                    currency you're using supports
+#                  ^ in cents or smalles unit supported
+#                    by the currency you're using
 
 interledger_entry =
   journalize! using: ACME.ChartOfAccounts do
@@ -121,8 +127,8 @@ import Bookk.Notation, only: [journalize!: 2]
 
 user_id = "785627e6-bf43-41dd-a8a8-3fdc5f761489"
 deposited_amount = 100_00
-#                  ^ in cents or smalles unit that the
-#                    currency you're using supports
+#                  ^ in cents or smallest unit supported
+#                    by the currency you're using
 
 interledger_entry =
   journalize! using: ACME.ChartOfAccounts do
@@ -235,10 +241,10 @@ defmodule DepositTransaction do
 
   @typedoc false
   @type t :: %DepositTransaction{
-              id: String.t(),
-              user_id: String.t(),
-              amount: pos_integer
-            }
+               id: String.t(),
+               user_id: String.t(),
+               amount: pos_integer
+             }
 
   defstruct [:id, :user_id, :amount]
 end
@@ -270,7 +276,7 @@ defmodule Accounting do
   @moduledoc false
 
   @doc false
-  @spec transact(Transactionable.t()) :: {:ok, Ecto.Multi.t()} | {:error, term}
+  @spec transact(Transactionable.t()) :: {:ok, map} | {:error, term}
 
   def transact(tx) do
     interledger_entry = Transactionable.to_interledger_entry(tx)
