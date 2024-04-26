@@ -46,6 +46,26 @@ end
 ```
 
 
+## Project Status
+
+> [!Warning]
+> This library is currently in Beta (v0.x.x).
+
+I've been using Book in production for a couple years now but there are still key missing features that are important for ledgers with high throughput, such as:
+  - **DSL**: specifying a **Lock Mechanism** while updating an account's balance (at a journal entry's Operation level);
+  - **DSL**: specifying **Authorization Rules** (also at a journal entry's Operation level -- like assertions that, if failed, rolls back the bookkeeping transaction);
+  - **InMemory State**: derive current balance of an account based on its journal entries' operations so that new operations can be posted retroactively;
+  - **InMemory State**: get the balance of an account at a given point in time;
+  - **InMemory State**: store snapshots of accounts' balances at regular intervals, decreasing the cost of calculating an account's balance at a given point in time.
+
+These missing features MAY cause breaking changes to Book's API and DSL. While in Beta, breaking changes will be released as a new Minor version. Therefore, **it's recomended that you require Book with a pinned minor version**:
+
+
+  ```elixir
+  {:bookk, "~> 0.1.0"}
+  ```
+
+
 ## Examples
 
 > [!Warning]
