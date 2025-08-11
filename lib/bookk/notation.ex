@@ -3,7 +3,7 @@
 #   NOTE: C'est la vie
 #
 defmodule Bookk.Notation do
-  @moduledoc """
+  @moduledoc ~S"""
   DSL notation for describing an interledger entries
   (`Bookk.InterledgerEntry`).
 
@@ -20,7 +20,7 @@ defmodule Bookk.Notation do
     end
   end
 
-  @doc """
+  @doc ~S"""
   DSL notation for describing an interledger entries
   (`Bookk.InterledgerEntry`).
 
@@ -28,13 +28,13 @@ defmodule Bookk.Notation do
 
   Returns a balanced interledger journal entry:
 
-      iex> import Bookk.Notation, only: [journalize: 2]
+      iex> use Bookk.Notation
       iex>
       iex> %Bookk.InterledgerEntry{} = journal_entry =
       iex>   journalize using: TestChartOfAccounts do
       iex>     on ledger(:acme) do
-      iex>       debit account(:cash), 150_00
-      iex>       credit account(:deposits), 150_00
+      iex>       debit account(:cash), Decimal.new(150_00)
+      iex>       credit account(:deposits), Decimal.new(150_00)
       iex>     end
       iex>   end
       iex>
@@ -43,32 +43,59 @@ defmodule Bookk.Notation do
 
   Returns an unbalanced interledger journal entry:
 
-      iex> import Bookk.Notation, only: [journalize: 2]
+      iex> use Bookk.Notation
       iex>
       iex> %Bookk.InterledgerEntry{} = journal_entry =
       iex>   journalize using: TestChartOfAccounts do
       iex>     on ledger(:acme) do
-      iex>       debit account(:cash), 150_00
-      iex>       credit account(:deposits), 50_00
+      iex>       debit account(:cash), Decimal.new(150_00)
+      iex>       credit account(:deposits), Decimal.new(50_00)
       iex>     end
       iex>   end
       iex>
       iex> assert not Bookk.InterledgerEntry.empty?(journal_entry)
       iex> assert not Bookk.InterledgerEntry.balanced?(journal_entry)
 
+  You can do basic arithmetic operations with amounts even though they
+  are most likely `Decimal` structs. The supported operations are
+  addition, subtraction, multiplication and division where you can mix
+  and match the use of `Decimal` amounts with integer or float amounts
+  since they will automatically be converted into `Decimal`. These
+  operations will be replaced by `Decimal.add/2`, `Decimal.sub/2`,
+  `Decimal.mul/2` and `Decimal.div/2` respectively.
+
+      iex> use Bookk.Notation
+      iex>
+      iex> foo = %{amount: 50}
+      iex>
+      iex> journalize using: TestChartOfAccounts do
+      iex>   on ledger(:acme) do
+      iex>     debit account(:cash), ((%Decimal{exp: 0, sign: 1, coef: 100} + Decimal.new(100) - foo.amount) * 2) / 2
+      iex>     credit account(:deposits), ((Decimal.new(100) + foo.amount) * Decimal.new(2)) / Decimal.new(2)
+      iex>   end
+      iex> end
+      %Bookk.InterledgerEntry{
+        entries_by_ledger: %{
+          "acme" => [
+            %Bookk.JournalEntry{
+              operations: [
+                debit(fixture_account_head(:cash), Decimal.new(150)),
+                credit(fixture_account_head(:deposits), Decimal.new(150))
+              ]
+            }
+          ]
+        }
+      }
+
   """
 
   defmacro journalize([{:using, chart_of_accounts_mod} | _], do: block) do
-    coa =
-      {:__aliases__, [],
-       Macro.expand(chart_of_accounts_mod, __CALLER__)
-       |> Module.split()
-       |> Enum.map(&String.to_atom/1)}
+    coa = {:__aliases__, [], [Macro.expand(chart_of_accounts_mod, __CALLER__)]}
 
     to_interledger_journal_entry(__CALLER__, coa, block)
   end
 
-  @doc """
+  @doc ~S"""
   Same as `journalize/2` but it raises an error if the resulting
   interledger journal entry is unbalanced.
 
@@ -76,13 +103,13 @@ defmodule Bookk.Notation do
 
   Returns a balanced interledger journal entry:
 
-      iex> import Bookk.Notation, only: [journalize!: 2]
+      iex> use Bookk.Notation
       iex>
       iex> %Bookk.InterledgerEntry{} = journal_entry =
       iex>   journalize! using: TestChartOfAccounts do
       iex>     on ledger(:acme) do
-      iex>       debit account(:cash), 150_00
-      iex>       credit account(:deposits), 150_00
+      iex>       debit account(:cash), Decimal.new(150_00)
+      iex>       credit account(:deposits), Decimal.new(150_00)
       iex>     end
       iex>   end
       iex>
@@ -92,12 +119,12 @@ defmodule Bookk.Notation do
   Raises an error when an unbalanced interledger journal entry is
   produced:
 
-      iex> import Bookk.Notation, only: [journalize!: 2]
+      iex> use Bookk.Notation
       iex>
       iex> journalize! using: TestChartOfAccounts do
       iex>   on ledger(:acme) do
-      iex>     debit account(:cash), 150_00
-      iex>     credit account(:deposits), 50_00
+      iex>     debit account(:cash), Decimal.new(150_00)
+      iex>     credit account(:deposits), Decimal.new(50_00)
       iex>   end
       iex> end
       ** (Bookk.UnbalancedError) `journalize!/2` produced an unbalanced journal entry
@@ -105,18 +132,13 @@ defmodule Bookk.Notation do
   """
 
   defmacro journalize!([{:using, chart_of_accounts_mod} | _], do: block) do
-    coa =
-      {:__aliases__, [],
-       Macro.expand(chart_of_accounts_mod, __CALLER__)
-       |> Module.split()
-       |> Enum.map(&String.to_atom/1)}
+    coa = {:__aliases__, [], [Macro.expand(chart_of_accounts_mod, __CALLER__)]}
 
     interledger_entry = to_interledger_journal_entry(__CALLER__, coa, block)
 
     {:if, [context: __CALLER__, imports: [{2, Kernel}]],
      [
-       {{:., [], [{:__aliases__, [alias: false], [Bookk, InterledgerEntry]}, :balanced?]}, [],
-        [interledger_entry]},
+       {{:., [], [{:__aliases__, [alias: false], [Bookk, InterledgerEntry]}, :balanced?]}, [], [interledger_entry]},
        [
          do: interledger_entry,
          else:
@@ -152,9 +174,7 @@ defmodule Bookk.Notation do
        {:__aliases__, [alias: false], [Bookk, InterledgerEntry]},
        {:%{}, [],
         [
-          entries_by_ledger:
-            {{:., [], [{:__aliases__, [alias: false], [Enum]}, :into]}, [],
-             [entries_by_ledger, {:%{}, [], []}]}
+          entries_by_ledger: {{:., [], [{:__aliases__, [alias: false], [Enum]}, :into]}, [], [entries_by_ledger, {:%{}, [], []}]}
         ]}
      ]}
   end
@@ -168,8 +188,7 @@ defmodule Bookk.Notation do
 
     {
       {{:., [context: caller], [coa, :ledger]}, meta_b, [name]},
-      {{:., [context: caller], [{:__aliases__, [alias: false], [Bookk, JournalEntry]}, :new]},
-       meta_a,
+      {{:., [context: caller], [{:__aliases__, [alias: false], [Bookk, JournalEntry]}, :new]}, meta_a,
        [
          Enum.map(statements, &to_operation(caller, coa, &1))
        ]}
@@ -178,7 +197,28 @@ defmodule Bookk.Notation do
 
   defp to_operation(caller, coa, {direction, meta_a, [{:account, meta_b, [name]}, amount]})
        when direction in [:credit, :debit] do
-    {{:., [context: caller], [{:__aliases__, [alias: false], [Bookk, Operation]}, direction]},
-     meta_a, [{{:., [context: caller], [coa, :account]}, meta_b, [name]}, amount]}
+    {{:., [context: caller], [{:__aliases__, [alias: false], [Bookk, Operation]}, direction]}, meta_a,
+     [{{:., [context: caller], [coa, :account]}, meta_b, [name]}, to_amount_expr(amount)]}
   end
+
+  defp to_amount_expr({:+, meta, [a, b]}),
+    do: {{:., meta, [{:__aliases__, meta, [:Decimal]}, :add]}, meta, [to_amount_expr(a), to_amount_expr(b)]}
+
+  defp to_amount_expr({:-, meta, [a, b]}),
+    do: {{:., meta, [{:__aliases__, meta, [:Decimal]}, :sub]}, meta, [to_amount_expr(a), to_amount_expr(b)]}
+
+  defp to_amount_expr({:*, meta, [a, b]}),
+    do: {{:., meta, [{:__aliases__, meta, [:Decimal]}, :mult]}, meta, [to_amount_expr(a), to_amount_expr(b)]}
+
+  defp to_amount_expr({:/, meta, [a, b]}),
+    do: {{:., meta, [{:__aliases__, meta, [:Decimal]}, :div]}, meta, [to_amount_expr(a), to_amount_expr(b)]}
+
+  defp to_amount_expr(amount) when is_integer(amount),
+    do: {{:., [], [{:__aliases__, [], [:Decimal]}, :new]}, [], [amount]}
+
+  defp to_amount_expr(amount) when is_float(amount),
+    do: {{:., [], [{:__aliases__, [], [:Decimal]}, :from_float]}, [], [amount]}
+
+  defp to_amount_expr(amount),
+    do: {{:., [], [{:__aliases__, [], [Bookk.Utils]}, :to_decimal]}, [], [amount]}
 end

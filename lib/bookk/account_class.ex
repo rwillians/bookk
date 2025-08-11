@@ -1,5 +1,5 @@
 defmodule Bookk.AccountClass do
-  @moduledoc """
+  @moduledoc ~S"""
   An account class has properties that are inherited by accounts and
   serves as a way of grouping account's balances.
 
@@ -28,7 +28,7 @@ defmodule Bookk.AccountClass do
   - `Bookk.Account`.
   """
 
-  @typedoc """
+  @typedoc ~S"""
   The struct that describes an account class.
 
   ## Fields

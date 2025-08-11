@@ -1,5 +1,5 @@
 defmodule Bookk.ChartOfAccounts do
-  @moduledoc """
+  @moduledoc ~S"""
   A Chart of Accounts (abbrv.: CoA) is a mapping of all the accounts
   and all the ledgers that can exist in your system. But instead of
   hard-coding them, you define patterns for accounts and ledgers
@@ -52,7 +52,7 @@ defmodule Bookk.ChartOfAccounts do
   """
   @callback account(term) :: Bookk.AccountHead.t()
 
-  @doc """
+  @doc ~S"""
   By using this module, you are declaring that your module implements
   the `Bookk.ChartOfAccounts` behaviour.
   """

@@ -1,7 +1,7 @@
 defmodule PerfTest do
   use ExUnit.Case
 
-  import Bookk.Notation, only: [journalize!: 2]
+  import Bookk.Notation, only: [journalize: 2, journalize!: 2]
 
   @opts [
     warmup: 1,
@@ -42,11 +42,15 @@ defmodule PerfTest do
     ledger = Bookk.NaiveState.get_ledger(naive_state, TestChartOfAccounts.ledger(:acme))
     account = Bookk.Ledger.get_account(ledger, operation.account_head)
 
-    account_count = Map.values(ledger.accounts) |> length()
+    account_count = length(Map.keys(ledger.accounts_by_name))
 
     cases = %{
-      "Bookk.NaiveState.post/2 (preloaded 1M entries)": fn -> Bookk.NaiveState.post(naive_state, interledger_entry) end,
-      "Bookk.Ledger.post/2 (preloaded #{account_count} accounts)": fn -> Bookk.Ledger.post(ledger, journal_entry) end,
+      "Bookk.NaiveState.post/2 (preloaded 1M entries)": fn ->
+        Bookk.NaiveState.post(naive_state, interledger_entry)
+      end,
+      "Bookk.Ledger.post/2 (preloaded #{account_count} accounts)": fn ->
+        Bookk.Ledger.post(ledger, journal_entry)
+      end,
       "Bookk.Account.post/2": fn -> Bookk.Account.post(account, operation) end
     }
 

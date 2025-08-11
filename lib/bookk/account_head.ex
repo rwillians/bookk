@@ -1,5 +1,5 @@
 defmodule Bookk.AccountHead do
-  @moduledoc """
+  @moduledoc ~S"""
   An Account head is a struct contained all the values necessary to
   either fetch or create a `Bookk.Account` from/into a `Bookk.Ledger`.
 
@@ -11,7 +11,7 @@ defmodule Bookk.AccountHead do
   - `Bookk.Operations`.
   """
 
-  @typedoc """
+  @typedoc ~S"""
   The struct that describes an account head.
 
   ## Fields

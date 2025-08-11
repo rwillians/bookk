@@ -1,8 +1,8 @@
 defmodule Bookk.NaiveState do
-  @moduledoc """
+  @moduledoc ~S"""
   A state struct that holds multiple ledgers. It's considered "naive"
-  because it doesn't hold any information regarding the journal
-  entries that put the state into its current value.
+  because it doesn't hold any information regarding the events that
+  led to the current state.
 
   ## Related
 
@@ -18,7 +18,7 @@ defmodule Bookk.NaiveState do
   alias Bookk.InterledgerEntry, as: InterledgerEntry
   alias Bookk.Ledger
 
-  @typedoc """
+  @typedoc ~S"""
   The struct representing a naive state.
 
   ## Fields
@@ -32,14 +32,14 @@ defmodule Bookk.NaiveState do
 
   defstruct ledgers_by_name: %{}
 
-  @doc """
+  @doc ~S"""
   Produces a empty naive state.
   """
   @spec empty() :: t
 
   def empty, do: %NaiveState{}
 
-  @doc """
+  @doc ~S"""
   Get's a ledger from the state by its name. If the ledger doesn't
   exist in the state yet, then a new empty ledger will be returned.
 
@@ -83,7 +83,7 @@ defmodule Bookk.NaiveState do
     end
   end
 
-  @doc """
+  @doc ~S"""
   Produces a new state struct from a set of ledgers.
   """
   @spec new([Bookk.Ledger.t()]) :: t
@@ -94,16 +94,16 @@ defmodule Bookk.NaiveState do
       when is_list(ledgers),
       do: Enum.into(ledgers, empty())
 
-  @doc """
+  @doc ~S"""
   Posts a `Bookk.InterledgerEntry` to the state, appling changes in
   balance to multiple accounts accross multiple ledgers.
 
   ## Examples
 
-      iex> import Bookk.Notation, only: [journalize!: 2]
+      iex> use Bookk.Notation
       iex>
       iex> user_id = "123"
-      iex> deposited_amount = 500_00
+      iex> deposited_amount = Decimal.new(500_00)
       iex>
       iex> journal_entry =
       iex>   journalize! using: TestChartOfAccounts do
@@ -127,11 +127,11 @@ defmodule Bookk.NaiveState do
             accounts_by_name: %{
               fixture_account_head(:cash).name => %Bookk.Account{
                 head: fixture_account_head(:cash),
-                balance: 500_00
+                balance: Decimal.new(500_00)
               },
               fixture_account_head({:unspent_cash, {:user, "123"}}).name => %Bookk.Account{
                 head: fixture_account_head({:unspent_cash, {:user, "123"}}),
-                balance: 500_00
+                balance: Decimal.new(500_00)
               }
             }
           },
@@ -140,11 +140,11 @@ defmodule Bookk.NaiveState do
             accounts_by_name: %{
               fixture_account_head(:cash).name => %Bookk.Account{
                 head: fixture_account_head(:cash),
-                balance: 500_00
+                balance: Decimal.new(500_00)
               },
               fixture_account_head(:deposits).name => %Bookk.Account{
                 head: fixture_account_head(:deposits),
-                balance: 500_00
+                balance: Decimal.new(500_00)
               }
             }
           }

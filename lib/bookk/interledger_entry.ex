@@ -1,5 +1,5 @@
 defmodule Bookk.InterledgerEntry do
-  @moduledoc """
+  @moduledoc ~S"""
   An interledger entry is a collection of journal entries affecting
   multiple ledgers that must be transacted under the same accounting
   transaction. It's somewhat analogous to an `Ecto.Multi` holding
@@ -19,7 +19,7 @@ defmodule Bookk.InterledgerEntry do
   alias __MODULE__, as: InterledgerEntry
   alias Bookk.JournalEntry, as: JournalEntry
 
-  @typedoc """
+  @typedoc ~S"""
   The struct that represents an interledger entry.
 
   ## Fields
@@ -37,7 +37,7 @@ defmodule Bookk.InterledgerEntry do
 
   defstruct entries_by_ledger: %{}
 
-  @doc """
+  @doc ~S"""
   Checks whether the interledger entry is balanced. It is balance if
   all of its journal entries are balanced.
 
@@ -50,8 +50,8 @@ defmodule Bookk.InterledgerEntry do
       iex>     "acme" => [
       iex>       %Bookk.JournalEntry{
       iex>         operations: [
-      iex>           fixture_account_head(:cash) |> debit(30_00),
-      iex>           fixture_account_head(:deposits) |> credit(30_00)
+      iex>           debit(fixture_account_head(:cash), Decimal.new(30_00)),
+      iex>           credit(fixture_account_head(:deposits), Decimal.new(30_00))
       iex>         ]
       iex>       }
       iex>     ]
@@ -68,7 +68,7 @@ defmodule Bookk.InterledgerEntry do
       iex>     "acme" => [
       iex>       %Bookk.JournalEntry{
       iex>         operations: [
-      iex>           fixture_account_head(:cash) |> debit(30_00),
+      iex>           debit(fixture_account_head(:cash), Decimal.new(30_00)),
       iex>         ]
       iex>       }
       iex>     ]
@@ -87,7 +87,7 @@ defmodule Bookk.InterledgerEntry do
     |> all?(&JournalEntry.balanced?/1)
   end
 
-  @doc """
+  @doc ~S"""
   Checks whether an interledger entry is empty. It is empty when it
   has now journal entries or when all its journal entries are empty.
 
@@ -107,7 +107,7 @@ defmodule Bookk.InterledgerEntry do
       iex>   entries_by_ledger: %{
       iex>     "acme" => [
       iex>       %Bookk.JournalEntry{
-      iex>         operations: [%Bookk.Operation{amount: 0}]
+      iex>         operations: [%Bookk.Operation{amount: Decimal.new(0)}]
       iex>       }
       iex>     ]
       iex>   }
@@ -123,8 +123,8 @@ defmodule Bookk.InterledgerEntry do
       iex>     "acme" => [
       iex>       %Bookk.JournalEntry{
       iex>         operations: [
-      iex>           %Bookk.Operation{amount: 0},
-      iex>           %Bookk.Operation{amount: 1},
+      iex>           %Bookk.Operation{amount: Decimal.new(0)},
+      iex>           %Bookk.Operation{amount: Decimal.new(1)},
       iex>         ]
       iex>       }
       iex>     ]
@@ -143,7 +143,7 @@ defmodule Bookk.InterledgerEntry do
     |> all?(&JournalEntry.empty?/1)
   end
 
-  @doc """
+  @doc ~S"""
   Produces a new interledger entry that is equaly opposite of the
   given interledger entry, meaning its capable of reverting all the
   changes that the given entry causes.
@@ -157,8 +157,8 @@ defmodule Bookk.InterledgerEntry do
       iex>     "acme" => [
       iex>       %Bookk.JournalEntry{
       iex>         operations: [
-      iex>           fixture_account_head(:cash) |> debit(10_00),
-      iex>           fixture_account_head(:deposits) |> credit(10_00)
+      iex>           debit(fixture_account_head(:cash), Decimal.new(10_00)),
+      iex>           credit(fixture_account_head(:deposits), Decimal.new(10_00))
       iex>         ]
       iex>       }
       iex>     ]
@@ -171,8 +171,8 @@ defmodule Bookk.InterledgerEntry do
           "acme" => [
             %Bookk.JournalEntry{
               operations: [
-                fixture_account_head(:deposits) |> debit(10_00),
-                fixture_account_head(:cash) |> credit(10_00)
+                debit(fixture_account_head(:deposits), Decimal.new(10_00)),
+                credit(fixture_account_head(:cash), Decimal.new(10_00))
               ]
             }
           ]
@@ -186,12 +186,12 @@ defmodule Bookk.InterledgerEntry do
     entries_by_ledger =
       for {ledger, entries} <- to_list(entries_by_ledger),
           into: %{},
-          do: {ledger, map(entries, &JournalEntry.reverse/1) |> :lists.reverse()}
+          do: {ledger, :lists.reverse(map(entries, &JournalEntry.reverse/1))}
 
     %{entry | entries_by_ledger: entries_by_ledger}
   end
 
-  @doc """
+  @doc ~S"""
   Given an interledger entry, it returns all its journal entries in
   the form of a list of tuples where the first element is the ledger's
   name and the second element is a list of journal entries that are
@@ -202,7 +202,7 @@ defmodule Bookk.InterledgerEntry do
   Returns a list of tuple where the first element is the ledger name
   and the second element is a journal entry:
 
-      iex> user_id = "b13a81cf-ff78-414d-b5b2-042e9ecf2082"
+      iex> user_id = "12345"
       iex> cash = fixture_account_head(:cash)
       iex> deposits = fixture_account_head(:deposits)
       iex> unspent_cash = fixture_account_head({:unspent_cash, {:user, user_id}})
@@ -211,14 +211,14 @@ defmodule Bookk.InterledgerEntry do
       iex>   entries_by_ledger: %{
       iex>     "acme" => [
       iex>       Bookk.JournalEntry.new([
-      iex>         debit(cash, 50_00),
-      iex>         credit(unspent_cash, 50_00)
+      iex>         debit(cash, Decimal.new(50_00)),
+      iex>         credit(unspent_cash, Decimal.new(50_00))
       iex>       ])
       iex>     ],
-      iex>     "user(b13a81cf-ff78-414d-b5b2-042e9ecf2082)" => [
+      iex>     "user(12345)" => [
       iex>       Bookk.JournalEntry.new([
-      iex>         debit(cash, 50_00),
-      iex>         credit(deposits, 50_00)
+      iex>         debit(cash, Decimal.new(50_00)),
+      iex>         credit(deposits, Decimal.new(50_00))
       iex>       ])
       iex>     ]
       iex>   }
@@ -227,12 +227,12 @@ defmodule Bookk.InterledgerEntry do
       iex> Bookk.InterledgerEntry.to_journal_entries(interledger)
       [
         {"acme", Bookk.JournalEntry.new([
-          debit(fixture_account_head(:cash), 50_00),
-          credit(fixture_account_head({:unspent_cash, {:user, "b13a81cf-ff78-414d-b5b2-042e9ecf2082"}}), 50_00)
+          debit(fixture_account_head(:cash), Decimal.new(50_00)),
+          credit(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(50_00))
         ])},
-        {"user(b13a81cf-ff78-414d-b5b2-042e9ecf2082)", Bookk.JournalEntry.new([
-          debit(fixture_account_head(:cash), 50_00),
-          credit(fixture_account_head(:deposits), 50_00)
+        {"user(12345)", Bookk.JournalEntry.new([
+          debit(fixture_account_head(:cash), Decimal.new(50_00)),
+          credit(fixture_account_head(:deposits), Decimal.new(50_00))
         ])}
       ]
 

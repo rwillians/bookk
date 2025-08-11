@@ -1,5 +1,5 @@
 defmodule Bookk.Ledger do
-  @moduledoc """
+  @moduledoc ~S"""
   A ledger is a book that holds accounts. Traditionally, ledgers would
   also hold the journal entries that changed the accounts but, in this
   library, persisting those journal entries is considered off scope.
@@ -11,7 +11,7 @@ defmodule Bookk.Ledger do
   - `Bookk.JournalEntry`.
   """
 
-  import Enum, only: [map: 2, split_with: 2, sum: 1]
+  import Enum, only: [reduce: 3, split_with: 2]
   import Map, only: [get: 2, put: 3, values: 1]
 
   alias __MODULE__, as: Ledger
@@ -20,7 +20,7 @@ defmodule Bookk.Ledger do
   alias Bookk.JournalEntry, as: JournalEntry
   alias Bookk.Operation, as: Op
 
-  @typedoc """
+  @typedoc ~S"""
   The struct that represents a ledger.
 
   ## Fields
@@ -36,7 +36,7 @@ defmodule Bookk.Ledger do
 
   defstruct [:name, accounts_by_name: %{}]
 
-  @doc """
+  @doc ~S"""
   Checks whether the ledger is balanced.
 
   A ledger is considered balance when the some of balance from its
@@ -63,8 +63,8 @@ defmodule Bookk.Ledger do
       iex>
       iex> journal_entry = %Bookk.JournalEntry{
       iex>   operations: [
-      iex>     debit(cash, 50_00),
-      iex>     credit(deposits, 50_00)
+      iex>     debit(cash, Decimal.new(50_00)),
+      iex>     credit(deposits, Decimal.new(50_00))
       iex>   ]
       iex> }
       iex>
@@ -80,7 +80,7 @@ defmodule Bookk.Ledger do
       iex>
       iex> journal_entry = %Bookk.JournalEntry{
       iex>   operations: [
-      iex>     debit(cash, 50_00)
+      iex>     debit(cash, Decimal.new(50_00))
       iex>   ]
       iex> }
       iex>
@@ -96,13 +96,13 @@ defmodule Bookk.Ledger do
       values(accounts_by_name)
       |> split_with(&(&1.head.class.natural_balance == :debit))
 
-    sum_debits = map(debits, & &1.balance) |> sum()
-    sum_credits = map(credits, & &1.balance) |> sum()
+    sum_debits = reduce(debits, Decimal.new(0), &Decimal.add(&1.balance, &2))
+    sum_credits = reduce(credits, Decimal.new(0), &Decimal.add(&1.balance, &2))
 
-    sum_debits == sum_credits
+    Decimal.eq?(sum_debits, sum_credits)
   end
 
-  @doc """
+  @doc ~S"""
   Get an account from the ledger by its `Bookk.AccountHead`. If the
   account doesn't exist yet, then an account will be returned with
   empty state.
@@ -116,7 +116,7 @@ defmodule Bookk.Ledger do
       iex>   accounts_by_name: %{
       iex>     "cash/CA" => %Bookk.Account{
       iex>       head: fixture_account_head(:cash),
-      iex>       balance: 25_00
+      iex>       balance: Decimal.new(25_00)
       iex>     }
       iex>   }
       iex> }
@@ -124,7 +124,7 @@ defmodule Bookk.Ledger do
       iex> Bookk.Ledger.get_account(ledger, fixture_account_head(:cash))
       %Bookk.Account{
         head: fixture_account_head(:cash),
-        balance: 25_00
+        balance: Decimal.new(25_00)
       }
 
   Returns an empty account when the it doesn't exist in the ledger:
@@ -133,7 +133,7 @@ defmodule Bookk.Ledger do
       iex> |> Bookk.Ledger.get_account(fixture_account_head(:cash))
       %Bookk.Account{
         head: fixture_account_head(:cash),
-        balance: 0
+        balance: Decimal.new(0)
       }
 
   """
@@ -149,7 +149,7 @@ defmodule Bookk.Ledger do
     end
   end
 
-  @doc """
+  @doc ~S"""
   Creates a new `Bookk.Ledger` from its name and, optionally, a list
   of `Bookk.Account`.
   """
@@ -163,7 +163,7 @@ defmodule Bookk.Ledger do
       when is_list(accounts),
       do: Enum.into(accounts, %Ledger{name: name})
 
-  @doc """
+  @doc ~S"""
   Posts a `Bookk.JournalEntry` to a ledger. This means that the
   balance change described in each operation of the journal entry will
   be applied to their respective accounts of the ledger. If there's a
@@ -181,15 +181,20 @@ defmodule Bookk.Ledger do
       iex>
       iex> journal_entry = %Bookk.JournalEntry{
       iex>   operations: [
-      iex>     debit(cash, 50_00),
-      iex>     credit(deposits, 50_00)
+      iex>     debit(cash, Decimal.new(50_00)),
+      iex>     credit(deposits, Decimal.new(50_00))
       iex>   ]
       iex> }
       iex>
       iex> updated_ledger = Bookk.Ledger.post(ledger, journal_entry)
-      iex>
-      iex> %Bookk.Account{balance: 50_00} = Bookk.Ledger.get_account(updated_ledger, cash)
-      iex> %Bookk.Account{balance: 50_00} = Bookk.Ledger.get_account(updated_ledger, deposits)
+      iex> [
+      iex>   Bookk.Ledger.get_account(updated_ledger, cash),
+      iex>   Bookk.Ledger.get_account(updated_ledger, deposits)
+      iex> ]
+      [
+        %Bookk.Account{head: fixture_account_head(:cash), balance: Decimal.new(50_00)},
+        %Bookk.Account{head: fixture_account_head(:deposits), balance: Decimal.new(50_00)}
+      ]
 
   When account exists then it gets updated:
 
@@ -200,8 +205,8 @@ defmodule Bookk.Ledger do
       iex>
       iex> journal_entry = %Bookk.JournalEntry{
       iex>   operations: [
-      iex>     debit(cash, 50_00),
-      iex>     credit(deposits, 50_00)
+      iex>     debit(cash, Decimal.new(50_00)),
+      iex>     credit(deposits, Decimal.new(50_00))
       iex>   ]
       iex> }
       iex>
@@ -210,8 +215,14 @@ defmodule Bookk.Ledger do
       iex>   |> Bookk.Ledger.post(journal_entry)
       iex>   |> Bookk.Ledger.post(journal_entry) # post twice
       iex>
-      iex> %Bookk.Account{balance: 100_00} = Bookk.Ledger.get_account(updated_ledger, cash)
-      iex> %Bookk.Account{balance: 100_00} = Bookk.Ledger.get_account(updated_ledger, deposits)
+      iex> [
+      iex>   Bookk.Ledger.get_account(updated_ledger, cash),
+      iex>   Bookk.Ledger.get_account(updated_ledger, deposits)
+      iex> ]
+      [
+        %Bookk.Account{head: fixture_account_head(:cash), balance: Decimal.new(100_00)},
+        %Bookk.Account{head: fixture_account_head(:deposits), balance: Decimal.new(100_00)}
+      ]
 
   """
   @spec post(t, Bookk.JournalEntry.t()) :: t
@@ -230,9 +241,9 @@ defmodule Bookk.Ledger do
   end
 
   defp put_account(
-        %Account{head: %{name: account_name}} = account,
-        %Ledger{accounts_by_name: accounts_by_name} = ledger
-      ) do
+         %Account{head: %{name: account_name}} = account,
+         %Ledger{accounts_by_name: accounts_by_name} = ledger
+       ) do
     %{
       ledger
       | accounts_by_name: put(accounts_by_name, account_name, account)
