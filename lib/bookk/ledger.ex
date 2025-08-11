@@ -1,3 +1,7 @@
+# credo:disable-for-this-file Credo.Check.Refactor.ABCSize
+#
+#   NOTE: C'est la vie
+#
 defmodule Bookk.Ledger do
   @moduledoc ~S"""
   A ledger is a book that holds accounts. Traditionally, ledgers would

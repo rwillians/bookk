@@ -186,7 +186,7 @@ defmodule Bookk.InterledgerEntry do
     entries_by_ledger =
       for {ledger, entries} <- to_list(entries_by_ledger),
           into: %{},
-          do: {ledger, :lists.reverse(map(entries, &JournalEntry.reverse/1))}
+          do: {ledger, map(entries, &JournalEntry.reverse/1) |> :lists.reverse()}
 
     %{entry | entries_by_ledger: entries_by_ledger}
   end

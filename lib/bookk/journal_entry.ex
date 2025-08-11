@@ -1,3 +1,7 @@
+# credo:disable-for-this-file Credo.Check.Refactor.ABCSize
+#
+#   NOTE: C'est la vie
+#
 defmodule Bookk.JournalEntry do
   @moduledoc ~S"""
   A Journal Entry is a set of operations that must be transacted under
@@ -177,7 +181,7 @@ defmodule Bookk.JournalEntry do
   @spec reverse(t) :: t
 
   def reverse(%JournalEntry{operations: ops} = entry),
-    do: %{entry | operations: :lists.reverse(map(ops, &Op.reverse/1))}
+    do: %{entry | operations: map(ops, &Op.reverse/1) |> :lists.reverse()}
 
   @doc ~S"""
   Returns the list of operations inside a journal entry.
