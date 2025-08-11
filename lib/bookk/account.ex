@@ -1,5 +1,5 @@
 defmodule Bookk.Account do
-  @moduledoc """
+  @moduledoc ~S"""
   An Account is pretty much like a bucked. It has a single purpose:
   holding a measurable amount of something, in this case it's
   currency.
@@ -15,7 +15,7 @@ defmodule Bookk.Account do
   alias Bookk.AccountHead, as: AccountHead
   alias Bookk.Operation, as: Op
 
-  @typedoc """
+  @typedoc ~S"""
   The struct that represents the state of an account.
 
   ## Fields
@@ -27,12 +27,12 @@ defmodule Bookk.Account do
   """
   @type t :: %Bookk.Account{
           head: Bookk.AccountHead.t(),
-          balance: integer
+          balance: Decimal.t()
         }
 
-  defstruct [:head, balance: 0]
+  defstruct [:head, balance: Decimal.new(0)]
 
-  @doc """
+  @doc ~S"""
   Creates a new account from a `Bookk.AccountHead`.
 
   ## Examples
@@ -44,28 +44,29 @@ defmodule Bookk.Account do
       iex> Bookk.Account.new(head)
       %Bookk.Account{
         head: fixture_account_head(:cash),
-        balance: 0
+        balance: Decimal.new(0)
       }
 
   If an initial balance is provided in the second argument, then balance will be
   set to it:
 
       iex> head = fixture_account_head(:cash)
-      iex> Bookk.Account.new(head, 50_00)
+      iex> Bookk.Account.new(head, Decimal.new(50_00))
       %Bookk.Account{
         head: fixture_account_head(:cash),
-        balance: 50_00
+        balance: Decimal.new(50_00)
       }
 
   """
   @spec new(Bookk.AccountHead.t()) :: t
-  @spec new(Bookk.AccountHead.t(), balance :: pos_integer) :: t
+  @spec new(Bookk.AccountHead.t(), balance :: Decimal.t()) :: t
 
-  def new(%AccountHead{} = head, balance \\ 0)
-      when is_integer(balance),
-      do: %Account{head: head, balance: balance}
+  def new(head, balance \\ Decimal.new(0))
 
-  @doc """
+  def new(%AccountHead{} = head, %Decimal{} = balance),
+    do: %Account{head: head, balance: balance}
+
+  @doc ~S"""
   Calculates de delta amount for the operation then adds it the account's
   balance. See `Bookk.Operation.to_delta_amount/1` for more information on
   delta amount.
@@ -76,12 +77,12 @@ defmodule Bookk.Account do
       iex> head = %Bookk.AccountHead{class: class}
       iex> account = Bookk.Account.new(head)
       iex>
-      iex> op = debit(head, 25_00)
+      iex> op = debit(head, Decimal.new(25_00))
       iex>
       iex> Bookk.Account.post(account, op)
       %Bookk.Account{
         head: %Bookk.AccountHead{class: %Bookk.AccountClass{natural_balance: :debit}},
-        balance: 25_00
+        balance: Decimal.new(25_00)
       }
 
   The account's head must match the head in the operation, otherwise an error is
@@ -91,7 +92,7 @@ defmodule Bookk.Account do
       iex> head_b = %Bookk.AccountHead{name: "b"}
       iex>
       iex> account = Bookk.Account.new(head_a)
-      iex> op = debit(head_b, 25_00)
+      iex> op = debit(head_b, Decimal.new(25_00))
       iex>
       iex> Bookk.Account.post(account, op)
       ** (FunctionClauseError) no function clause matching in Bookk.Account.post/2
@@ -105,7 +106,7 @@ defmodule Bookk.Account do
       ) do
     %Account{
       head: head,
-      balance: balance + Op.to_delta_amount(op)
+      balance: Decimal.add(balance, Op.to_delta_amount(op))
     }
   end
 end
