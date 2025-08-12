@@ -59,15 +59,15 @@ defmodule Bookk.MixProject do
   defp deps do
     [
       # Performance benchmark
-      {:benchee, "~> 1.1.0", only: :test, runtime: false, optional: true},
-      {:benchee_html, "~> 1.0.0", only: :test, runtime: false, optional: true},
+      {:benchee, "~> 1.4", only: :test, runtime: false, optional: true},
+      {:benchee_html, "~> 1.0", only: :test, runtime: false, optional: true},
 
       # Linter
-      {:credo, "~> 1.7.0", only: [:dev, :test], runtime: false, optional: true},
-      {:dialyxir, "~> 1.4.2", only: [:dev, :test], runtime: false, optional: true},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false, optional: true},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false, optional: true},
 
       # Docs
-      {:ex_doc, "~> 0.30.9", only: [:dev, :docs], runtime: false}
+      {:ex_doc, "~> 0.38", only: [:dev, :docs], runtime: false}
     ]
   end
 
