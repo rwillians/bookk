@@ -144,7 +144,7 @@ defmodule Bookk.Notation do
 
     entries_by_ledger =
       Enum.map(statements, &to_journal_entry(caller, coa, &1))
-      |> Enum.group_by(fn {k, _v} -> k end, fn {_, v} -> v end)
+      |> Enum.group_by(fn {k, _} -> k end, fn {_, v} -> v end)
       |> Enum.map(fn {ledger, xs} -> {ledger, List.flatten(xs)} end)
 
     {:%, meta,
