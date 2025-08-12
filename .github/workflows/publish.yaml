@@ -45,7 +45,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-build-
       - run: mix deps.get
-      - run: mix deps.compile
+      - run: MIX_ENV=test mix deps.compile
       - run: MIX_ENV=test mix compile --no-deps-check --return-errors --warnings-as-errors
       - run: mix test
       - run: mix credo
