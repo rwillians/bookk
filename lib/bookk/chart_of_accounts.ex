@@ -1,13 +1,13 @@
 defmodule Bookk.ChartOfAccounts do
-  @moduledoc ~S"""
+  @moduledoc """
   A Chart of Accounts (abbrv.: CoA) is a mapping of all the accounts
   and all the ledgers that can exist in your system. But instead of
   hard-coding them, you define patterns for accounts and ledgers
   supported by your application using functions and pattern matching.
 
   For example, if your application allows ledgers to have an account
-  for exampenses from paying salary to an employee, you could define a
-  function with a signature the like the one below:
+  for expenses related to paying salary to an employee, you could
+  define a function with a signature the like the one below:
 
       def account({:salary, {:employee, employee_id}})
 
@@ -38,6 +38,32 @@ defmodule Bookk.ChartOfAccounts do
   @callback ledger(term) :: String.t()
 
   @doc ~S"""
+  Get a `Bookk.AccountClass` definition by its id.
+
+  You are free to choose how and where you define your account classes, but you
+  need to provide an implementation for this function so that your classes
+  definitions are accessible to other modules.
+
+  ## Example
+
+      defmodule MyApp.Bookkeeping.ChartOfAccounts do
+        use Bookk.ChartOfAccounts
+
+        @classes %{
+          "A" => %Bookk.AccountClass{id: "A", parent_id: nil, name: "Assets", natural_balance: :debit},
+          "CA" => %Bookk.AccountClass{id: "CA", parent_id: "A", name: "Current Assets", natural_balance: :debit}
+        }
+
+        @impl Bookk.ChartOfAccounts
+        def class(id), do: Map.get(@classes, id)
+
+        # ...
+      end
+
+  """
+  @callback class(id :: String.t()) :: Bookk.AccountClass.t() | nil
+
+  @doc ~S"""
   This function maps all possible patterns of accounts that your
   application supports. It's recomended to use pattern matching and
   let it crash in the event of a mismatch.
@@ -52,7 +78,7 @@ defmodule Bookk.ChartOfAccounts do
   """
   @callback account(term) :: Bookk.AccountHead.t()
 
-  @doc ~S"""
+  @doc """
   By using this module, you are declaring that your module implements
   the `Bookk.ChartOfAccounts` behaviour.
   """
