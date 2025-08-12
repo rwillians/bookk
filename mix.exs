@@ -75,11 +75,9 @@ defmodule Bookk.MixProject do
 
   defp deps do
     [
-      # Linter
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false, optional: true},
+      {:decimal, "~> 2.3"},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false, optional: true},
-
-      # Docs
       {:ex_doc, "~> 0.38", only: [:dev, :docs], runtime: false}
     ]
   end
