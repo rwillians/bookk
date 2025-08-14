@@ -21,4 +21,7 @@ defmodule TestChartOfAccounts do
   def account(:cash), do: %H{name: "cash/CA", class: class("CA")}
   def account(:deposits), do: %H{name: "deposits/OE", class: class("OE")}
   def account({:unspent_cash, {:user, user_id}}), do: %H{name: "unspent-cash:user(#{user_id})/L", class: class("L")}
+
+  @impl Bookk.ChartOfAccounts
+  def account_id(ledger, account_head), do: "#{ledger}:#{account_head.name}"
 end

@@ -78,6 +78,17 @@ defmodule Bookk.ChartOfAccounts do
   """
   @callback account(term) :: Bookk.AccountHead.t()
 
+  @doc ~S"""
+  Combines a ledger with an account header, returning a unique id for
+  the account.
+
+        id = account_id(ledger(:acme), account(:cash))
+
+  """
+  @callback account_id(ledger_name, account_head) :: String.t()
+            when ledger_name: String.t(),
+                 account_head: Bookk.AccountHead.t()
+
   @doc """
   By using this module, you are declaring that your module implements
   the `Bookk.ChartOfAccounts` behaviour.
