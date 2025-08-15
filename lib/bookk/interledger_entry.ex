@@ -88,6 +88,47 @@ defmodule Bookk.InterledgerEntry do
   end
 
   @doc ~S"""
+  Compacts the interledger entry by merging all journal entries that
+  target the same ledger into a single journal entry.
+
+  ## Examples
+
+      iex> interledger_entry = Bookk.InterledgerEntry.new([
+      iex>   {"acme", Bookk.JournalEntry.new([
+      iex>     debit(fixture_account_head(:cash), Decimal.new(10_00)),
+      iex>     credit(fixture_account_head(:deposits), Decimal.new(10_00))
+      iex>   ])},
+      iex>   {"acme", Bookk.JournalEntry.new([
+      iex>     debit(fixture_account_head(:cash), Decimal.new(10_00)),
+      iex>     credit(fixture_account_head(:deposits), Decimal.new(10_00))
+      iex>   ])}
+      iex> ])
+      iex>
+      iex> Bookk.InterledgerEntry.compact(interledger_entry)
+      %Bookk.InterledgerEntry{
+        entries_by_ledger: %{
+          "acme" => [
+            Bookk.JournalEntry.new([
+              debit(fixture_account_head(:cash), Decimal.new(20_00)),
+              credit(fixture_account_head(:deposits), Decimal.new(20_00))
+            ])
+          ]
+        }
+      }
+
+  """
+  @spec compact(t) :: t
+
+  def compact(%InterledgerEntry{} = entry) do
+    entries_by_ledger =
+      entry.entries_by_ledger
+      |> Enum.map(fn {ledger, entries} -> {ledger, [JournalEntry.merge(entries)]} end)
+      |> Enum.into(%{})
+
+    %InterledgerEntry{entries_by_ledger: entries_by_ledger}
+  end
+
+  @doc ~S"""
   Checks whether an interledger entry is empty. It is empty when it
   has now journal entries or when all its journal entries are empty.
 
