@@ -144,6 +144,55 @@ defmodule Bookk.InterledgerEntry do
   end
 
   @doc ~S"""
+  Creates a new interledger entry from a list of ledger + journal entry
+  tuple.
+
+  ## Examples
+
+      iex> Bookk.InterledgerEntry.new([
+      iex>   {"acme", Bookk.JournalEntry.new([
+      iex>     debit(fixture_account_head(:cash), Decimal.new(50_00)),
+      iex>     credit(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(50_00))
+      iex>   ])},
+      iex>   {"user(12345)", Bookk.JournalEntry.new([
+      iex>     debit(fixture_account_head(:cash), Decimal.new(50_00)),
+      iex>     credit(fixture_account_head(:deposits), Decimal.new(50_00))
+      iex>   ])}
+      iex> ])
+      %Bookk.InterledgerEntry{
+        entries_by_ledger: %{
+          "acme" => [
+            Bookk.JournalEntry.new([
+              debit(fixture_account_head(:cash), Decimal.new(50_00)),
+              credit(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(50_00))
+            ])
+          ],
+          "user(12345)" => [
+            Bookk.JournalEntry.new([
+              debit(fixture_account_head(:cash), Decimal.new(50_00)),
+              credit(fixture_account_head(:deposits), Decimal.new(50_00))
+            ])
+          ]
+        }
+      }
+
+  """
+  @spec new([entry]) :: t
+        when entry: {ledger_name :: String.t(), Bookk.JournalEntry.t()}
+
+  def new(entries \\ [])
+  def new([]), do: %InterledgerEntry{}
+
+  def new([_ | _] = entries) do
+    entries_by_ledger =
+      entries
+      |> Enum.group_by(fn {<<ledger::binary>>, _} -> ledger end, fn {_, %JournalEntry{} = entry} -> entry end)
+      |> Enum.into(%{})
+
+    %InterledgerEntry{entries_by_ledger: entries_by_ledger}
+  end
+
+  @doc ~S"""
   Produces a new interledger entry that is equaly opposite of the
   given interledger entry, meaning its capable of reverting all the
   changes that the given entry causes.
