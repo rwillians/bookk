@@ -144,6 +144,97 @@ defmodule Bookk.InterledgerEntry do
   end
 
   @doc ~S"""
+  Merges a set of interledger entries into one.
+
+  ## Examples
+
+      iex> a = Bookk.InterledgerEntry.new([
+      iex>   {"acme", Bookk.JournalEntry.new([
+      iex>     debit(fixture_account_head(:cash), Decimal.new(10_00)),
+      iex>     credit(fixture_account_head(:deposits), Decimal.new(10_00))
+      iex>   ])}
+      iex> ])
+      iex>
+      iex> b = Bookk.InterledgerEntry.new([
+      iex>   {"acme", Bookk.JournalEntry.new([
+      iex>     debit(fixture_account_head(:cash), Decimal.new(10_00)),
+      iex>     credit(fixture_account_head(:deposits), Decimal.new(10_00))
+      iex>   ])}
+      iex> ])
+      iex>
+      iex> Bookk.InterledgerEntry.merge([a, b])
+      %Bookk.InterledgerEntry{
+        entries_by_ledger: %{
+          "acme" => [
+            Bookk.JournalEntry.new([
+              debit(fixture_account_head(:cash), Decimal.new(10_00)),
+              credit(fixture_account_head(:deposits), Decimal.new(10_00))
+            ]),
+            Bookk.JournalEntry.new([
+              debit(fixture_account_head(:cash), Decimal.new(10_00)),
+              credit(fixture_account_head(:deposits), Decimal.new(10_00))
+            ])
+          ]
+        }
+      }
+
+  """
+  @spec merge([t]) :: t
+
+  def merge([]), do: new()
+  def merge([%InterledgerEntry{} = entry]), do: entry
+  def merge([head | tail]), do: merge(head, merge(tail))
+
+  @doc ~S"""
+  Merges two interledger entries into one.
+
+  ## Examples
+
+      iex> a = Bookk.InterledgerEntry.new([
+      iex>   {"acme", Bookk.JournalEntry.new([
+      iex>     debit(fixture_account_head(:cash), Decimal.new(10_00)),
+      iex>     credit(fixture_account_head(:deposits), Decimal.new(10_00))
+      iex>   ])}
+      iex> ])
+      iex>
+      iex> b = Bookk.InterledgerEntry.new([
+      iex>   {"acme", Bookk.JournalEntry.new([
+      iex>     debit(fixture_account_head(:cash), Decimal.new(10_00)),
+      iex>     credit(fixture_account_head(:deposits), Decimal.new(10_00))
+      iex>   ])}
+      iex> ])
+      iex>
+      iex> Bookk.InterledgerEntry.merge(a, b)
+      %Bookk.InterledgerEntry{
+        entries_by_ledger: %{
+          "acme" => [
+            Bookk.JournalEntry.new([
+              debit(fixture_account_head(:cash), Decimal.new(10_00)),
+              credit(fixture_account_head(:deposits), Decimal.new(10_00))
+            ]),
+            Bookk.JournalEntry.new([
+              debit(fixture_account_head(:cash), Decimal.new(10_00)),
+              credit(fixture_account_head(:deposits), Decimal.new(10_00))
+            ])
+          ]
+        }
+      }
+
+  """
+  @spec merge(t, t) :: t
+
+  def merge(%InterledgerEntry{} = a, %InterledgerEntry{} = b) do
+    entries_by_ledger =
+      to_journal_entries(a)
+      |> Enum.concat(to_journal_entries(b))
+      |> Enum.group_by(fn {ledger, _} -> ledger end, fn {_, entries} -> entries end)
+      |> Enum.map(fn {ledger, xs} -> {ledger, flatten(xs)} end)
+      |> Enum.into(%{})
+
+    %InterledgerEntry{entries_by_ledger: entries_by_ledger}
+  end
+
+  @doc ~S"""
   Creates a new interledger entry from a list of ledger + journal entry
   tuple.
 
