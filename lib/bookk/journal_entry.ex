@@ -126,6 +126,80 @@ defmodule Bookk.JournalEntry do
   def empty?(%JournalEntry{operations: ops}), do: all?(ops, &Op.empty?/1)
 
   @doc ~S"""
+  Merges a set or journal entries into one.
+
+  ## Examples
+
+      iex> cash = fixture_account_head(:cash)
+      iex> deposits = fixture_account_head(:deposits)
+      iex>
+      iex> a = Bookk.JournalEntry.new([
+      iex>   debit(cash, Decimal.new(80_00)),
+      iex>   debit(cash, Decimal.new(20_00)),
+      iex>   credit(deposits, Decimal.new(100_00))
+      iex> ])
+      iex>
+      iex> b = Bookk.JournalEntry.new([
+      iex>   debit(cash, Decimal.new(80_00)),
+      iex>   debit(cash, Decimal.new(20_00)),
+      iex>   credit(deposits, Decimal.new(100_00))
+      iex> ])
+      iex>
+      iex> Bookk.JournalEntry.merge([a, b])
+      %Bookk.JournalEntry{
+        operations: [
+          debit(fixture_account_head(:cash), Decimal.new(200_00)),
+          credit(fixture_account_head(:deposits), Decimal.new(200_00))
+        ]
+      }
+
+  """
+  @spec merge([t]) :: t
+
+  def merge([]), do: new([])
+  def merge([%JournalEntry{} = a]), do: a
+  def merge([head | tail]), do: merge(head, merge(tail))
+
+  @doc ~S"""
+  Merges two journal entries into one.
+
+  ## Examples
+
+      iex> cash = fixture_account_head(:cash)
+      iex> deposits = fixture_account_head(:deposits)
+      iex>
+      iex> a = Bookk.JournalEntry.new([
+      iex>   debit(cash, Decimal.new(80_00)),
+      iex>   debit(cash, Decimal.new(20_00)),
+      iex>   credit(deposits, Decimal.new(100_00))
+      iex> ])
+      iex>
+      iex> b = Bookk.JournalEntry.new([
+      iex>   debit(cash, Decimal.new(80_00)),
+      iex>   debit(cash, Decimal.new(20_00)),
+      iex>   credit(deposits, Decimal.new(100_00))
+      iex> ])
+      iex>
+      iex> Bookk.JournalEntry.merge(a, b)
+      %Bookk.JournalEntry{
+        operations: [
+          debit(fixture_account_head(:cash), Decimal.new(200_00)),
+          credit(fixture_account_head(:deposits), Decimal.new(200_00))
+        ]
+      }
+
+  """
+  @spec merge(t, t) :: t
+
+  def merge(%JournalEntry{} = a, %JournalEntry{} = b) do
+    to_operations(a)
+    |> Enum.concat(to_operations(b))
+    |> Enum.group_by(& &1.account_head)
+    |> Enum.map(fn {_, ops} -> Op.merge(ops) end)
+    |> new()
+  end
+
+  @doc ~S"""
   Creates a new journal entry from a set of operations.
 
   ## Examples
