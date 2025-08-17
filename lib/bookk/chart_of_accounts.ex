@@ -25,19 +25,6 @@ defmodule Bookk.ChartOfAccounts do
   """
 
   @doc ~S"""
-  This function maps all possible patterns of ledger names your
-  application supports. It's recomended to use pattern matching and
-  let it crash in the event of a mismatch.
-
-  ## Example
-
-      def ledger(:acme), do: "acme"
-      def ledger({:user, <<id::binary-size(36)>>}), do: "user(#{id})"
-
-  """
-  @callback ledger(term) :: String.t()
-
-  @doc ~S"""
   Get a `Bookk.AccountClass` definition by its id.
 
   You are free to choose how and where you define your account classes, but you
@@ -46,19 +33,9 @@ defmodule Bookk.ChartOfAccounts do
 
   ## Example
 
-      defmodule MyApp.Bookkeeping.ChartOfAccounts do
-        use Bookk.ChartOfAccounts
-
-        @classes %{
-          "A" => %Bookk.AccountClass{id: "A", parent_id: nil, name: "Assets", natural_balance: :debit},
-          "CA" => %Bookk.AccountClass{id: "CA", parent_id: "A", name: "Current Assets", natural_balance: :debit}
-        }
-
-        @impl Bookk.ChartOfAccounts
-        def class(id), do: Map.get(@classes, id)
-
-        # ...
-      end
+      @impl Bookk.ChartOfAccounts
+      def class("A"), do: %Bookk.AccountClass{id: "A", parent_id: nil, name: "Assets", natural_balance: :debit},
+      def class("CA"), do: %Bookk.AccountClass{id: "CA", parent_id: "A", name: "Current Assets", natural_balance: :debit}
 
   """
   @callback class(id :: String.t()) :: Bookk.AccountClass.t() | nil
@@ -70,23 +47,36 @@ defmodule Bookk.ChartOfAccounts do
 
   ## Examples
 
-      def account(:cash), do: %Bookk.AccountHead{...}
-      def account(:deposits), do: %Bookk.AccountHead{...}
-      def account({:payables, {:user, id}}), do: %Bookk.AccountHead{...}
-      def account({:receivables, {:user, id}}), do: %Bookk.AccountHead{...}
+      @impl Bookk.ChartOfAccounts
+      def account(:cash), do: %Bookk.AccountHead{name: "cash", class: class("CA")}
+      def account({:payables, {:user, id}}), do: %Bookk.AccountHead{name: "payables:user(#{id})", class: class("L")}
 
   """
   @callback account(term) :: Bookk.AccountHead.t()
 
   @doc ~S"""
-  Combines a ledger with an account header, returning a unique id for
-  the account.
+  This function maps all of your ledger codes into a ledger id string.
+  It's recomended to use pattern matching and let it crash in the
+  event of a mismatch.
 
-        id = account_id(ledger(:acme), account(:cash))
+  ## Example
+
+      @impl Bookk.ChartOfAccounts
+      def ledger_id(:acme), do: "acme"
+      def ledger_id({:user, <<id::binary-size(36)>>}), do: "user(#{id})"
 
   """
-  @callback account_id(ledger_name, account_head) :: String.t()
-            when ledger_name: String.t(),
+  @callback ledger_id(term) :: String.t()
+
+  @doc ~S"""
+  Combines a ledger id with an account header, returning a unique id
+  for the account.
+
+        id = account_id(ledger_id(:acme), account(:cash))
+
+  """
+  @callback account_id(ledger_id, account_head) :: String.t()
+            when ledger_id: String.t(),
                  account_head: Bookk.AccountHead.t()
 
   @doc """
@@ -96,6 +86,12 @@ defmodule Bookk.ChartOfAccounts do
   defmacro __using__(_) do
     quote do
       @behaviour unquote(__MODULE__)
+
+      @impl Bookk.ChartOfAccounts
+      def account_id(<<_, _::binary>> = ledger_id, %Bookk.AccountHead{} = account_head),
+        do: "#{ledger_id}:#{account_head.name}/#{account_head.class.id}"
+
+      defoverridable account_id: 2
     end
   end
 end

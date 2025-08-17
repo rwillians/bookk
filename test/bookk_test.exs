@@ -3,7 +3,7 @@ defmodule BookkTest do
 
   import Bookk.Operation, only: [credit: 2, debit: 2]
 
-  defdelegate fixture_account_head(term), to: TestChartOfAccounts, as: :account
+  defdelegate fixture_account_head(term), to: DummyChartOfAccounts, as: :account
 
   doctest Bookk.Account
   doctest Bookk.AccountClass

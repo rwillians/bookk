@@ -106,7 +106,7 @@ defmodule Bookk.NaiveState do
       iex> deposited_amount = Decimal.new(500_00)
       iex>
       iex> journal_entry =
-      iex>   journalize! using: TestChartOfAccounts do
+      iex>   journalize! using: DummyChartOfAccounts do
       iex>     on ledger(:acme) do
       iex>       debit account(:cash), deposited_amount
       iex>       credit account({:unspent_cash, {:user, user_id}}), deposited_amount
@@ -165,8 +165,8 @@ defmodule Bookk.NaiveState do
   defp post_reduce(state, [{_, []} | x_tail]), do: post_reduce(state, x_tail)
   defp post_reduce(state, []), do: state
 
-  defp do_post(state, ledger_name, journal_entry) do
-    get_ledger(state, ledger_name)
+  defp do_post(state, ledger_id, journal_entry) do
+    get_ledger(state, ledger_id)
     |> Ledger.post(journal_entry)
     |> put_ledger(state)
   end

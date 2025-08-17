@@ -31,7 +31,7 @@ defmodule Bookk.InterledgerEntry do
   """
   @type t :: %Bookk.InterledgerEntry{
           entries_by_ledger: %{
-            (ledger_name :: String.t()) => Bookk.JournalEntry.t()
+            (ledger_id :: String.t()) => Bookk.JournalEntry.t()
           }
         }
 
@@ -310,7 +310,7 @@ defmodule Bookk.InterledgerEntry do
 
   """
   @spec new([entry]) :: t
-        when entry: {ledger_name :: String.t(), Bookk.JournalEntry.t()}
+        when entry: {ledger_id :: String.t(), Bookk.JournalEntry.t()}
 
   def new(entries \\ [])
   def new([]), do: %InterledgerEntry{}
@@ -418,11 +418,11 @@ defmodule Bookk.InterledgerEntry do
       ]
 
   """
-  @spec to_journal_entries(t) :: [{ledger_name :: String.t(), Bookk.JournalEntry.t()}]
+  @spec to_journal_entries(t) :: [{ledger_id :: String.t(), Bookk.JournalEntry.t()}]
 
   def to_journal_entries(%InterledgerEntry{} = interledger) do
-    for {ledger_name, entries} <- to_list(interledger.entries_by_ledger),
+    for {ledger_id, entries} <- to_list(interledger.entries_by_ledger),
         entry <- entries,
-        do: {ledger_name, entry}
+        do: {ledger_id, entry}
   end
 end
