@@ -108,8 +108,8 @@ defmodule ACME.ChartOfAccounts do
   Given a ledger name and an AccountHead, it returns the account's
   deterministic id.
   """
-  def account_id(ledger_name, %H{} = account_head),
-    do: "#{ledger_name}:#{account_head.name}/#{account_head.class.id}"
+  def account_id(ledger_id, %H{} = account_head),
+    do: "#{ledger_id}:#{account_head.name}/#{account_head.class.id}"
 end
 ```
 
@@ -303,16 +303,16 @@ defmodule Accounting do
     now = DateTime.utc_now()
 
     multis =
-      for {ledger_name, journal_entry} <- Bookk.InterledgerEntry.to_journal_entries(interledger_entry),
+      for {ledger_id, journal_entry} <- Bookk.InterledgerEntry.to_journal_entries(interledger_entry),
           op <- Bookk.JournalEntry.to_operations(journal_entry),
-          do: op_to_multi(op, ledger_name, tx.id, now)
+          do: op_to_multi(op, ledger_id, tx.id, now)
 
     multis
     |> Enum.reduce(Ecto.Multi.new(), &Ecto.Multi.append(&2, &1))
     |> ACME.Repo.transaction()
   end
 
-  defp op_to_multi(%Bookk.Operation{} = op, ledger_name, tx_id, now) do
+  defp op_to_multi(%Bookk.Operation{} = op, ledger_id, tx_id, now) do
     #   we need uniq names for each multi operation, there will be 2 of them for
     # ↓ each `Bookk.Operation`
     multi_a_name = Ecto.UUID.generate()
@@ -322,12 +322,12 @@ defmodule Accounting do
     #   positive or negative integer — in cents or the smallest fraction of the
     # ↓ currency you're using)
     delta_amount = Bookk.Operations.to_delta_amount(op)
-    account_id = ACME.ChartOfAccounts.account_id(ledger_name, op.account_head)
+    account_id = ACME.ChartOfAccounts.account_id(ledger_id, op.account_head)
 
     account_changeset =
       Account.changeset(%{
         id: account_id,
-        ledger_id: ledger_name,
+        ledger_id: ledger_id,
         balance: delta_amount,
         created_at: now,
         updated_at: now

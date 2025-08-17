@@ -31,7 +31,7 @@ defmodule Bookk.Notation do
       iex> use Bookk.Notation
       iex>
       iex> %Bookk.InterledgerEntry{} = journal_entry =
-      iex>   journalize using: TestChartOfAccounts do
+      iex>   journalize using: DummyChartOfAccounts do
       iex>     on ledger(:acme) do
       iex>       debit account(:cash), Decimal.new(150_00)
       iex>       credit account(:deposits), Decimal.new(150_00)
@@ -46,7 +46,7 @@ defmodule Bookk.Notation do
       iex> use Bookk.Notation
       iex>
       iex> %Bookk.InterledgerEntry{} = journal_entry =
-      iex>   journalize using: TestChartOfAccounts do
+      iex>   journalize using: DummyChartOfAccounts do
       iex>     on ledger(:acme) do
       iex>       debit account(:cash), Decimal.new(150_00)
       iex>       credit account(:deposits), Decimal.new(50_00)
@@ -68,7 +68,7 @@ defmodule Bookk.Notation do
       iex>
       iex> foo = %{amount: 50}
       iex>
-      iex> journalize using: TestChartOfAccounts do
+      iex> journalize using: DummyChartOfAccounts do
       iex>   on ledger(:acme) do
       iex>     debit account(:cash), ((%Decimal{exp: 0, sign: 1, coef: 100} + Decimal.new(100) - foo.amount) * 2) / 2
       iex>     credit account(:deposits), ((Decimal.new(100) + foo.amount) * Decimal.new(2)) / Decimal.new(2)
@@ -106,7 +106,7 @@ defmodule Bookk.Notation do
       iex> use Bookk.Notation
       iex>
       iex> %Bookk.InterledgerEntry{} = journal_entry =
-      iex>   journalize! using: TestChartOfAccounts do
+      iex>   journalize! using: DummyChartOfAccounts do
       iex>     on ledger(:acme) do
       iex>       debit account(:cash), Decimal.new(150_00)
       iex>       credit account(:deposits), Decimal.new(150_00)
@@ -121,7 +121,7 @@ defmodule Bookk.Notation do
 
       iex> use Bookk.Notation
       iex>
-      iex> journalize! using: TestChartOfAccounts do
+      iex> journalize! using: DummyChartOfAccounts do
       iex>   on ledger(:acme) do
       iex>     debit account(:cash), Decimal.new(150_00)
       iex>     credit account(:deposits), Decimal.new(50_00)
@@ -187,7 +187,7 @@ defmodule Bookk.Notation do
       end
 
     {
-      {{:., [context: caller], [coa, :ledger]}, meta_b, [name]},
+      {{:., [context: caller], [coa, :ledger_id]}, meta_b, [name]},
       {{:., [context: caller], [{:__aliases__, [alias: false], [Bookk, JournalEntry]}, :new]}, meta_a,
        [
          Enum.map(statements, &to_operation(caller, coa, &1))

@@ -39,7 +39,7 @@ defmodule PerfTest do
     [{_, journal_entry} | _] = Bookk.InterledgerEntry.to_journal_entries(interledger_entry)
     [operation | _] = Bookk.JournalEntry.to_operations(journal_entry)
 
-    ledger = Bookk.NaiveState.get_ledger(naive_state, TestChartOfAccounts.ledger(:acme))
+    ledger = Bookk.NaiveState.get_ledger(naive_state, DummyChartOfAccounts.ledger(:acme))
     account = Bookk.Ledger.get_account(ledger, operation.account_head)
 
     account_count = length(Map.keys(ledger.accounts_by_name))
@@ -62,7 +62,7 @@ defmodule PerfTest do
   #
 
   defp deposit_balance(user_id, amount) do
-    journalize using: TestChartOfAccounts do
+    journalize using: DummyChartOfAccounts do
       on ledger(:acme) do
         debit account(:cash), amount
         credit account({:unspent_cash, {:user, user_id}}), amount
@@ -76,7 +76,7 @@ defmodule PerfTest do
   end
 
   defp deposit_balance!(user_id, amount) do
-    journalize! using: TestChartOfAccounts do
+    journalize! using: DummyChartOfAccounts do
       on ledger(:acme) do
         debit account(:cash), amount
         credit account({:unspent_cash, {:user, user_id}}), amount
