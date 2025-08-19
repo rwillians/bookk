@@ -18,7 +18,7 @@ defmodule Bookk.JournalEntry do
   import Enum, only: [all?: 2, map: 2, reduce: 3, split_with: 2]
 
   alias __MODULE__, as: JournalEntry
-  alias Bookk.AccountHead, as: AccountHead
+  alias Bookk.AccountHead
   alias Bookk.Operation, as: Op
 
   @typedoc ~S"""

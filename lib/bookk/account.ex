@@ -12,7 +12,7 @@ defmodule Bookk.Account do
   """
 
   alias __MODULE__, as: Account
-  alias Bookk.AccountHead, as: AccountHead
+  alias Bookk.AccountHead
   alias Bookk.Operation, as: Op
 
   @typedoc ~S"""
@@ -31,6 +31,24 @@ defmodule Bookk.Account do
         }
 
   defstruct [:head, balance: Decimal.new(0)]
+
+  @doc ~S"""
+  Checks whether an account is empty (no balance).
+
+  ## Examples
+
+      iex> Bookk.Account.new(fixture_account_head(:cash), Decimal.new(0))
+      iex> |> Bookk.Account.empty?()
+      true
+
+      iex> Bookk.Account.new(fixture_account_head(:cash), Decimal.new(10))
+      iex> |> Bookk.Account.empty?()
+      false
+
+  """
+  @spec empty?(t) :: boolean()
+
+  def empty?(%Account{} = account), do: Decimal.eq?(account.balance, 0)
 
   @doc ~S"""
   Creates a new account from a `Bookk.AccountHead`.

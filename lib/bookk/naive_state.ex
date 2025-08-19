@@ -92,11 +92,42 @@ defmodule Bookk.NaiveState do
   end
 
   @doc ~S"""
-  Produces a empty naive state.
-  """
-  @spec empty() :: t
+  Checks wether the given state is empty (no ledgers with balance).
 
-  def empty, do: %NaiveState{}
+  ## Examples
+
+      iex> Bookk.NaiveState.new()
+      iex> |> Bookk.NaiveState.empty?()
+      true
+
+      iex> state = Bookk.NaiveState.new([
+      iex>   Bookk.Ledger.new("acme", [
+      iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(0)),
+      iex>     Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(0))
+      iex>   ])
+      iex> ])
+      iex>
+      iex> Bookk.NaiveState.empty?(state)
+      true
+
+      iex> state = Bookk.NaiveState.new([
+      iex>   Bookk.Ledger.new("acme", [
+      iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(10)),
+      iex>     Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(10))
+      iex>   ])
+      iex> ])
+      iex>
+      iex> Bookk.NaiveState.empty?(state)
+      false
+
+  """
+  @spec empty?(t) :: boolean()
+
+  def empty?(%NaiveState{} = state) do
+    state.ledgers_by_id
+    |> Map.values()
+    |> Enum.all?(&Ledger.empty?/1)
+  end
 
   @doc ~S"""
   Get's a ledger from the state by its id. If the ledger doesn't exist
@@ -141,11 +172,12 @@ defmodule Bookk.NaiveState do
   """
   @spec new([Bookk.Ledger.t()]) :: t
 
-  def new([]), do: empty()
+  def new(ledgers \\ [])
+  def new([]), do: %NaiveState{}
 
   def new(ledgers)
       when is_list(ledgers),
-      do: Enum.into(ledgers, empty())
+      do: Enum.into(ledgers, %NaiveState{})
 
   @doc ~S"""
   Posts a `Bookk.InterledgerEntry` to the state, appling changes in
@@ -171,7 +203,7 @@ defmodule Bookk.NaiveState do
       iex>     end
       iex>   end
       iex>
-      iex> Bookk.NaiveState.empty()
+      iex> Bookk.NaiveState.new()
       iex> |> Bookk.NaiveState.post(journal_entry)
       Bookk.NaiveState.new([
         Bookk.Ledger.new("acme", [
