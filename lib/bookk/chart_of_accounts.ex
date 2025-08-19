@@ -15,7 +15,7 @@ defmodule Bookk.ChartOfAccounts do
   every employee to have their own ledger, you could define a function
   with a signature like the one below:
 
-      def ledger({:employee, employee_id})
+      def ledger_id({:employee, employee_id})
 
   ## Related
 
@@ -73,11 +73,21 @@ defmodule Bookk.ChartOfAccounts do
   for the account.
 
         id = account_id(ledger_id(:acme), account(:cash))
+        #> %Bookk.AccountHead{...}
+
+  Can alternativelly be called directly with ledger code and account
+  code:
+
+      id = account_id(:acme, :cash)
+      #> %Bookk.AccountHead{...}
 
   """
   @callback account_id(ledger_id, account_head) :: String.t()
             when ledger_id: String.t(),
                  account_head: Bookk.AccountHead.t()
+  @callback account_id(ledger_code, account_code) :: String.t()
+            when ledger_code: term(),
+                 account_code: term()
 
   @doc """
   By using this module, you are declaring that your module implements
