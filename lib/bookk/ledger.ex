@@ -131,6 +131,8 @@ defmodule Bookk.Ledger do
       ])
 
   """
+  @spec diff(a :: t(), b :: t()) :: Bookk.JournalEntry.t()
+
   def diff(%Ledger{} = a, %Ledger{} = b) do
     account_heads =
       []
