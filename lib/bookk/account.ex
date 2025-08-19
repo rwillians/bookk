@@ -51,6 +51,56 @@ defmodule Bookk.Account do
   def empty?(%Account{} = account), do: Decimal.eq?(account.balance, 0)
 
   @doc ~S"""
+  Merges two accounts into one (account head MUST be the same).
+
+  ## Examples
+
+      iex> a = Bookk.Account.new(fixture_account_head(:cash), Decimal.new(5))
+      iex> b = Bookk.Account.new(fixture_account_head(:cash), Decimal.new(15))
+      iex> Bookk.Account.merge(a, b)
+      Bookk.Account.new(fixture_account_head(:cash), Decimal.new(20))
+
+  It raises if the account head is different:
+
+      iex> a = Bookk.Account.new(fixture_account_head(:cash), Decimal.new(5))
+      iex> b = Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(15))
+      iex> Bookk.Account.merge(a, b)
+      ** (FunctionClauseError) no function clause matching in Bookk.Account.merge/2
+
+  """
+  @spec merge(t, t) :: t
+
+  def merge(%Account{head: same} = a, %Account{head: same} = b) do
+    %Account{
+      head: same,
+      balance: Decimal.add(a.balance, b.balance)
+    }
+  end
+
+  @doc ~S"""
+  Merges a non-empty set of accounts into one (account head MUST be
+  the same).
+
+  ## Examples
+
+      iex> a = Bookk.Account.new(fixture_account_head(:cash), Decimal.new(5))
+      iex> b = Bookk.Account.new(fixture_account_head(:cash), Decimal.new(15))
+      iex> c = Bookk.Account.new(fixture_account_head(:cash), Decimal.new(30))
+      iex> Bookk.Account.merge([a, b, c])
+      Bookk.Account.new(fixture_account_head(:cash), Decimal.new(50))
+
+  It raises if an empty list is given:
+
+      iex> Bookk.Account.merge([])
+      ** (FunctionClauseError) no function clause matching in Bookk.Account.merge/1
+
+  """
+  @spec merge([t, ...]) :: t
+
+  def merge([%Account{} = account]), do: account
+  def merge([%Account{} = head | tail]), do: merge(head, merge(tail))
+
+  @doc ~S"""
   Creates a new account from a `Bookk.AccountHead`.
 
   ## Examples
