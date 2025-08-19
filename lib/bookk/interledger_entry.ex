@@ -17,7 +17,7 @@ defmodule Bookk.InterledgerEntry do
   import Map, only: [values: 1]
 
   alias __MODULE__, as: InterledgerEntry
-  alias Bookk.JournalEntry, as: JournalEntry
+  alias Bookk.JournalEntry
 
   @typedoc ~S"""
   The struct that represents an interledger entry.

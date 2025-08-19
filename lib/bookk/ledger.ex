@@ -19,9 +19,9 @@ defmodule Bookk.Ledger do
   import Map, only: [get: 2, put: 3, values: 1]
 
   alias __MODULE__, as: Ledger
-  alias Bookk.Account, as: Account
-  alias Bookk.AccountHead, as: AccountHead
-  alias Bookk.JournalEntry, as: JournalEntry
+  alias Bookk.Account
+  alias Bookk.AccountHead
+  alias Bookk.JournalEntry
   alias Bookk.Operation, as: Op
 
   @typedoc ~S"""
@@ -148,6 +148,39 @@ defmodule Bookk.Ledger do
       end
 
     JournalEntry.new(operations)
+  end
+
+  @doc ~S"""
+  Checks whether the given ledger is empty (no accounts with balance).
+
+  ## Examples
+
+      iex> Bookk.Ledger.new("acme")
+      iex> |> Bookk.Ledger.empty?()
+      true
+
+      iex> ledger = Bookk.Ledger.new("acme", [
+      iex>   Bookk.Account.new(fixture_account_head(:cash), Decimal.new(0)),
+      iex>   Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(0)),
+      iex> ])
+      iex>
+      iex> Bookk.Ledger.empty?(ledger)
+      true
+
+      iex> ledger = Bookk.Ledger.new("acme", [
+      iex>   Bookk.Account.new(fixture_account_head(:cash), Decimal.new(10))
+      iex> ])
+      iex>
+      iex> Bookk.Ledger.empty?(ledger)
+      false
+
+  """
+  @spec empty?(t) :: boolean()
+
+  def empty?(%Ledger{} = ledger) do
+    ledger.accounts_by_name
+    |> Map.values()
+    |> Enum.all?(&Account.empty?/1)
   end
 
   @doc ~S"""
