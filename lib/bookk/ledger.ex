@@ -29,16 +29,16 @@ defmodule Bookk.Ledger do
 
   ## Fields
 
-  - `name`: the name of the ledger;
+  - `id`: the id of the ledger;
   - `accounts_by_name`: a map of the accounts known by the ledger,
     grouped by their name.
   """
   @type t :: %Bookk.Ledger{
-          name: String.t(),
+          id: String.t(),
           accounts_by_name: %{(name :: String.t()) => Bookk.Account.t()}
         }
 
-  defstruct [:name, accounts_by_name: %{}]
+  defstruct [:id, accounts_by_name: %{}]
 
   @doc ~S"""
   Checks whether the ledger is balanced.
@@ -116,7 +116,7 @@ defmodule Bookk.Ledger do
   Returns the account when it exists in the ledger:
 
       iex> ledger = %Bookk.Ledger{
-      iex>   name: "acme",
+      iex>   id: "acme",
       iex>   accounts_by_name: %{
       iex>     "cash/CA" => %Bookk.Account{
       iex>       head: fixture_account_head(:cash),
@@ -154,18 +154,18 @@ defmodule Bookk.Ledger do
   end
 
   @doc ~S"""
-  Creates a new `Bookk.Ledger` from its name and, optionally, a list
+  Creates a new `Bookk.Ledger` from its id and, optionally, a list
   of `Bookk.Account`.
   """
-  @spec new(name :: String.t()) :: t
-  @spec new(name :: String.t(), [Bookk.Account.t()]) :: t
+  @spec new(id :: String.t()) :: t
+  @spec new(id :: String.t(), [Bookk.Account.t()]) :: t
 
-  def new(name, accounts \\ [])
-  def new(<<name::binary>>, []), do: %Ledger{name: name}
+  def new(id, accounts \\ [])
+  def new(<<id::binary>>, []), do: %Ledger{id: id}
 
-  def new(<<name::binary>>, accounts)
+  def new(<<id::binary>>, accounts)
       when is_list(accounts),
-      do: Enum.into(accounts, %Ledger{name: name})
+      do: Enum.into(accounts, %Ledger{id: id})
 
   @doc ~S"""
   Posts a `Bookk.JournalEntry` to a ledger. This means that the
