@@ -62,13 +62,11 @@ defmodule Bookk.Ledger do
   of credit accounts balances:
 
       iex> ledger = Bookk.Ledger.new("acme")
-      iex> cash = fixture_account_head(:cash)
-      iex> deposits = fixture_account_head(:deposits)
       iex>
       iex> journal_entry = %Bookk.JournalEntry{
       iex>   operations: [
-      iex>     debit(cash, Decimal.new(50_00)),
-      iex>     credit(deposits, Decimal.new(50_00))
+      iex>     debit(fixture_account_head(:cash), Decimal.new(50)),
+      iex>     credit(fixture_account_head(:deposits), Decimal.new(50))
       iex>   ]
       iex> }
       iex>
@@ -80,11 +78,10 @@ defmodule Bookk.Ledger do
   the sum of credit accounts balances:
 
       iex> ledger = Bookk.Ledger.new("acme")
-      iex> cash = fixture_account_head(:cash)
       iex>
       iex> journal_entry = %Bookk.JournalEntry{
       iex>   operations: [
-      iex>     debit(cash, Decimal.new(50_00))
+      iex>     debit(fixture_account_head(:cash), Decimal.new(50))
       iex>   ]
       iex> }
       iex>
@@ -114,20 +111,20 @@ defmodule Bookk.Ledger do
   ## Examples
 
       iex> a = Bookk.Ledger.new("acme", [
-      iex>   Bookk.Account.new(fixture_account_head(:cash), Decimal.from_float(10.00)),
-      iex>   Bookk.Account.new(fixture_account_head(:deposits), Decimal.from_float(10.00)),
+      iex>   Bookk.Account.new(fixture_account_head(:cash), Decimal.new(10)),
+      iex>   Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(10)),
       iex> ])
       iex>
       iex> b = Bookk.Ledger.new("acme", [
-      iex>   Bookk.Account.new(fixture_account_head(:cash), Decimal.from_float(50.00)),
-      iex>   Bookk.Account.new(fixture_account_head({:unspent_cash, {:user, "1234"}}), Decimal.from_float(50.00))
+      iex>   Bookk.Account.new(fixture_account_head(:cash), Decimal.new(50)),
+      iex>   Bookk.Account.new(fixture_account_head({:unspent_cash, {:user, "1234"}}), Decimal.new(50))
       iex> ])
       iex>
       iex> Bookk.Ledger.diff(a, b)
       Bookk.JournalEntry.new([
-        Bookk.Operation.debit(fixture_account_head(:cash), Decimal.from_float(40.00)),
-        Bookk.Operation.debit(fixture_account_head(:deposits), Decimal.from_float(10.00)),
-        Bookk.Operation.credit(fixture_account_head({:unspent_cash, {:user, "1234"}}), Decimal.from_float(50.00)),
+        Bookk.Operation.debit(fixture_account_head(:cash), Decimal.new(40)),
+        Bookk.Operation.debit(fixture_account_head(:deposits), Decimal.new(10)),
+        Bookk.Operation.credit(fixture_account_head({:unspent_cash, {:user, "1234"}}), Decimal.new(50)),
       ])
 
   """
@@ -162,20 +159,17 @@ defmodule Bookk.Ledger do
 
   Returns the account when it exists in the ledger:
 
-      iex> ledger = %Bookk.Ledger{
-      iex>   id: "acme",
-      iex>   accounts_by_name: %{
-      iex>     "cash/CA" => %Bookk.Account{
-      iex>       head: fixture_account_head(:cash),
-      iex>       balance: Decimal.new(25_00)
-      iex>     }
+      iex> ledger = Bookk.Ledger.new("acme", [
+      iex>   %Bookk.Account{
+      iex>     head: fixture_account_head(:cash),
+      iex>     balance: Decimal.new(25)
       iex>   }
-      iex> }
+      iex> ])
       iex>
       iex> Bookk.Ledger.get_account(ledger, fixture_account_head(:cash))
       %Bookk.Account{
         head: fixture_account_head(:cash),
-        balance: Decimal.new(25_00)
+        balance: Decimal.new(25)
       }
 
   Returns an empty account when the it doesn't exist in the ledger:
@@ -227,37 +221,32 @@ defmodule Bookk.Ledger do
 
       iex> ledger = Bookk.Ledger.new("acme")
       iex>
-      iex> cash = fixture_account_head(:cash)
-      iex> deposits = fixture_account_head(:deposits)
-      iex>
       iex> journal_entry = %Bookk.JournalEntry{
       iex>   operations: [
-      iex>     debit(cash, Decimal.new(50_00)),
-      iex>     credit(deposits, Decimal.new(50_00))
+      iex>     debit(fixture_account_head(:cash), Decimal.new(50)),
+      iex>     credit(fixture_account_head(:deposits), Decimal.new(50))
       iex>   ]
       iex> }
       iex>
       iex> updated_ledger = Bookk.Ledger.post(ledger, journal_entry)
+      iex>
       iex> [
-      iex>   Bookk.Ledger.get_account(updated_ledger, cash),
-      iex>   Bookk.Ledger.get_account(updated_ledger, deposits)
+      iex>   Bookk.Ledger.get_account(updated_ledger, fixture_account_head(:cash)),
+      iex>   Bookk.Ledger.get_account(updated_ledger, fixture_account_head(:deposits))
       iex> ]
       [
-        %Bookk.Account{head: fixture_account_head(:cash), balance: Decimal.new(50_00)},
-        %Bookk.Account{head: fixture_account_head(:deposits), balance: Decimal.new(50_00)}
+        %Bookk.Account{head: fixture_account_head(:cash), balance: Decimal.new(50)},
+        %Bookk.Account{head: fixture_account_head(:deposits), balance: Decimal.new(50)}
       ]
 
   When account exists then it gets updated:
 
       iex> ledger = Bookk.Ledger.new("acme")
       iex>
-      iex> cash = fixture_account_head(:cash)
-      iex> deposits = fixture_account_head(:deposits)
-      iex>
       iex> journal_entry = %Bookk.JournalEntry{
       iex>   operations: [
-      iex>     debit(cash, Decimal.new(50_00)),
-      iex>     credit(deposits, Decimal.new(50_00))
+      iex>     debit(fixture_account_head(:cash), Decimal.new(50)),
+      iex>     credit(fixture_account_head(:deposits), Decimal.new(50))
       iex>   ]
       iex> }
       iex>
@@ -267,12 +256,12 @@ defmodule Bookk.Ledger do
       iex>   |> Bookk.Ledger.post(journal_entry) # post twice
       iex>
       iex> [
-      iex>   Bookk.Ledger.get_account(updated_ledger, cash),
-      iex>   Bookk.Ledger.get_account(updated_ledger, deposits)
+      iex>   Bookk.Ledger.get_account(updated_ledger, fixture_account_head(:cash)),
+      iex>   Bookk.Ledger.get_account(updated_ledger, fixture_account_head(:deposits))
       iex> ]
       [
-        %Bookk.Account{head: fixture_account_head(:cash), balance: Decimal.new(100_00)},
-        %Bookk.Account{head: fixture_account_head(:deposits), balance: Decimal.new(100_00)}
+        %Bookk.Account{head: fixture_account_head(:cash), balance: Decimal.new(100)},
+        %Bookk.Account{head: fixture_account_head(:deposits), balance: Decimal.new(100)}
       ]
 
   """

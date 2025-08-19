@@ -47,8 +47,8 @@ defmodule Bookk.InterledgerEntry do
 
       iex> interledger_entry = Bookk.InterledgerEntry.new([
       iex>   {"acme", Bookk.JournalEntry.new([
-      iex>     debit(fixture_account_head(:cash), Decimal.new(30_00)),
-      iex>     credit(fixture_account_head(:deposits), Decimal.new(30_00))
+      iex>     debit(fixture_account_head(:cash), Decimal.new(30)),
+      iex>     credit(fixture_account_head(:deposits), Decimal.new(30))
       iex>   ])}
       iex> ])
       iex>
@@ -59,7 +59,7 @@ defmodule Bookk.InterledgerEntry do
 
       iex> interledger_entry = Bookk.InterledgerEntry.new([
       iex>   {"acme", Bookk.JournalEntry.new([
-      iex>     debit(fixture_account_head(:cash), Decimal.new(30_00))
+      iex>     debit(fixture_account_head(:cash), Decimal.new(30))
       iex>   ])},
       iex> ])
       iex>
@@ -83,20 +83,20 @@ defmodule Bookk.InterledgerEntry do
 
       iex> interledger_entry = Bookk.InterledgerEntry.new([
       iex>   {"acme", Bookk.JournalEntry.new([
-      iex>     debit(fixture_account_head(:cash), Decimal.new(10_00)),
-      iex>     credit(fixture_account_head(:deposits), Decimal.new(10_00))
+      iex>     debit(fixture_account_head(:cash), Decimal.new(10)),
+      iex>     credit(fixture_account_head(:deposits), Decimal.new(10))
       iex>   ])},
       iex>   {"acme", Bookk.JournalEntry.new([
-      iex>     debit(fixture_account_head(:cash), Decimal.new(10_00)),
-      iex>     credit(fixture_account_head(:deposits), Decimal.new(10_00))
+      iex>     debit(fixture_account_head(:cash), Decimal.new(10)),
+      iex>     credit(fixture_account_head(:deposits), Decimal.new(10))
       iex>   ])}
       iex> ])
       iex>
       iex> Bookk.InterledgerEntry.compact(interledger_entry)
       Bookk.InterledgerEntry.new([
         {"acme", Bookk.JournalEntry.new([
-          debit(fixture_account_head(:cash), Decimal.new(20_00)),
-          credit(fixture_account_head(:deposits), Decimal.new(20_00))
+          debit(fixture_account_head(:cash), Decimal.new(20)),
+          credit(fixture_account_head(:deposits), Decimal.new(20))
         ])}
       ])
 
@@ -179,6 +179,7 @@ defmodule Bookk.InterledgerEntry do
 
   defp get_journal_entry(%InterledgerEntry{} = entry, <<ledger_id::binary>>) do
     case get_journal_entries(entry, ledger_id) do
+      # ↓ it's supposed to only ever be called on a compact interledger entry
       [%JournalEntry{} = journal_entry] -> journal_entry
       [] -> Bookk.JournalEntry.new([])
     end
@@ -238,16 +239,16 @@ defmodule Bookk.InterledgerEntry do
 
       iex> interledger_entry = Bookk.InterledgerEntry.new([
       iex>   {"acme", Bookk.JournalEntry.new([
-      iex>     debit(fixture_account_head(:cash), Decimal.new(50_00)),
-      iex>     credit(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(50_00))
+      iex>     debit(fixture_account_head(:cash), Decimal.new(50)),
+      iex>     credit(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(50))
       iex>   ])}
       iex> ])
       iex>
       iex> Bookk.InterledgerEntry.get_journal_entries(interledger_entry, "acme")
       [
         Bookk.JournalEntry.new([
-          debit(fixture_account_head(:cash), Decimal.new(50_00)),
-          credit(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(50_00))
+          debit(fixture_account_head(:cash), Decimal.new(50)),
+          credit(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(50))
         ])
       ]
 
@@ -269,27 +270,27 @@ defmodule Bookk.InterledgerEntry do
 
       iex> a = Bookk.InterledgerEntry.new([
       iex>   {"acme", Bookk.JournalEntry.new([
-      iex>     debit(fixture_account_head(:cash), Decimal.new(10_00)),
-      iex>     credit(fixture_account_head(:deposits), Decimal.new(10_00))
+      iex>     debit(fixture_account_head(:cash), Decimal.new(10)),
+      iex>     credit(fixture_account_head(:deposits), Decimal.new(10))
       iex>   ])}
       iex> ])
       iex>
       iex> b = Bookk.InterledgerEntry.new([
       iex>   {"acme", Bookk.JournalEntry.new([
-      iex>     debit(fixture_account_head(:cash), Decimal.new(10_00)),
-      iex>     credit(fixture_account_head(:deposits), Decimal.new(10_00))
+      iex>     debit(fixture_account_head(:cash), Decimal.new(10)),
+      iex>     credit(fixture_account_head(:deposits), Decimal.new(10))
       iex>   ])}
       iex> ])
       iex>
       iex> Bookk.InterledgerEntry.merge([a, b])
       Bookk.InterledgerEntry.new([
         {"acme", Bookk.JournalEntry.new([
-          debit(fixture_account_head(:cash), Decimal.new(10_00)),
-          credit(fixture_account_head(:deposits), Decimal.new(10_00))
+          debit(fixture_account_head(:cash), Decimal.new(10)),
+          credit(fixture_account_head(:deposits), Decimal.new(10))
         ])},
         {"acme", Bookk.JournalEntry.new([
-          debit(fixture_account_head(:cash), Decimal.new(10_00)),
-          credit(fixture_account_head(:deposits), Decimal.new(10_00))
+          debit(fixture_account_head(:cash), Decimal.new(10)),
+          credit(fixture_account_head(:deposits), Decimal.new(10))
         ])}
       ])
 
@@ -307,27 +308,27 @@ defmodule Bookk.InterledgerEntry do
 
       iex> a = Bookk.InterledgerEntry.new([
       iex>   {"acme", Bookk.JournalEntry.new([
-      iex>     debit(fixture_account_head(:cash), Decimal.new(10_00)),
-      iex>     credit(fixture_account_head(:deposits), Decimal.new(10_00))
+      iex>     debit(fixture_account_head(:cash), Decimal.new(10)),
+      iex>     credit(fixture_account_head(:deposits), Decimal.new(10))
       iex>   ])}
       iex> ])
       iex>
       iex> b = Bookk.InterledgerEntry.new([
       iex>   {"acme", Bookk.JournalEntry.new([
-      iex>     debit(fixture_account_head(:cash), Decimal.new(10_00)),
-      iex>     credit(fixture_account_head(:deposits), Decimal.new(10_00))
+      iex>     debit(fixture_account_head(:cash), Decimal.new(10)),
+      iex>     credit(fixture_account_head(:deposits), Decimal.new(10))
       iex>   ])}
       iex> ])
       iex>
       iex> Bookk.InterledgerEntry.merge(a, b)
       Bookk.InterledgerEntry.new([
         {"acme", Bookk.JournalEntry.new([
-          debit(fixture_account_head(:cash), Decimal.new(10_00)),
-          credit(fixture_account_head(:deposits), Decimal.new(10_00))
+          debit(fixture_account_head(:cash), Decimal.new(10)),
+          credit(fixture_account_head(:deposits), Decimal.new(10))
         ])},
         {"acme", Bookk.JournalEntry.new([
-          debit(fixture_account_head(:cash), Decimal.new(10_00)),
-          credit(fixture_account_head(:deposits), Decimal.new(10_00))
+          debit(fixture_account_head(:cash), Decimal.new(10)),
+          credit(fixture_account_head(:deposits), Decimal.new(10))
         ])}
       ])
 
@@ -353,26 +354,26 @@ defmodule Bookk.InterledgerEntry do
 
       iex> Bookk.InterledgerEntry.new([
       iex>   {"acme", Bookk.JournalEntry.new([
-      iex>     debit(fixture_account_head(:cash), Decimal.new(50_00)),
-      iex>     credit(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(50_00))
+      iex>     debit(fixture_account_head(:cash), Decimal.new(50)),
+      iex>     credit(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(50))
       iex>   ])},
       iex>   {"user(12345)", Bookk.JournalEntry.new([
-      iex>     debit(fixture_account_head(:cash), Decimal.new(50_00)),
-      iex>     credit(fixture_account_head(:deposits), Decimal.new(50_00))
+      iex>     debit(fixture_account_head(:cash), Decimal.new(50)),
+      iex>     credit(fixture_account_head(:deposits), Decimal.new(50))
       iex>   ])}
       iex> ])
       %Bookk.InterledgerEntry{
         entries_by_ledger_id: %{
           "acme" => [
             Bookk.JournalEntry.new([
-              debit(fixture_account_head(:cash), Decimal.new(50_00)),
-              credit(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(50_00))
+              debit(fixture_account_head(:cash), Decimal.new(50)),
+              credit(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(50))
             ])
           ],
           "user(12345)" => [
             Bookk.JournalEntry.new([
-              debit(fixture_account_head(:cash), Decimal.new(50_00)),
-              credit(fixture_account_head(:deposits), Decimal.new(50_00))
+              debit(fixture_account_head(:cash), Decimal.new(50)),
+              credit(fixture_account_head(:deposits), Decimal.new(50))
             ])
           ]
         }
@@ -443,24 +444,24 @@ defmodule Bookk.InterledgerEntry do
 
       iex> interledger = Bookk.InterledgerEntry.new([
       iex>  {"acme", Bookk.JournalEntry.new([
-      iex>    debit(fixture_account_head(:cash), Decimal.new(50_00)),
-      iex>    credit(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(50_00))
+      iex>    debit(fixture_account_head(:cash), Decimal.new(50)),
+      iex>    credit(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(50))
       iex>  ])},
       iex>  {"user(12345)", Bookk.JournalEntry.new([
-      iex>    debit(fixture_account_head(:cash), Decimal.new(50_00)),
-      iex>    credit(fixture_account_head(:deposits), Decimal.new(50_00))
+      iex>    debit(fixture_account_head(:cash), Decimal.new(50)),
+      iex>    credit(fixture_account_head(:deposits), Decimal.new(50))
       iex>  ])},
       iex> ])
       iex>
       iex> Bookk.InterledgerEntry.to_journal_entries(interledger)
       [
         {"acme", Bookk.JournalEntry.new([
-          debit(fixture_account_head(:cash), Decimal.new(50_00)),
-          credit(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(50_00))
+          debit(fixture_account_head(:cash), Decimal.new(50)),
+          credit(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(50))
         ])},
         {"user(12345)", Bookk.JournalEntry.new([
-          debit(fixture_account_head(:cash), Decimal.new(50_00)),
-          credit(fixture_account_head(:deposits), Decimal.new(50_00))
+          debit(fixture_account_head(:cash), Decimal.new(50)),
+          credit(fixture_account_head(:deposits), Decimal.new(50))
         ])}
       ]
 
