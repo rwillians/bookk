@@ -107,6 +107,51 @@ defmodule Bookk.Ledger do
   end
 
   @doc ~S"""
+  Calculates a `Bookk.JournalEntry` represending the diff between two
+  ledgers where, if such journal entry were to be applied to ledger "a",
+  its state would become equal to ledger "b".
+
+  ## Examples
+
+      iex> a = Bookk.Ledger.new("acme", [
+      iex>   Bookk.Account.new(fixture_account_head(:cash), Decimal.from_float(10.00)),
+      iex>   Bookk.Account.new(fixture_account_head(:deposits), Decimal.from_float(10.00)),
+      iex> ])
+      iex>
+      iex> b = Bookk.Ledger.new("acme", [
+      iex>   Bookk.Account.new(fixture_account_head(:cash), Decimal.from_float(50.00)),
+      iex>   Bookk.Account.new(fixture_account_head({:unspent_cash, {:user, "1234"}}), Decimal.from_float(50.00))
+      iex> ])
+      iex>
+      iex> Bookk.Ledger.diff(a, b)
+      Bookk.JournalEntry.new([
+        Bookk.Operation.debit(fixture_account_head(:cash), Decimal.from_float(40.00)),
+        Bookk.Operation.debit(fixture_account_head(:deposits), Decimal.from_float(10.00)),
+        Bookk.Operation.credit(fixture_account_head({:unspent_cash, {:user, "1234"}}), Decimal.from_float(50.00)),
+      ])
+
+  """
+  def diff(%Ledger{} = a, %Ledger{} = b) do
+    account_heads =
+      []
+      |> Enum.concat(Enum.map(a.accounts_by_name, fn {_, account} -> account.head end))
+      |> Enum.concat(Enum.map(b.accounts_by_name, fn {_, account} -> account.head end))
+      |> Enum.uniq()
+      |> Enum.sort_by(& &1.name)
+
+    operations =
+      for %AccountHead{} = account_head <- account_heads do
+        account_a = Ledger.get_account(a, account_head)
+        account_b = Ledger.get_account(b, account_head)
+        diff_amount = Decimal.sub(account_b.balance, account_a.balance)
+
+        Op.new(account_head.class.natural_balance, account_head, diff_amount)
+      end
+
+    JournalEntry.new(operations)
+  end
+
+  @doc ~S"""
   Get an account from the ledger by its `Bookk.AccountHead`. If the
   account doesn't exist yet, then an account will be returned with
   empty state.
