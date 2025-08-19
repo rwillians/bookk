@@ -112,6 +112,76 @@ defmodule Bookk.InterledgerEntry do
     %InterledgerEntry{entries_by_ledger_id: entries_by_ledger_id}
   end
 
+  @doc ~S"""
+  Calculates a `Bookk.InterledgerEntry` represending the diff between
+  two `Bookk.InterledgerEntry` where, if the diff interledger entry
+  were to be merged with interledger entry "a", it would become equal
+  to interledger entry "b".
+
+  ## Examples
+
+      iex> a = Bookk.InterledgerEntry.new([
+      iex>   {"acme", Bookk.JournalEntry.new([
+      iex>     debit(fixture_account_head(:cash), Decimal.new(50)),
+      iex>     credit(fixture_account_head(:deposits), Decimal.new(50)),
+      iex>   ])},
+      iex>   {"acme", Bookk.JournalEntry.new([
+      iex>     debit(fixture_account_head(:cash), Decimal.new(25)),
+      iex>     credit(fixture_account_head(:deposits), Decimal.new(25)),
+      iex>   ])},
+      iex> ])
+      iex>
+      iex> b = Bookk.InterledgerEntry.new([
+      iex>   {"acme", Bookk.JournalEntry.new([
+      iex>     debit(fixture_account_head(:cash), Decimal.new(100)),
+      iex>     credit(fixture_account_head(:deposits), Decimal.new(100)),
+      iex>   ])},
+      iex>   {"acme", Bookk.JournalEntry.new([
+      iex>     debit(fixture_account_head(:cash), Decimal.new(50)),
+      iex>     credit(fixture_account_head(:deposits), Decimal.new(50)),
+      iex>   ])},
+      iex> ])
+      iex>
+      iex> Bookk.InterledgerEntry.diff(a, b)
+      Bookk.InterledgerEntry.new([
+        {"acme", Bookk.JournalEntry.new([
+          debit(fixture_account_head(:cash), Decimal.new(75)),
+          credit(fixture_account_head(:deposits), Decimal.new(75)),
+        ])}
+      ])
+
+  """
+  @spec diff(a :: t(), b :: t()) :: t()
+
+  def diff(%InterledgerEntry{} = a, %InterledgerEntry{} = b) do
+    a = compact(a)
+    b = compact(b)
+    #   ↑ so there's at most 1 journal entry per ledger
+
+    ledger_ids =
+      []
+      |> Enum.concat(Map.keys(a.entries_by_ledger_id))
+      |> Enum.concat(Map.keys(b.entries_by_ledger_id))
+      |> Enum.uniq()
+      #       ↓ so the result has a deterministic order of entries
+      |> Enum.sort()
+
+    entries =
+      for ledger_id <- ledger_ids do
+        lhs = get_journal_entry(a, ledger_id)
+        rhs = get_journal_entry(b, ledger_id)
+
+        {ledger_id, JournalEntry.diff(lhs, rhs)}
+      end
+
+    new(entries)
+  end
+
+  defp get_journal_entry(%InterledgerEntry{} = entry, <<ledger_id::binary>>) do
+    case get_journal_entries(entry, ledger_id) do
+      [%JournalEntry{} = journal_entry] -> journal_entry
+      [] -> Bookk.JournalEntry.new([])
+    end
   end
 
   @doc ~S"""
