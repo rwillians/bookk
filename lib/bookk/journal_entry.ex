@@ -98,18 +98,18 @@ defmodule Bookk.JournalEntry do
   ## Examples
 
       iex> a = Bookk.JournalEntry.new([
-      iex>   Bookk.Operation.debit(fixture_account_head(:cash), Decimal.from_float(25.00))
+      iex>   Bookk.Operation.debit(fixture_account_head(:cash), Decimal.new(25))
       iex> ])
       iex>
       iex> b = Bookk.JournalEntry.new([
-      iex>   Bookk.Operation.debit(fixture_account_head(:cash), Decimal.from_float(100.00)),
-      iex>   Bookk.Operation.credit(fixture_account_head(:deposits), Decimal.from_float(100.00)),
+      iex>   Bookk.Operation.debit(fixture_account_head(:cash), Decimal.new(100)),
+      iex>   Bookk.Operation.credit(fixture_account_head(:deposits), Decimal.new(100)),
       iex> ])
       iex>
       iex> Bookk.JournalEntry.diff(a, b)
       Bookk.JournalEntry.new([
-        Bookk.Operation.debit(fixture_account_head(:cash), Decimal.from_float(75.00)),
-        Bookk.Operation.credit(fixture_account_head(:deposits), Decimal.from_float(100.00))
+        Bookk.Operation.debit(fixture_account_head(:cash), Decimal.new(75)),
+        Bookk.Operation.credit(fixture_account_head(:deposits), Decimal.new(100))
       ])
 
   """
@@ -298,11 +298,34 @@ defmodule Bookk.JournalEntry do
         ]
       }
 
+  Empty operations will be dropped:
+
+      iex> Bookk.JournalEntry.new([
+      iex>   debit(fixture_account_head(:cash), Decimal.new(80)),
+      iex>   debit(fixture_account_head(:cash), Decimal.new(20)),
+      iex>   credit(fixture_account_head(:deposits), Decimal.new(100)),
+      iex>   credit(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(0))
+      iex> ])
+      %Bookk.JournalEntry{
+        operations: [
+          debit(fixture_account_head(:cash), Decimal.new(100)),
+          credit(fixture_account_head(:deposits), Decimal.new(100))
+        ]
+      }
+
   """
   @spec new([Bookk.Operation.t()]) :: t
 
   def new([]), do: %JournalEntry{}
-  def new([_ | _] = ops), do: %JournalEntry{operations: Op.uniq(ops)}
+
+  def new([_ | _] = ops) do
+    uniq_ops =
+      ops
+      |> Enum.reject(&Op.empty?/1)
+      |> Op.uniq()
+
+    %JournalEntry{operations: uniq_ops}
+  end
 
   @doc ~S"""
   Creates a new journal entry that reverses all effects from the given
@@ -337,14 +360,14 @@ defmodule Bookk.JournalEntry do
   Returns the journal entry's list of operations:
 
       iex> journal_entry = Bookk.JournalEntry.new([
-      iex>   debit(fixture_account_head(:cash), Decimal.from_float(50.00)),
-      iex>   credit(fixture_account_head(:deposits), Decimal.from_float(50.00))
+      iex>   debit(fixture_account_head(:cash), Decimal.new(50)),
+      iex>   credit(fixture_account_head(:deposits), Decimal.new(50))
       iex> ])
       iex>
       iex> Bookk.JournalEntry.to_operations(journal_entry)
       [
-        debit(fixture_account_head(:cash), Decimal.from_float(50.00)),
-        credit(fixture_account_head(:deposits), Decimal.from_float(50.00))
+        debit(fixture_account_head(:cash), Decimal.new(50)),
+        credit(fixture_account_head(:deposits), Decimal.new(50))
       ]
 
   """

@@ -15,7 +15,7 @@ defmodule Bookk.NaiveState do
   import Map, only: [get: 2, put: 3]
 
   alias __MODULE__, as: NaiveState
-  alias Bookk.InterledgerEntry, as: InterledgerEntry
+  alias Bookk.InterledgerEntry
   alias Bookk.Ledger
 
   @typedoc ~S"""
@@ -30,6 +30,66 @@ defmodule Bookk.NaiveState do
         }
 
   defstruct ledgers_by_id: %{}
+
+  @doc ~S"""
+  Calculates a `Bookk.InterledgerEntry` represending the diff between
+  two `Bookk.NaiveState` where, if such interledger entry were to be
+  posted to state "a", it would become equal to state "b".
+
+  ## Examples
+
+      iex> a = Bookk.NaiveState.new([
+      iex>   Bookk.Ledger.new("acme", [
+      iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(25)),
+      iex>     Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(25)),
+      iex>   ])
+      iex> ])
+      iex>
+      iex> b = Bookk.NaiveState.new([
+      iex>   Bookk.Ledger.new("acme", [
+      iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(100)),
+      iex>     Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(25)),
+      iex>     Bookk.Account.new(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(75))
+      iex>   ]),
+      iex>   Bookk.Ledger.new("foo", [
+      iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(75)),
+      iex>     Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(75)),
+      iex>   ])
+      iex> ])
+      iex>
+      iex> Bookk.NaiveState.diff(a, b)
+      Bookk.InterledgerEntry.new([
+        {"acme", Bookk.JournalEntry.new([
+          debit(fixture_account_head(:cash), Decimal.new(75)),
+          credit(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(75))
+        ])},
+        {"foo", Bookk.JournalEntry.new([
+          debit(fixture_account_head(:cash), Decimal.new(75)),
+          credit(fixture_account_head(:deposits), Decimal.new(75))
+        ])}
+      ])
+
+  """
+  @spec diff(a :: t(), b :: t()) :: Bookk.InterledgerEntry.t()
+
+  def diff(%NaiveState{} = a, %NaiveState{} = b) do
+    ledger_ids =
+      []
+      |> Enum.concat(Map.keys(a.ledgers_by_id))
+      |> Enum.concat(Map.keys(b.ledgers_by_id))
+      |> Enum.uniq()
+      |> Enum.sort()
+
+    entries =
+      for ledger_id <- ledger_ids do
+        ledger_a = get_ledger(a, ledger_id)
+        ledger_b = get_ledger(b, ledger_id)
+
+        {ledger_id, Ledger.diff(ledger_a, ledger_b)}
+      end
+
+    InterledgerEntry.new(entries)
+  end
 
   @doc ~S"""
   Produces a empty naive state.
