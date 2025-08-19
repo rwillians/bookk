@@ -228,6 +228,93 @@ defmodule Bookk.Ledger do
   end
 
   @doc ~S"""
+  Merges a non-empty set of Ledgers into one (ledger id MUST be the same).
+
+  ## Examples
+
+      iex> a = Bookk.Ledger.new("acme", [
+      iex>   Bookk.Account.new(fixture_account_head(:cash), Decimal.new(5)),
+      iex>   Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(5)),
+      iex> ])
+      iex>
+      iex> b = Bookk.Ledger.new("acme", [
+      iex>   Bookk.Account.new(fixture_account_head(:cash), Decimal.new(15)),
+      iex>   Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(15)),
+      iex> ])
+      iex>
+      iex> c = Bookk.Ledger.new("acme", [
+      iex>   Bookk.Account.new(fixture_account_head(:cash), Decimal.new(30)),
+      iex>   Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(30)),
+      iex> ])
+      iex>
+      iex> Bookk.Ledger.merge([a, b, c])
+      Bookk.Ledger.new("acme", [
+        Bookk.Account.new(fixture_account_head(:cash), Decimal.new(50)),
+        Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(50))
+      ])
+
+  It will raise if the list is empty:
+
+      iex> Bookk.Ledger.merge([])
+      ** (FunctionClauseError) no function clause matching in Bookk.Ledger.merge/1
+
+  """
+  @spec merge([t, ...]) :: t
+
+  def merge([%Ledger{} = ledger]), do: ledger
+  def merge([%Ledger{} = head | tail]), do: merge(head, merge(tail))
+
+  @doc ~S"""
+  Merges two ledgers into one (ledger id MUST be the same).
+
+  ## Examples
+
+      iex> a = Bookk.Ledger.new("acme", [
+      iex>   Bookk.Account.new(fixture_account_head(:cash), Decimal.new(5)),
+      iex>   Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(5)),
+      iex> ])
+      iex>
+      iex> b = Bookk.Ledger.new("acme", [
+      iex>   Bookk.Account.new(fixture_account_head(:cash), Decimal.new(15)),
+      iex>   Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(15)),
+      iex> ])
+      iex>
+      iex> Bookk.Ledger.merge(a, b)
+      Bookk.Ledger.new("acme", [
+        Bookk.Account.new(fixture_account_head(:cash), Decimal.new(20)),
+        Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(20))
+      ])
+
+  It will raise if ledgers have different ids:
+
+      iex> a = Bookk.Ledger.new("acme")
+      iex> b = Bookk.Ledger.new("foo")
+      iex> Bookk.Ledger.merge(a, b)
+      ** (FunctionClauseError) no function clause matching in Bookk.Ledger.merge/2
+
+  """
+  @spec merge(t, t) :: t
+
+  def merge(%Ledger{id: same} = a, %Ledger{id: same} = b) do
+    account_heads =
+      []
+      |> Enum.concat(Enum.map(a.accounts_by_name, fn {_, account} -> account.head end))
+      |> Enum.concat(Enum.map(b.accounts_by_name, fn {_, account} -> account.head end))
+      |> Enum.uniq()
+      |> Enum.sort_by(& &1.name)
+
+    accounts =
+      for %AccountHead{} = account_head <- account_heads do
+        account_a = Ledger.get_account(a, account_head)
+        account_b = Ledger.get_account(b, account_head)
+
+        Account.merge(account_a, account_b)
+      end
+
+    new(same, accounts)
+  end
+
+  @doc ~S"""
   Creates a new `Bookk.Ledger` from its id and, optionally, a list
   of `Bookk.Account`.
   """
