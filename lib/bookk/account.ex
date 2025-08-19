@@ -51,10 +51,10 @@ defmodule Bookk.Account do
   set to it:
 
       iex> head = fixture_account_head(:cash)
-      iex> Bookk.Account.new(head, Decimal.new(50_00))
+      iex> Bookk.Account.new(head, Decimal.new(50))
       %Bookk.Account{
         head: fixture_account_head(:cash),
-        balance: Decimal.new(50_00)
+        balance: Decimal.new(50)
       }
 
   """
@@ -77,12 +77,12 @@ defmodule Bookk.Account do
       iex> head = %Bookk.AccountHead{class: class}
       iex> account = Bookk.Account.new(head)
       iex>
-      iex> op = debit(head, Decimal.new(25_00))
+      iex> op = debit(head, Decimal.new(25))
       iex>
       iex> Bookk.Account.post(account, op)
       %Bookk.Account{
         head: %Bookk.AccountHead{class: %Bookk.AccountClass{natural_balance: :debit}},
-        balance: Decimal.new(25_00)
+        balance: Decimal.new(25)
       }
 
   The account's head must match the head in the operation, otherwise an error is
@@ -92,7 +92,7 @@ defmodule Bookk.Account do
       iex> head_b = %Bookk.AccountHead{name: "b"}
       iex>
       iex> account = Bookk.Account.new(head_a)
-      iex> op = debit(head_b, Decimal.new(25_00))
+      iex> op = debit(head_b, Decimal.new(25))
       iex>
       iex> Bookk.Account.post(account, op)
       ** (FunctionClauseError) no function clause matching in Bookk.Account.post/2

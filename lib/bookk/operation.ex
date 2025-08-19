@@ -50,32 +50,32 @@ defmodule Bookk.Operation do
   Crediting a positive amount produces a credit operation:
 
       iex> head = fixture_account_head(:cash)
-      iex> Bookk.Operation.credit(head, Decimal.new(25_00))
+      iex> Bookk.Operation.credit(head, Decimal.new(25))
       %Bookk.Operation{
         direction: :credit,
         account_head: fixture_account_head(:cash),
-        amount: Decimal.new(25_00)
+        amount: Decimal.new(25)
       }
 
   Crediting a negative amount produces a debit operation:
 
       iex> head = fixture_account_head(:cash)
-      iex> Bookk.Operation.credit(head, Decimal.new(-25_00))
+      iex> Bookk.Operation.credit(head, Decimal.new(-25))
       %Bookk.Operation{
         direction: :debit,
         account_head: fixture_account_head(:cash),
-        amount: Decimal.new(25_00)
+        amount: Decimal.new(25)
       }
 
   If the given amount is an `integer` or a `float`, it will be converted
   to `Decimal`:
 
       iex> head = fixture_account_head(:cash)
-      iex> Bookk.Operation.credit(head, 10_00)
+      iex> Bookk.Operation.credit(head, 10)
       %Bookk.Operation{
         direction: :credit,
         account_head: fixture_account_head(:cash),
-        amount: Decimal.new(10_00)
+        amount: Decimal.new(10)
       }
 
       iex> head = fixture_account_head(:cash)
@@ -108,32 +108,32 @@ defmodule Bookk.Operation do
   Debiting a positive amount produces a debit operation:
 
       iex> head = fixture_account_head(:cash)
-      iex> Bookk.Operation.debit(head, Decimal.new(25_00))
+      iex> Bookk.Operation.debit(head, Decimal.new(25))
       %Bookk.Operation{
         direction: :debit,
         account_head: fixture_account_head(:cash),
-        amount: Decimal.new(25_00)
+        amount: Decimal.new(25)
       }
 
   Debiting a negative amount produces a credit operation:
 
       iex> head = fixture_account_head(:cash)
-      iex> Bookk.Operation.debit(head, Decimal.new(-25_00))
+      iex> Bookk.Operation.debit(head, Decimal.new(-25))
       %Bookk.Operation{
         direction: :credit,
         account_head: fixture_account_head(:cash),
-        amount: Decimal.new(25_00)
+        amount: Decimal.new(25)
       }
 
   If the given amount is an `integer` or a `float`, it will be converted
   to `Decimal`:
 
       iex> head = fixture_account_head(:cash)
-      iex> Bookk.Operation.debit(head, 10_00)
+      iex> Bookk.Operation.debit(head, 10)
       %Bookk.Operation{
         direction: :debit,
         account_head: fixture_account_head(:cash),
-        amount: Decimal.new(10_00)
+        amount: Decimal.new(10)
       }
 
       iex> head = fixture_account_head(:cash)
@@ -186,15 +186,15 @@ defmodule Bookk.Operation do
 
       iex> head = fixture_account_head(:cash)
       iex>
-      iex> a = debit(head, Decimal.new(100_00))
-      iex> b = debit(head, Decimal.new(200_00))
-      iex> c = debit(head, Decimal.new(300_00))
+      iex> a = debit(head, Decimal.new(100))
+      iex> b = debit(head, Decimal.new(200))
+      iex> c = debit(head, Decimal.new(300))
       iex>
       iex> Bookk.Operation.merge([a, b, c])
       %Bookk.Operation{
         direction: :debit,
         account_head: fixture_account_head(:cash),
-        amount: Decimal.new(600_00)
+        amount: Decimal.new(600)
       }
 
   If an empty list is provided, then an error will be raised:
@@ -219,14 +219,14 @@ defmodule Bookk.Operation do
 
       iex> head = fixture_account_head(:cash)
       iex>
-      iex> a = debit(head, Decimal.new(70_00))
-      iex> b = debit(head, Decimal.new(30_00))
+      iex> a = debit(head, Decimal.new(70))
+      iex> b = debit(head, Decimal.new(30))
       iex>
       iex> Bookk.Operation.merge(a, b)
       %Bookk.Operation{
         direction: :debit,
         account_head: fixture_account_head(:cash),
-        amount: Decimal.new(100_00)
+        amount: Decimal.new(100)
       }
 
   When the two operations have different direction, the account's
@@ -237,14 +237,14 @@ defmodule Bookk.Operation do
 
       iex> head = fixture_account_head(:cash)
       iex>
-      iex> a = debit(head, Decimal.new(70_00))
-      iex> b = credit(head, Decimal.new(30_00))
+      iex> a = debit(head, Decimal.new(70))
+      iex> b = credit(head, Decimal.new(30))
       iex>
       iex> Bookk.Operation.merge(a, b)
       %Bookk.Operation{
         direction: :debit,
         account_head: fixture_account_head(:cash),
-        amount: Decimal.new(40_00)
+        amount: Decimal.new(40)
       }
 
   If the resulting balance is a negative number, then the resulting
@@ -253,21 +253,21 @@ defmodule Bookk.Operation do
 
       iex> head = fixture_account_head(:cash)
       iex>
-      iex> a = credit(head, Decimal.new(70_00))
-      iex> b = debit(head, Decimal.new(30_00))
+      iex> a = credit(head, Decimal.new(70))
+      iex> b = debit(head, Decimal.new(30))
       iex>
       iex> Bookk.Operation.merge(a, b)
       %Bookk.Operation{
         direction: :credit,
         account_head: fixture_account_head(:cash),
-        amount: Decimal.new(40_00)
+        amount: Decimal.new(40)
       }
 
   If the operations' account heads aren't the same in both operations,
   then an error will be raised:
 
-      iex> a = debit(fixture_account_head(:cash), Decimal.new(10_00))
-      iex> b = credit(fixture_account_head(:deposits), Decimal.new(10_00))
+      iex> a = debit(fixture_account_head(:cash), Decimal.new(10))
+      iex> b = credit(fixture_account_head(:deposits), Decimal.new(10))
       iex>
       iex> Bookk.Operation.merge(a, b)
       ** (FunctionClauseError) no function clause matching in Bookk.Operation.merge/2
@@ -295,11 +295,11 @@ defmodule Bookk.Operation do
 
   By default, the amount should be a `Decimal`:
 
-      iex> Bookk.Operation.new(:debit, fixture_account_head(:cash), Decimal.new(10_00))
+      iex> Bookk.Operation.new(:debit, fixture_account_head(:cash), Decimal.new(10))
       %Bookk.Operation{
         direction: :debit,
         account_head: fixture_account_head(:cash),
-        amount: Decimal.new(10_00)
+        amount: Decimal.new(10)
       }
 
   """
@@ -318,15 +318,15 @@ defmodule Bookk.Operation do
 
   A credit operation becomes a debit operation:
 
-      iex> entry = %Bookk.Operation{direction: :credit, amount: Decimal.new(10_00)}
+      iex> entry = %Bookk.Operation{direction: :credit, amount: Decimal.new(10)}
       iex> Bookk.Operation.reverse(entry)
-      %Bookk.Operation{direction: :debit, amount: Decimal.new(10_00)}
+      %Bookk.Operation{direction: :debit, amount: Decimal.new(10)}
 
   A debit operation becomes a credit operation:
 
-      iex> entry = %Bookk.Operation{direction: :debit, amount: Decimal.new(10_00)}
+      iex> entry = %Bookk.Operation{direction: :debit, amount: Decimal.new(10)}
       iex> Bookk.Operation.reverse(entry)
-      %Bookk.Operation{direction: :credit, amount: Decimal.new(10_00)}
+      %Bookk.Operation{direction: :credit, amount: Decimal.new(10)}
 
   """
   @spec reverse(t) :: t
@@ -348,46 +348,38 @@ defmodule Bookk.Operation do
   Debiting an account which has a debit natural balance produces a
   positive number:
 
-      iex> head = %Bookk.AccountHead{
-      iex>   class: %Bookk.AccountClass{natural_balance: :debit}
-      iex> }
+      iex> account_head = fixture_account_head(:cash)
       iex>
-      iex> debit(head, Decimal.new(100_00))
+      iex> Bookk.Operation.debit(account_head, Decimal.new(100))
       iex> |> Bookk.Operation.to_delta_amount()
-      Decimal.new(100_00)
+      Decimal.new(100)
 
   Debiting an account which has a credit natural balance produces a
   negative number:
 
-      iex> head = %Bookk.AccountHead{
-      iex>   class: %Bookk.AccountClass{natural_balance: :debit}
-      iex> }
+      iex> account_head = fixture_account_head(:cash)
       iex>
-      iex> credit(head, Decimal.new(100_00))
+      iex> Bookk.Operation.credit(account_head, Decimal.new(100))
       iex> |> Bookk.Operation.to_delta_amount()
-      Decimal.new(-100_00)
+      Decimal.new(-100)
 
   Crediting an account which has a credit natural balance produces a
   positive number:
 
-      iex> head = %Bookk.AccountHead{
-      iex>   class: %Bookk.AccountClass{natural_balance: :credit}
-      iex> }
+      iex> account_head = fixture_account_head(:deposits)
       iex>
-      iex> credit(head, Decimal.new(100_00))
+      iex> Bookk.Operation.credit(account_head, Decimal.new(100))
       iex> |> Bookk.Operation.to_delta_amount()
-      Decimal.new(100_00)
+      Decimal.new(100)
 
   Debiting an account which has a credit natural balance produces a
   negative number:
 
-      iex> head = %Bookk.AccountHead{
-      iex>   class: %Bookk.AccountClass{natural_balance: :credit}
-      iex> }
+      iex> account_head = fixture_account_head(:deposits)
       iex>
-      iex> debit(head, Decimal.new(100_00))
+      iex> Bookk.Operation.debit(account_head, Decimal.new(100))
       iex> |> Bookk.Operation.to_delta_amount()
-      Decimal.new(-100_00)
+      Decimal.new(-100)
 
   """
   @spec to_delta_amount(t) :: integer()
@@ -412,31 +404,25 @@ defmodule Bookk.Operation do
   those operations are merged together so that the resulting list
   contains one a single operation thouching each account:
 
-      iex> cash = fixture_account_head(:cash)
-      iex> deposits = fixture_account_head(:deposits)
-      iex>
-      iex> a = debit(cash, Decimal.new(40_00))
-      iex> b = debit(cash, Decimal.new(60_00))
-      iex> c = credit(deposits, Decimal.new(100_00))
+      iex> a = Bookk.Operation.debit(fixture_account_head(:cash), Decimal.new(40))
+      iex> b = Bookk.Operation.debit(fixture_account_head(:cash), Decimal.new(60))
+      iex> c = Bookk.Operation.credit(fixture_account_head(:deposits), Decimal.new(100))
       iex>
       iex> Bookk.Operation.uniq([a, b, c])
       [
-        debit(fixture_account_head(:cash), Decimal.new(100_00)),
-        credit(fixture_account_head(:deposits), Decimal.new(100_00))
+        debit(fixture_account_head(:cash), Decimal.new(100)),
+        credit(fixture_account_head(:deposits), Decimal.new(100))
       ]
 
   When all operations are unique, the list is returned as is:
 
-      iex> cash = fixture_account_head(:cash)
-      iex> deposits = fixture_account_head(:deposits)
-      iex>
-      iex> a = debit(cash, Decimal.new(100_00))
-      iex> b = credit(deposits, Decimal.new(100_00))
+      iex> a = Bookk.Operation.debit(fixture_account_head(:cash), Decimal.new(100))
+      iex> b = Bookk.Operation.credit(fixture_account_head(:deposits), Decimal.new(100))
       iex>
       iex> Bookk.Operation.uniq([a, b])
       [
-        debit(fixture_account_head(:cash), Decimal.new(100_00)),
-        credit(fixture_account_head(:deposits), Decimal.new(100_00))
+        debit(fixture_account_head(:cash), Decimal.new(100)),
+        credit(fixture_account_head(:deposits), Decimal.new(100))
       ]
 
   When an empty list is given, the result will also be an empty list:

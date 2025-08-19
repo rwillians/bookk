@@ -52,22 +52,16 @@ defmodule Bookk.NaiveState do
 
   Returns the ledger when it exists in state:
 
-      iex> state = %Bookk.NaiveState{
-      iex>   ledgers_by_id: %{
-      iex>     "foo" => %Bookk.Ledger{
-      iex>       accounts_by_name: %{
-      iex>         "cash" => %Bookk.Account{}
-      iex>       }
-      iex>     }
-      iex>   }
-      iex> }
+      iex> state = Bookk.NaiveState.new([
+      iex>   Bookk.Ledger.new("foo", [
+      iex>     Bookk.Account.new(fixture_account_head(:cash))
+      iex>   ])
+      iex> ])
       iex>
       iex> Bookk.NaiveState.get_ledger(state, "foo")
-      %Bookk.Ledger{
-        accounts_by_name: %{
-          "cash" => %Bookk.Account{}
-        }
-      }
+      Bookk.Ledger.new("foo", [
+        Bookk.Account.new(fixture_account_head(:cash))
+      ])
 
   """
   @spec get_ledger(t, String.t()) :: Bookk.Ledger.t()
@@ -102,7 +96,7 @@ defmodule Bookk.NaiveState do
       iex> use Bookk.Notation
       iex>
       iex> user_id = "123"
-      iex> deposited_amount = Decimal.new(500_00)
+      iex> deposited_amount = Decimal.new(500)
       iex>
       iex> journal_entry =
       iex>   journalize! using: DummyChartOfAccounts do
@@ -119,36 +113,16 @@ defmodule Bookk.NaiveState do
       iex>
       iex> Bookk.NaiveState.empty()
       iex> |> Bookk.NaiveState.post(journal_entry)
-      %Bookk.NaiveState{
-        ledgers_by_id: %{
-          "acme" => %Bookk.Ledger{
-            id: "acme",
-            accounts_by_name: %{
-              fixture_account_head(:cash).name => %Bookk.Account{
-                head: fixture_account_head(:cash),
-                balance: Decimal.new(500_00)
-              },
-              fixture_account_head({:unspent_cash, {:user, "123"}}).name => %Bookk.Account{
-                head: fixture_account_head({:unspent_cash, {:user, "123"}}),
-                balance: Decimal.new(500_00)
-              }
-            }
-          },
-          "user(123)" => %Bookk.Ledger{
-            id: "user(123)",
-            accounts_by_name: %{
-              fixture_account_head(:cash).name => %Bookk.Account{
-                head: fixture_account_head(:cash),
-                balance: Decimal.new(500_00)
-              },
-              fixture_account_head(:deposits).name => %Bookk.Account{
-                head: fixture_account_head(:deposits),
-                balance: Decimal.new(500_00)
-              }
-            }
-          }
-        }
-      }
+      Bookk.NaiveState.new([
+        Bookk.Ledger.new("acme", [
+          Bookk.Account.new(fixture_account_head(:cash), Decimal.new(500)),
+          Bookk.Account.new(fixture_account_head({:unspent_cash, {:user, "123"}}), Decimal.new(500))
+        ]),
+        Bookk.Ledger.new("user(123)", [
+          Bookk.Account.new(fixture_account_head(:cash), Decimal.new(500)),
+          Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(500))
+        ])
+      ])
 
   """
   @spec post(t, Bookk.InterledgerEntry.t()) :: t

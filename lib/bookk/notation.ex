@@ -33,8 +33,8 @@ defmodule Bookk.Notation do
       iex> %Bookk.InterledgerEntry{} = journal_entry =
       iex>   journalize using: DummyChartOfAccounts do
       iex>     on ledger(:acme) do
-      iex>       debit account(:cash), Decimal.new(150_00)
-      iex>       credit account(:deposits), Decimal.new(150_00)
+      iex>       debit account(:cash), Decimal.new(150)
+      iex>       credit account(:deposits), Decimal.new(150)
       iex>     end
       iex>   end
       iex>
@@ -48,8 +48,8 @@ defmodule Bookk.Notation do
       iex> %Bookk.InterledgerEntry{} = journal_entry =
       iex>   journalize using: DummyChartOfAccounts do
       iex>     on ledger(:acme) do
-      iex>       debit account(:cash), Decimal.new(150_00)
-      iex>       credit account(:deposits), Decimal.new(50_00)
+      iex>       debit account(:cash), Decimal.new(150)
+      iex>       credit account(:deposits), Decimal.new(50)
       iex>     end
       iex>   end
       iex>
@@ -74,18 +74,12 @@ defmodule Bookk.Notation do
       iex>     credit account(:deposits), ((Decimal.new(100) + foo.amount) * Decimal.new(2)) / Decimal.new(2)
       iex>   end
       iex> end
-      %Bookk.InterledgerEntry{
-        entries_by_ledger_id: %{
-          "acme" => [
-            %Bookk.JournalEntry{
-              operations: [
-                debit(fixture_account_head(:cash), Decimal.new(150)),
-                credit(fixture_account_head(:deposits), Decimal.new(150))
-              ]
-            }
-          ]
-        }
-      }
+      Bookk.InterledgerEntry.new([
+        {"acme", Bookk.JournalEntry.new([
+          debit(fixture_account_head(:cash), Decimal.new(150)),
+          credit(fixture_account_head(:deposits), Decimal.new(150))
+        ])}
+      ])
 
   """
 
@@ -108,8 +102,8 @@ defmodule Bookk.Notation do
       iex> %Bookk.InterledgerEntry{} = journal_entry =
       iex>   journalize! using: DummyChartOfAccounts do
       iex>     on ledger(:acme) do
-      iex>       debit account(:cash), Decimal.new(150_00)
-      iex>       credit account(:deposits), Decimal.new(150_00)
+      iex>       debit account(:cash), Decimal.new(150)
+      iex>       credit account(:deposits), Decimal.new(150)
       iex>     end
       iex>   end
       iex>
@@ -123,8 +117,8 @@ defmodule Bookk.Notation do
       iex>
       iex> journalize! using: DummyChartOfAccounts do
       iex>   on ledger(:acme) do
-      iex>     debit account(:cash), Decimal.new(150_00)
-      iex>     credit account(:deposits), Decimal.new(50_00)
+      iex>     debit account(:cash), Decimal.new(150)
+      iex>     credit account(:deposits), Decimal.new(50)
       iex>   end
       iex> end
       ** (Bookk.UnbalancedError) `journalize!/2` produced an unbalanced journal entry

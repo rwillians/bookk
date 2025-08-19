@@ -1,7 +1,7 @@
 defmodule Bookk.UnbalancedError do
   @moduledoc ~S"""
   An error representing that something (a journal entry, a ledger, a
-  state...) isn't balanced.
+  state, etc) isn't balanced.
   """
 
   @typedoc false

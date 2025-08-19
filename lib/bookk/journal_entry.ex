@@ -36,41 +36,43 @@ defmodule Bookk.JournalEntry do
 
   @doc ~S"""
   Checks whether a journal entry is balanced. It is considered balance
-  when tht
-  operations.
+  when the sum of debits is equal the sum of credits.
 
   ## Examples
 
-  Is balanced when th:
+  Balanced:
 
-      iex> journal_entry = %Bookk.JournalEntry{
-      iex>   operations: [
-      iex>     debit(fixture_account_head(:cash), Decimal.from_float(10.00)),
-      iex>     credit(fixture_account_head(:deposits), Decimal.from_float(10.00))
-      iex>   ]
-      iex> }
+      iex> journal_entry = Bookk.JournalEntry.new([
+      iex>   debit(fixture_account_head(:cash), Decimal.new(10)),
+      iex>   credit(fixture_account_head(:deposits), Decimal.new(10))
+      iex> ])
       iex>
       iex> Bookk.JournalEntry.balanced?(journal_entry)
       true
 
-      iex> journal_entry = %Bookk.JournalEntry{
-      iex>   operations: [
-      iex>     debit(fixture_account_head(:cash), Decimal.from_float(10.00)),
-      iex>     credit(fixture_account_head(:deposits), Decimal.from_float(7.00)),
-      iex>     credit(fixture_account_head(:deposits), Decimal.from_float(3.00))
-      iex>   ]
-      iex> }
+      iex> journal_entry = Bookk.JournalEntry.new([
+      iex>   debit(fixture_account_head(:cash), Decimal.new(10)),
+      iex>   credit(fixture_account_head(:deposits), Decimal.new(7)),
+      iex>   credit(fixture_account_head(:deposits), Decimal.new(3))
+      iex> ])
       iex>
       iex> Bookk.JournalEntry.balanced?(journal_entry)
       true
 
-  Is unbalanced when th:
+  Unbalanced:
 
-      iex> journal_entry = %Bookk.JournalEntry{
-      iex>   operations: [
-      iex>     debit(fixture_account_head(:cash), Decimal.from_float(10.00))
-      iex>   ]
-      iex> }
+      iex> journal_entry = Bookk.JournalEntry.new([
+      iex>   debit(fixture_account_head(:cash), Decimal.new(10))
+      iex> ])
+      iex>
+      iex> Bookk.JournalEntry.balanced?(journal_entry)
+      false
+
+      iex> journal_entry = Bookk.JournalEntry.new([
+      iex>   debit(fixture_account_head(:cash), Decimal.new(10)),
+      iex>   credit(fixture_account_head(:deposits), Decimal.new(7)),
+      iex>   credit(fixture_account_head(:deposits), Decimal.new(5))
+      iex> ])
       iex>
       iex> Bookk.JournalEntry.balanced?(journal_entry)
       false
@@ -145,11 +147,10 @@ defmodule Bookk.JournalEntry do
 
   Is empty when all operations in the journal entry are empty:
 
-      iex> journal_entry = %Bookk.JournalEntry{
-      iex>   operations: [
-      iex>     %Bookk.Operation{amount: Decimal.new(0)}
-      iex>   ]
-      iex> }
+      iex> journal_entry = Bookk.JournalEntry.new([
+      iex>   debit(fixture_account_head(:cash), Decimal.new(0)),
+      iex>   credit(fixture_account_head(:deposits), Decimal.new(0)),
+      iex> ])
       iex>
       iex> Bookk.JournalEntry.empty?(journal_entry)
       true
@@ -157,11 +158,9 @@ defmodule Bookk.JournalEntry do
   Is not empty when at least one operation in the journal entry isn't
   empty:
 
-      iex> journal_entry = %Bookk.JournalEntry{
-      iex>   operations: [
-      iex>     %Bookk.Operation{amount: Decimal.from_float(10.00)}
-      iex>   ]
-      iex> }
+      iex> journal_entry = Bookk.JournalEntry.new([
+      iex>   debit(fixture_account_head(:cash), Decimal.new(10)),
+      iex> ])
       iex>
       iex> Bookk.JournalEntry.empty?(journal_entry)
       false
@@ -180,21 +179,15 @@ defmodule Bookk.JournalEntry do
 
   When exists an operation for the given account head, it is returned:
 
-      iex> journal_entry = %Bookk.JournalEntry{
-      iex>  operations: [
-      iex>    %Bookk.Operation{
-      iex>      direction: :debit,
-      iex>      account_head: fixture_account_head(:cash),
-      iex>      amount: Decimal.from_float(25.00)
-      iex>    }
-      iex>  ]
-      iex> }
+      iex> journal_entry = Bookk.JournalEntry.new([
+      iex>   debit(fixture_account_head(:cash), Decimal.new(25))
+      iex> ])
       iex>
       iex> Bookk.JournalEntry.get_op(journal_entry, fixture_account_head(:cash))
       %Bookk.Operation{
         direction: :debit,
         account_head: fixture_account_head(:cash),
-        amount: Decimal.from_float(25.00)
+        amount: Decimal.new(25)
       }
 
   When there's no operations for the given account head, then a new
@@ -225,24 +218,22 @@ defmodule Bookk.JournalEntry do
       iex> deposits = fixture_account_head(:deposits)
       iex>
       iex> a = Bookk.JournalEntry.new([
-      iex>   debit(cash, Decimal.from_float(80.00)),
-      iex>   debit(cash, Decimal.from_float(20.00)),
-      iex>   credit(deposits, Decimal.from_float(100.00))
+      iex>   debit(cash, Decimal.new(80)),
+      iex>   debit(cash, Decimal.new(20)),
+      iex>   credit(deposits, Decimal.new(100))
       iex> ])
       iex>
       iex> b = Bookk.JournalEntry.new([
-      iex>   debit(cash, Decimal.from_float(80.00)),
-      iex>   debit(cash, Decimal.from_float(20.00)),
-      iex>   credit(deposits, Decimal.from_float(100.00))
+      iex>   debit(cash, Decimal.new(80)),
+      iex>   debit(cash, Decimal.new(20)),
+      iex>   credit(deposits, Decimal.new(100))
       iex> ])
       iex>
       iex> Bookk.JournalEntry.merge([a, b])
-      %Bookk.JournalEntry{
-        operations: [
-          debit(fixture_account_head(:cash), Decimal.from_float(200.00)),
-          credit(fixture_account_head(:deposits), Decimal.from_float(200.00))
-        ]
-      }
+      Bookk.JournalEntry.new([
+        debit(fixture_account_head(:cash), Decimal.new(200)),
+        credit(fixture_account_head(:deposits), Decimal.new(200))
+      ])
 
   """
   @spec merge([t]) :: t
@@ -256,26 +247,23 @@ defmodule Bookk.JournalEntry do
 
   ## Examples
 
-      iex> cash = fixture_account_head(:cash)
-      iex> deposits = fixture_account_head(:deposits)
-      iex>
       iex> a = Bookk.JournalEntry.new([
-      iex>   debit(cash, Decimal.from_float(80.00)),
-      iex>   debit(cash, Decimal.from_float(20.00)),
-      iex>   credit(deposits, Decimal.from_float(100.00))
+      iex>   debit(fixture_account_head(:cash), Decimal.new(80)),
+      iex>   debit(fixture_account_head(:cash), Decimal.new(20)),
+      iex>   credit(fixture_account_head(:deposits), Decimal.new(100))
       iex> ])
       iex>
       iex> b = Bookk.JournalEntry.new([
-      iex>   debit(cash, Decimal.from_float(80.00)),
-      iex>   debit(cash, Decimal.from_float(20.00)),
-      iex>   credit(deposits, Decimal.from_float(100.00))
+      iex>   debit(fixture_account_head(:cash), Decimal.new(80)),
+      iex>   debit(fixture_account_head(:cash), Decimal.new(20)),
+      iex>   credit(fixture_account_head(:deposits), Decimal.new(100))
       iex> ])
       iex>
       iex> Bookk.JournalEntry.merge(a, b)
       %Bookk.JournalEntry{
         operations: [
-          debit(fixture_account_head(:cash), Decimal.from_float(200.00)),
-          credit(fixture_account_head(:deposits), Decimal.from_float(200.00))
+          debit(fixture_account_head(:cash), Decimal.new(200)),
+          credit(fixture_account_head(:deposits), Decimal.new(200))
         ]
       }
 
@@ -298,18 +286,15 @@ defmodule Bookk.JournalEntry do
   If there're multiple operations touching the same account, they will
   be merged into a single operation:
 
-      iex> cash = fixture_account_head(:cash)
-      iex> deposits = fixture_account_head(:deposits)
-      iex>
       iex> Bookk.JournalEntry.new([
-      iex>   debit(cash, Decimal.from_float(80.00)),
-      iex>   debit(cash, Decimal.from_float(20.00)),
-      iex>   credit(deposits, Decimal.from_float(100.00))
+      iex>   debit(fixture_account_head(:cash), Decimal.new(80)),
+      iex>   debit(fixture_account_head(:cash), Decimal.new(20)),
+      iex>   credit(fixture_account_head(:deposits), Decimal.new(100))
       iex> ])
       %Bookk.JournalEntry{
         operations: [
-          debit(fixture_account_head(:cash), Decimal.from_float(100.00)),
-          credit(fixture_account_head(:deposits), Decimal.from_float(100.00))
+          debit(fixture_account_head(:cash), Decimal.new(100)),
+          credit(fixture_account_head(:deposits), Decimal.new(100))
         ]
       }
 
@@ -327,20 +312,16 @@ defmodule Bookk.JournalEntry do
 
   Reverses all operations in the journal entry:
 
-      iex> journal_entry = %Bookk.JournalEntry{
-      iex>   operations: [
-      iex>     debit(fixture_account_head(:cash), Decimal.from_float(10.00)),
-      iex>     credit(fixture_account_head(:deposits), Decimal.from_float(10.00))
-      iex>   ]
-      iex> }
+      iex> journal_entry = Bookk.JournalEntry.new([
+      iex>   debit(fixture_account_head(:cash), Decimal.new(10)),
+      iex>   credit(fixture_account_head(:deposits), Decimal.new(10))
+      iex> ])
       iex>
       iex> Bookk.JournalEntry.reverse(journal_entry)
-      %Bookk.JournalEntry{
-        operations: [
-          debit(fixture_account_head(:deposits), Decimal.from_float(10.00)),
-          credit(fixture_account_head(:cash), Decimal.from_float(10.00))
-        ]
-      }
+      Bookk.JournalEntry.new([
+        debit(fixture_account_head(:deposits), Decimal.new(10)),
+        credit(fixture_account_head(:cash), Decimal.new(10))
+      ])
 
   """
   @spec reverse(t) :: t
@@ -355,11 +336,12 @@ defmodule Bookk.JournalEntry do
 
   Returns the journal entry's list of operations:
 
-      iex> Bookk.JournalEntry.new([
+      iex> journal_entry = Bookk.JournalEntry.new([
       iex>   debit(fixture_account_head(:cash), Decimal.from_float(50.00)),
       iex>   credit(fixture_account_head(:deposits), Decimal.from_float(50.00))
       iex> ])
-      iex> |> Bookk.JournalEntry.to_operations()
+      iex>
+      iex> Bookk.JournalEntry.to_operations(journal_entry)
       [
         debit(fixture_account_head(:cash), Decimal.from_float(50.00)),
         credit(fixture_account_head(:deposits), Decimal.from_float(50.00))
