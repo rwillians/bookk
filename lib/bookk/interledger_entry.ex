@@ -25,17 +25,17 @@ defmodule Bookk.InterledgerEntry do
   ## Fields
 
   An interledger entry is composed of:
-  - `entries_by_ledger`: the map of journal entries that are included
+  - `entries_by_ledger_id`: the map of journal entries that are included
     in the interledger entry, grouped by the name of the ledger
     against which they should be posted.
   """
   @type t :: %Bookk.InterledgerEntry{
-          entries_by_ledger: %{
+          entries_by_ledger_id: %{
             (ledger_id :: String.t()) => Bookk.JournalEntry.t()
           }
         }
 
-  defstruct entries_by_ledger: %{}
+  defstruct entries_by_ledger_id: %{}
 
   @doc ~S"""
   Checks whether the interledger entry is balanced. It is balance if
@@ -45,44 +45,32 @@ defmodule Bookk.InterledgerEntry do
 
   Balanced entry:
 
-      iex> interledger = %Bookk.InterledgerEntry{
-      iex>   entries_by_ledger: %{
-      iex>     "acme" => [
-      iex>       %Bookk.JournalEntry{
-      iex>         operations: [
-      iex>           debit(fixture_account_head(:cash), Decimal.new(30_00)),
-      iex>           credit(fixture_account_head(:deposits), Decimal.new(30_00))
-      iex>         ]
-      iex>       }
-      iex>     ]
-      iex>   }
-      iex> }
+      iex> interledger_entry = Bookk.InterledgerEntry.new([
+      iex>   {"acme", Bookk.JournalEntry.new([
+      iex>     debit(fixture_account_head(:cash), Decimal.new(30_00)),
+      iex>     credit(fixture_account_head(:deposits), Decimal.new(30_00))
+      iex>   ])}
+      iex> ])
       iex>
-      iex> Bookk.InterledgerEntry.balanced?(interledger)
+      iex> Bookk.InterledgerEntry.balanced?(interledger_entry)
       true
 
   Unbalanced entry:
 
-      iex> interledger = %Bookk.InterledgerEntry{
-      iex>   entries_by_ledger: %{
-      iex>     "acme" => [
-      iex>       %Bookk.JournalEntry{
-      iex>         operations: [
-      iex>           debit(fixture_account_head(:cash), Decimal.new(30_00)),
-      iex>         ]
-      iex>       }
-      iex>     ]
-      iex>   }
-      iex> }
+      iex> interledger_entry = Bookk.InterledgerEntry.new([
+      iex>   {"acme", Bookk.JournalEntry.new([
+      iex>     debit(fixture_account_head(:cash), Decimal.new(30_00))
+      iex>   ])},
+      iex> ])
       iex>
-      iex> Bookk.InterledgerEntry.balanced?(interledger)
+      iex> Bookk.InterledgerEntry.balanced?(interledger_entry)
       false
 
   """
   @spec balanced?(t) :: boolean
 
-  def balanced?(%InterledgerEntry{entries_by_ledger: %{} = entries_by_ledger}) do
-    values(entries_by_ledger)
+  def balanced?(%InterledgerEntry{entries_by_ledger_id: %{} = entries_by_ledger_id}) do
+    values(entries_by_ledger_id)
     |> flatten()
     |> all?(&JournalEntry.balanced?/1)
   end
@@ -105,27 +93,24 @@ defmodule Bookk.InterledgerEntry do
       iex> ])
       iex>
       iex> Bookk.InterledgerEntry.compact(interledger_entry)
-      %Bookk.InterledgerEntry{
-        entries_by_ledger: %{
-          "acme" => [
-            Bookk.JournalEntry.new([
-              debit(fixture_account_head(:cash), Decimal.new(20_00)),
-              credit(fixture_account_head(:deposits), Decimal.new(20_00))
-            ])
-          ]
-        }
-      }
+      Bookk.InterledgerEntry.new([
+        {"acme", Bookk.JournalEntry.new([
+          debit(fixture_account_head(:cash), Decimal.new(20_00)),
+          credit(fixture_account_head(:deposits), Decimal.new(20_00))
+        ])}
+      ])
 
   """
   @spec compact(t) :: t
 
   def compact(%InterledgerEntry{} = entry) do
-    entries_by_ledger =
-      entry.entries_by_ledger
+    entries_by_ledger_id =
+      entry.entries_by_ledger_id
       |> Enum.map(fn {ledger, entries} -> {ledger, [JournalEntry.merge(entries)]} end)
       |> Enum.into(%{})
 
-    %InterledgerEntry{entries_by_ledger: entries_by_ledger}
+    %InterledgerEntry{entries_by_ledger_id: entries_by_ledger_id}
+  end
   end
 
   @doc ~S"""
@@ -144,33 +129,22 @@ defmodule Bookk.InterledgerEntry do
 
   Is empty when all entries are empty:
 
-      iex> interledger = %Bookk.InterledgerEntry{
-      iex>   entries_by_ledger: %{
-      iex>     "acme" => [
-      iex>       %Bookk.JournalEntry{
-      iex>         operations: [%Bookk.Operation{amount: Decimal.new(0)}]
-      iex>       }
-      iex>     ]
-      iex>   }
-      iex> }
+      iex> interledger = Bookk.InterledgerEntry.new([
+      iex>   {"acme", Bookk.JournalEntry.new([
+      iex>     debit(fixture_account_head(:cash), Decimal.new(0))
+      iex>   ])}
+      iex> ])
       iex>
       iex> Bookk.InterledgerEntry.empty?(interledger)
       true
 
   Is not empty when at least one entry isn't empty:
 
-      iex> interledger = %Bookk.InterledgerEntry{
-      iex>   entries_by_ledger: %{
-      iex>     "acme" => [
-      iex>       %Bookk.JournalEntry{
-      iex>         operations: [
-      iex>           %Bookk.Operation{amount: Decimal.new(0)},
-      iex>           %Bookk.Operation{amount: Decimal.new(1)},
-      iex>         ]
-      iex>       }
-      iex>     ]
-      iex>   }
-      iex> }
+      iex> interledger = Bookk.InterledgerEntry.new([
+      iex>   {"acme", Bookk.JournalEntry.new([
+      iex>     debit(fixture_account_head(:cash), Decimal.new(1))
+      iex>   ])}
+      iex> ])
       iex>
       iex> Bookk.InterledgerEntry.empty?(interledger)
       false
@@ -178,11 +152,44 @@ defmodule Bookk.InterledgerEntry do
   """
   @spec empty?(t) :: boolean
 
-  def empty?(%InterledgerEntry{entries_by_ledger: %{} = entries_by_ledger}) do
-    values(entries_by_ledger)
+  def empty?(%InterledgerEntry{entries_by_ledger_id: %{} = entries_by_ledger_id}) do
+    values(entries_by_ledger_id)
     |> flatten()
     |> all?(&JournalEntry.empty?/1)
   end
+
+  @doc ~S"""
+  Get the journal entries for a given ledger id.
+
+  ## Examples
+
+  When exists journal entries for the given ledger id:
+
+      iex> interledger_entry = Bookk.InterledgerEntry.new([
+      iex>   {"acme", Bookk.JournalEntry.new([
+      iex>     debit(fixture_account_head(:cash), Decimal.new(50_00)),
+      iex>     credit(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(50_00))
+      iex>   ])}
+      iex> ])
+      iex>
+      iex> Bookk.InterledgerEntry.get_journal_entries(interledger_entry, "acme")
+      [
+       Bookk.JournalEntry.new([
+         debit(fixture_account_head(:cash), Decimal.new(50_00)),
+         credit(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(50_00))
+       ])
+      ]
+
+  Returns an empty array when there's no journal entries for the given
+  ledger id:
+
+      iex> Bookk.InterledgerEntry.new([])
+      iex> |> Bookk.InterledgerEntry.get_journal_entries("acme")
+      []
+
+  """
+  def get_journal_entries(%InterledgerEntry{} = entry, <<ledger_id::binary>>),
+    do: Map.get(entry.entries_by_ledger_id, ledger_id, [])
 
   @doc ~S"""
   Merges a set of interledger entries into one.
@@ -205,7 +212,7 @@ defmodule Bookk.InterledgerEntry do
       iex>
       iex> Bookk.InterledgerEntry.merge([a, b])
       %Bookk.InterledgerEntry{
-        entries_by_ledger: %{
+        entries_by_ledger_id: %{
           "acme" => [
             Bookk.JournalEntry.new([
               debit(fixture_account_head(:cash), Decimal.new(10_00)),
@@ -247,7 +254,7 @@ defmodule Bookk.InterledgerEntry do
       iex>
       iex> Bookk.InterledgerEntry.merge(a, b)
       %Bookk.InterledgerEntry{
-        entries_by_ledger: %{
+        entries_by_ledger_id: %{
           "acme" => [
             Bookk.JournalEntry.new([
               debit(fixture_account_head(:cash), Decimal.new(10_00)),
@@ -265,14 +272,14 @@ defmodule Bookk.InterledgerEntry do
   @spec merge(t, t) :: t
 
   def merge(%InterledgerEntry{} = a, %InterledgerEntry{} = b) do
-    entries_by_ledger =
+    entries_by_ledger_id =
       to_journal_entries(a)
       |> Enum.concat(to_journal_entries(b))
       |> Enum.group_by(fn {ledger, _} -> ledger end, fn {_, entries} -> entries end)
       |> Enum.map(fn {ledger, xs} -> {ledger, flatten(xs)} end)
       |> Enum.into(%{})
 
-    %InterledgerEntry{entries_by_ledger: entries_by_ledger}
+    %InterledgerEntry{entries_by_ledger_id: entries_by_ledger_id}
   end
 
   @doc ~S"""
@@ -292,7 +299,7 @@ defmodule Bookk.InterledgerEntry do
       iex>   ])}
       iex> ])
       %Bookk.InterledgerEntry{
-        entries_by_ledger: %{
+        entries_by_ledger_id: %{
           "acme" => [
             Bookk.JournalEntry.new([
               debit(fixture_account_head(:cash), Decimal.new(50_00)),
@@ -316,12 +323,12 @@ defmodule Bookk.InterledgerEntry do
   def new([]), do: %InterledgerEntry{}
 
   def new([_ | _] = entries) do
-    entries_by_ledger =
+    entries_by_ledger_id =
       entries
       |> Enum.group_by(fn {<<ledger::binary>>, _} -> ledger end, fn {_, %JournalEntry{} = entry} -> entry end)
       |> Enum.into(%{})
 
-    %InterledgerEntry{entries_by_ledger: entries_by_ledger}
+    %InterledgerEntry{entries_by_ledger_id: entries_by_ledger_id}
   end
 
   @doc ~S"""
@@ -334,7 +341,7 @@ defmodule Bookk.InterledgerEntry do
   Reverses all of its journal entries:
 
       iex> interledger = %Bookk.InterledgerEntry{
-      iex>   entries_by_ledger: %{
+      iex>   entries_by_ledger_id: %{
       iex>     "acme" => [
       iex>       %Bookk.JournalEntry{
       iex>         operations: [
@@ -348,7 +355,7 @@ defmodule Bookk.InterledgerEntry do
       iex>
       iex> Bookk.InterledgerEntry.reverse(interledger)
       %Bookk.InterledgerEntry{
-        entries_by_ledger: %{
+        entries_by_ledger_id: %{
           "acme" => [
             %Bookk.JournalEntry{
               operations: [
@@ -363,13 +370,13 @@ defmodule Bookk.InterledgerEntry do
   """
   @spec reverse(t) :: t
 
-  def reverse(%InterledgerEntry{entries_by_ledger: %{} = entries_by_ledger} = entry) do
-    entries_by_ledger =
-      for {ledger, entries} <- to_list(entries_by_ledger),
+  def reverse(%InterledgerEntry{entries_by_ledger_id: %{} = entries_by_ledger_id} = entry) do
+    entries_by_ledger_id =
+      for {ledger, entries} <- to_list(entries_by_ledger_id),
           into: %{},
           do: {ledger, map(entries, &JournalEntry.reverse/1) |> :lists.reverse()}
 
-    %{entry | entries_by_ledger: entries_by_ledger}
+    %{entry | entries_by_ledger_id: entries_by_ledger_id}
   end
 
   @doc ~S"""
@@ -389,7 +396,7 @@ defmodule Bookk.InterledgerEntry do
       iex> unspent_cash = fixture_account_head({:unspent_cash, {:user, user_id}})
       iex>
       iex> interledger = %Bookk.InterledgerEntry{
-      iex>   entries_by_ledger: %{
+      iex>   entries_by_ledger_id: %{
       iex>     "acme" => [
       iex>       Bookk.JournalEntry.new([
       iex>         debit(cash, Decimal.new(50_00)),
@@ -421,7 +428,7 @@ defmodule Bookk.InterledgerEntry do
   @spec to_journal_entries(t) :: [{ledger_id :: String.t(), Bookk.JournalEntry.t()}]
 
   def to_journal_entries(%InterledgerEntry{} = interledger) do
-    for {ledger_id, entries} <- to_list(interledger.entries_by_ledger),
+    for {ledger_id, entries} <- to_list(interledger.entries_by_ledger_id),
         entry <- entries,
         do: {ledger_id, entry}
   end

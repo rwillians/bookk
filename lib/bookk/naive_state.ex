@@ -154,7 +154,7 @@ defmodule Bookk.NaiveState do
   @spec post(t, Bookk.InterledgerEntry.t()) :: t
 
   def post(%NaiveState{} = state, %InterledgerEntry{} = entry),
-    do: post_reduce(state, to_list(entry.entries_by_ledger))
+    do: post_reduce(state, to_list(entry.entries_by_ledger_id))
 
   defp post_reduce(state, [{y_ledger_name, [y_journal_entry | y_tail]} | x_tail]) do
     do_post(state, y_ledger_name, y_journal_entry)
