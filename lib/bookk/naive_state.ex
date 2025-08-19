@@ -168,6 +168,112 @@ defmodule Bookk.NaiveState do
   end
 
   @doc ~S"""
+  Merges a set of states into one.
+
+  ## Examples
+
+      iex> a = Bookk.NaiveState.new([
+      iex>   Bookk.Ledger.new("acme", [
+      iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(5))
+      iex>   ])
+      iex> ])
+      iex>
+      iex> b = Bookk.NaiveState.new([
+      iex>   Bookk.Ledger.new("acme", [
+      iex>     Bookk.Account.new(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(5))
+      iex>   ]),
+      iex>   Bookk.Ledger.new("user(12345)", [
+      iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(5)),
+      iex>     Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(5)),
+      iex>   ])
+      iex> ])
+      iex>
+      iex> c = Bookk.NaiveState.new([
+      iex>   Bookk.Ledger.new("foo", [
+      iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(25)),
+      iex>     Bookk.Account.new(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(25))
+      iex>   ])
+      iex> ])
+      iex>
+      iex> Bookk.NaiveState.merge([a, b, c])
+      Bookk.NaiveState.new([
+        Bookk.Ledger.new("acme", [
+          Bookk.Account.new(fixture_account_head(:cash), Decimal.new(5)),
+          Bookk.Account.new(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(5))
+        ]),
+        Bookk.Ledger.new("foo", [
+          Bookk.Account.new(fixture_account_head(:cash), Decimal.new(25)),
+          Bookk.Account.new(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(25))
+        ]),
+        Bookk.Ledger.new("user(12345)", [
+          Bookk.Account.new(fixture_account_head(:cash), Decimal.new(5)),
+          Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(5)),
+        ])
+      ])
+
+  """
+  @spec merge([t]) :: t
+
+  def merge([]), do: new()
+  def merge([%NaiveState{} = state]), do: state
+  def merge([%NaiveState{} = head | tail]), do: merge(head, merge(tail))
+
+  @doc ~S"""
+  Merges two states into one.
+
+  ## Examples
+
+      iex> a = Bookk.NaiveState.new([
+      iex>   Bookk.Ledger.new("acme", [
+      iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(5))
+      iex>   ])
+      iex> ])
+      iex>
+      iex> b = Bookk.NaiveState.new([
+      iex>   Bookk.Ledger.new("acme", [
+      iex>     Bookk.Account.new(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(5))
+      iex>   ]),
+      iex>   Bookk.Ledger.new("user(12345)", [
+      iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(5)),
+      iex>     Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(5)),
+      iex>   ])
+      iex> ])
+      iex>
+      iex> Bookk.NaiveState.merge(a, b)
+      Bookk.NaiveState.new([
+        Bookk.Ledger.new("acme", [
+          Bookk.Account.new(fixture_account_head(:cash), Decimal.new(5)),
+          Bookk.Account.new(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(5))
+        ]),
+        Bookk.Ledger.new("user(12345)", [
+          Bookk.Account.new(fixture_account_head(:cash), Decimal.new(5)),
+          Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(5)),
+        ])
+      ])
+
+  """
+  @spec merge(t, t) :: t
+
+  def merge(%NaiveState{} = a, %NaiveState{} = b) do
+    ledger_ids =
+      []
+      |> Enum.concat(Map.keys(a.ledgers_by_id))
+      |> Enum.concat(Map.keys(b.ledgers_by_id))
+      |> Enum.uniq()
+      |> Enum.sort()
+
+    ledgers =
+      for ledger_id <- ledger_ids do
+        ledger_a = get_ledger(a, ledger_id)
+        ledger_b = get_ledger(b, ledger_id)
+
+        Ledger.merge(ledger_a, ledger_b)
+      end
+
+    new(ledgers)
+  end
+
+  @doc ~S"""
   Produces a new state struct from a set of ledgers.
   """
   @spec new([Bookk.Ledger.t()]) :: t
