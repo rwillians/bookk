@@ -87,9 +87,12 @@ defmodule Bookk.ChartOfAccounts do
     quote do
       @behaviour unquote(__MODULE__)
 
+      alias Bookk.AccountClass, as: Class
+      alias Bookk.AccountHead, as: Account
+
       @impl Bookk.ChartOfAccounts
-      def account_id(<<_, _::binary>> = ledger_id, %Bookk.AccountHead{} = account_head),
-        do: "#{ledger_id}:#{account_head.name}/#{account_head.class.id}"
+      def account_id(<<ledger_id::binary>>, %Account{} = account), do: "#{ledger_id}:#{account.name}/#{account.class.id}"
+      def account_id(ledger_code, account_code), do: account_id(ledger_id(ledger_code), account(account_code))
 
       defoverridable account_id: 2
     end
