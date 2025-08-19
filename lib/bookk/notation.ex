@@ -75,7 +75,7 @@ defmodule Bookk.Notation do
       iex>   end
       iex> end
       %Bookk.InterledgerEntry{
-        entries_by_ledger: %{
+        entries_by_ledger_id: %{
           "acme" => [
             %Bookk.JournalEntry{
               operations: [
@@ -164,7 +164,7 @@ defmodule Bookk.Notation do
         {:on, meta, _} = statement -> {[statement], meta}
       end
 
-    entries_by_ledger =
+    entries_by_ledger_id =
       Enum.map(statements, &to_journal_entry(caller, coa, &1))
       |> Enum.group_by(fn {k, _} -> k end, fn {_, v} -> v end)
       |> Enum.map(fn {ledger, xs} -> {ledger, List.flatten(xs)} end)
@@ -174,7 +174,7 @@ defmodule Bookk.Notation do
        {:__aliases__, [alias: false], [Bookk, InterledgerEntry]},
        {:%{}, [],
         [
-          entries_by_ledger: {{:., [], [{:__aliases__, [alias: false], [Enum]}, :into]}, [], [entries_by_ledger, {:%{}, [], []}]}
+          entries_by_ledger_id: {{:., [], [{:__aliases__, [alias: false], [Enum]}, :into]}, [], [entries_by_ledger_id, {:%{}, [], []}]}
         ]}
      ]}
   end
