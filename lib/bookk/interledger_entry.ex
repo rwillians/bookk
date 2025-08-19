@@ -111,6 +111,7 @@ defmodule Bookk.InterledgerEntry do
 
     %InterledgerEntry{entries_by_ledger_id: entries_by_ledger_id}
   end
+
   end
 
   @doc ~S"""
@@ -174,10 +175,10 @@ defmodule Bookk.InterledgerEntry do
       iex>
       iex> Bookk.InterledgerEntry.get_journal_entries(interledger_entry, "acme")
       [
-       Bookk.JournalEntry.new([
-         debit(fixture_account_head(:cash), Decimal.new(50_00)),
-         credit(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(50_00))
-       ])
+        Bookk.JournalEntry.new([
+          debit(fixture_account_head(:cash), Decimal.new(50_00)),
+          credit(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(50_00))
+        ])
       ]
 
   Returns an empty array when there's no journal entries for the given
@@ -211,20 +212,16 @@ defmodule Bookk.InterledgerEntry do
       iex> ])
       iex>
       iex> Bookk.InterledgerEntry.merge([a, b])
-      %Bookk.InterledgerEntry{
-        entries_by_ledger_id: %{
-          "acme" => [
-            Bookk.JournalEntry.new([
-              debit(fixture_account_head(:cash), Decimal.new(10_00)),
-              credit(fixture_account_head(:deposits), Decimal.new(10_00))
-            ]),
-            Bookk.JournalEntry.new([
-              debit(fixture_account_head(:cash), Decimal.new(10_00)),
-              credit(fixture_account_head(:deposits), Decimal.new(10_00))
-            ])
-          ]
-        }
-      }
+      Bookk.InterledgerEntry.new([
+        {"acme", Bookk.JournalEntry.new([
+          debit(fixture_account_head(:cash), Decimal.new(10_00)),
+          credit(fixture_account_head(:deposits), Decimal.new(10_00))
+        ])},
+        {"acme", Bookk.JournalEntry.new([
+          debit(fixture_account_head(:cash), Decimal.new(10_00)),
+          credit(fixture_account_head(:deposits), Decimal.new(10_00))
+        ])}
+      ])
 
   """
   @spec merge([t]) :: t
@@ -253,20 +250,16 @@ defmodule Bookk.InterledgerEntry do
       iex> ])
       iex>
       iex> Bookk.InterledgerEntry.merge(a, b)
-      %Bookk.InterledgerEntry{
-        entries_by_ledger_id: %{
-          "acme" => [
-            Bookk.JournalEntry.new([
-              debit(fixture_account_head(:cash), Decimal.new(10_00)),
-              credit(fixture_account_head(:deposits), Decimal.new(10_00))
-            ]),
-            Bookk.JournalEntry.new([
-              debit(fixture_account_head(:cash), Decimal.new(10_00)),
-              credit(fixture_account_head(:deposits), Decimal.new(10_00))
-            ])
-          ]
-        }
-      }
+      Bookk.InterledgerEntry.new([
+        {"acme", Bookk.JournalEntry.new([
+          debit(fixture_account_head(:cash), Decimal.new(10_00)),
+          credit(fixture_account_head(:deposits), Decimal.new(10_00))
+        ])},
+        {"acme", Bookk.JournalEntry.new([
+          debit(fixture_account_head(:cash), Decimal.new(10_00)),
+          credit(fixture_account_head(:deposits), Decimal.new(10_00))
+        ])}
+      ])
 
   """
   @spec merge(t, t) :: t
@@ -340,32 +333,20 @@ defmodule Bookk.InterledgerEntry do
 
   Reverses all of its journal entries:
 
-      iex> interledger = %Bookk.InterledgerEntry{
-      iex>   entries_by_ledger_id: %{
-      iex>     "acme" => [
-      iex>       %Bookk.JournalEntry{
-      iex>         operations: [
-      iex>           debit(fixture_account_head(:cash), Decimal.new(10_00)),
-      iex>           credit(fixture_account_head(:deposits), Decimal.new(10_00))
-      iex>         ]
-      iex>       }
-      iex>     ]
-      iex>   }
-      iex> }
+      iex> interledger = Bookk.InterledgerEntry.new([
+      iex>   {"acme", Bookk.JournalEntry.new([
+      iex>     debit(fixture_account_head(:cash), Decimal.new(10)),
+      iex>     credit(fixture_account_head(:deposits), Decimal.new(10))
+      iex>   ])}
+      iex> ])
       iex>
       iex> Bookk.InterledgerEntry.reverse(interledger)
-      %Bookk.InterledgerEntry{
-        entries_by_ledger_id: %{
-          "acme" => [
-            %Bookk.JournalEntry{
-              operations: [
-                debit(fixture_account_head(:deposits), Decimal.new(10_00)),
-                credit(fixture_account_head(:cash), Decimal.new(10_00))
-              ]
-            }
-          ]
-        }
-      }
+      Bookk.InterledgerEntry.new([
+        {"acme", Bookk.JournalEntry.new([
+          debit(fixture_account_head(:deposits), Decimal.new(10)),
+          credit(fixture_account_head(:cash), Decimal.new(10))
+        ])}
+      ])
 
   """
   @spec reverse(t) :: t
@@ -390,27 +371,16 @@ defmodule Bookk.InterledgerEntry do
   Returns a list of tuple where the first element is the ledger name
   and the second element is a journal entry:
 
-      iex> user_id = "12345"
-      iex> cash = fixture_account_head(:cash)
-      iex> deposits = fixture_account_head(:deposits)
-      iex> unspent_cash = fixture_account_head({:unspent_cash, {:user, user_id}})
-      iex>
-      iex> interledger = %Bookk.InterledgerEntry{
-      iex>   entries_by_ledger_id: %{
-      iex>     "acme" => [
-      iex>       Bookk.JournalEntry.new([
-      iex>         debit(cash, Decimal.new(50_00)),
-      iex>         credit(unspent_cash, Decimal.new(50_00))
-      iex>       ])
-      iex>     ],
-      iex>     "user(12345)" => [
-      iex>       Bookk.JournalEntry.new([
-      iex>         debit(cash, Decimal.new(50_00)),
-      iex>         credit(deposits, Decimal.new(50_00))
-      iex>       ])
-      iex>     ]
-      iex>   }
-      iex> }
+      iex> interledger = Bookk.InterledgerEntry.new([
+      iex>  {"acme", Bookk.JournalEntry.new([
+      iex>    debit(fixture_account_head(:cash), Decimal.new(50_00)),
+      iex>    credit(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(50_00))
+      iex>  ])},
+      iex>  {"user(12345)", Bookk.JournalEntry.new([
+      iex>    debit(fixture_account_head(:cash), Decimal.new(50_00)),
+      iex>    credit(fixture_account_head(:deposits), Decimal.new(50_00))
+      iex>  ])},
+      iex> ])
       iex>
       iex> Bookk.InterledgerEntry.to_journal_entries(interledger)
       [
