@@ -454,5 +454,12 @@ defmodule Bookk.Operation do
     |> group_by(fn %Op{account_head: %{name: name}} -> name end)
     #               ↑ about 61% faster than `& &1.account_head.name`
     |> map(fn {_, xs} -> merge(xs) end)
+    #                ↓ deterministic sorting so its easier to test
+    |> Enum.sort_by(&sort_key/1)
   end
+
+  @directions credit: "b",
+              debit: "a"
+  defp sort_key(%Op{} = op),
+    do: Keyword.fetch!(@directions, op.direction) <> op.account_head.name <> op.account_head.class.id
 end
