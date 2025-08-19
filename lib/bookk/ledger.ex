@@ -43,7 +43,7 @@ defmodule Bookk.Ledger do
   @doc ~S"""
   Checks whether the ledger is balanced.
 
-  A ledger is considered balance when the some of balance from its
+  A ledger is considered balance when the sum of balance from its
   debit accounts is equal the sum of balance from its credit accounts.
   You know if an account is a "debit account" or a "credit account" by
   the natural balance of its class.

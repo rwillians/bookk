@@ -32,6 +32,51 @@ defmodule Bookk.NaiveState do
   defstruct ledgers_by_id: %{}
 
   @doc ~S"""
+  Checks whether the state is balanced.
+
+  A state is considered balance when the sum of balance from its
+  debit accounts is equal the sum of balance from its credit accounts.
+  You know if an account is a "debit account" or a "credit account" by
+  the natural balance of its class.
+
+  See `Bookk.AccountClass` for more information on natural balance.
+
+  ## Examples
+
+  Balanced:
+
+      iex> state = Bookk.NaiveState.new([
+      iex>   Bookk.Ledger.new("acme", [
+      iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(25)),
+      iex>     Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(25))
+      iex>   ])
+      iex> ])
+      iex>
+      iex> Bookk.NaiveState.balanced?(state)
+      true
+
+  Unbalanced:
+
+      iex> state = Bookk.NaiveState.new([
+      iex>   Bookk.Ledger.new("acme", [
+      iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(25)),
+      iex>     Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(10))
+      iex>   ])
+      iex> ])
+      iex>
+      iex> Bookk.NaiveState.balanced?(state)
+      false
+
+  """
+  @spec balanced?(t) :: boolean()
+
+  def balanced?(%NaiveState{} = state) do
+    state.ledgers_by_id
+    |> Map.values()
+    |> Enum.all?(&Ledger.balanced?/1)
+  end
+
+  @doc ~S"""
   Calculates a `Bookk.InterledgerEntry` represending the diff between
   two `Bookk.NaiveState` where, if such interledger entry were to be
   posted to state "a", it would become equal to state "b".
@@ -41,7 +86,7 @@ defmodule Bookk.NaiveState do
       iex> a = Bookk.NaiveState.new([
       iex>   Bookk.Ledger.new("acme", [
       iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(25)),
-      iex>     Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(25)),
+      iex>     Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(25))
       iex>   ])
       iex> ])
       iex>
@@ -53,7 +98,7 @@ defmodule Bookk.NaiveState do
       iex>   ]),
       iex>   Bookk.Ledger.new("foo", [
       iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(75)),
-      iex>     Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(75)),
+      iex>     Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(75))
       iex>   ])
       iex> ])
       iex>
