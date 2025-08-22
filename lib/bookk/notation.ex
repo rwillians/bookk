@@ -81,6 +81,33 @@ defmodule Bookk.Notation do
         ])}
       ])
 
+  It's possible to post multiple times to the same ledger inside the
+  interledger entry:
+
+      iex> use Bookk.Notation
+      iex>
+      iex> journalize using: DummyChartOfAccounts do
+      iex>   on ledger(:acme) do
+      iex>     debit account(:cash), 50
+      iex>     credit account(:deposits), 50
+      iex>   end
+      iex>
+      iex>   on ledger(:acme) do
+      iex>     debit account(:cash), 100
+      iex>     credit account(:deposits), 100
+      iex>   end
+      iex> end
+      Bookk.InterledgerEntry.new([
+        {"acme", Bookk.JournalEntry.new([
+          debit(fixture_account_head(:cash), Decimal.new(50)),
+          credit(fixture_account_head(:deposits), Decimal.new(50))
+        ])},
+        {"acme", Bookk.JournalEntry.new([
+          debit(fixture_account_head(:cash), Decimal.new(100)),
+          credit(fixture_account_head(:deposits), Decimal.new(100))
+        ])}
+      ])
+
   """
 
   defmacro journalize([{:using, chart_of_accounts_mod} | _], do: block) do
@@ -152,25 +179,15 @@ defmodule Bookk.Notation do
   #
 
   defp to_interledger_journal_entry(caller, coa, block) do
-    {statements, meta} =
+    statements =
       case block do
-        {:__block__, meta, statements} -> {statements, meta}
-        {:on, meta, _} = statement -> {[statement], meta}
+        {:__block__, _, statements} -> statements
+        {:on, _, _} = statement -> [statement]
       end
 
-    entries_by_ledger_id =
-      Enum.map(statements, &to_journal_entry(caller, coa, &1))
-      |> Enum.group_by(fn {k, _} -> k end, fn {_, v} -> v end)
-      |> Enum.map(fn {ledger, xs} -> {ledger, List.flatten(xs)} end)
+    entries_by_ledger_id = Enum.map(statements, &to_journal_entry(caller, coa, &1))
 
-    {:%, meta,
-     [
-       {:__aliases__, [alias: false], [Bookk, InterledgerEntry]},
-       {:%{}, [],
-        [
-          entries_by_ledger_id: {{:., [], [{:__aliases__, [alias: false], [Enum]}, :into]}, [], [entries_by_ledger_id, {:%{}, [], []}]}
-        ]}
-     ]}
+    {{:., [context: caller], [{:__aliases__, [alias: false], [Bookk, InterledgerEntry]}, :new]}, [], [entries_by_ledger_id]}
   end
 
   defp to_journal_entry(caller, coa, {:on, meta_a, [{:ledger, meta_b, [name]}, [do: block]]}) do
