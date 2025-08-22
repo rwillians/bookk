@@ -76,6 +76,43 @@ defmodule Bookk.InterledgerEntry do
   end
 
   @doc ~S"""
+  Raises `Bookk.UnbalancedError` if the interledger entry is
+  unbalanced, otherwise returns the entry.
+
+      iex> interledger_entry = Bookk.InterledgerEntry.new([
+      iex>   {"acme", Bookk.JournalEntry.new([
+      iex>     debit(fixture_account_head(:cash), Decimal.new(30))
+      iex>   ])},
+      iex> ])
+      iex>
+      iex> Bookk.InterledgerEntry.balanced!(interledger_entry)
+      ** (Bookk.UnbalancedError) The interledger entry is unbalanced!
+
+
+      iex> interledger_entry = Bookk.InterledgerEntry.new([
+      iex>   {"acme", Bookk.JournalEntry.new([
+      iex>     debit(fixture_account_head(:cash), Decimal.new(30)),
+      iex>     credit(fixture_account_head(:deposits), Decimal.new(30))
+      iex>   ])},
+      iex> ])
+      iex>
+      iex> Bookk.InterledgerEntry.balanced!(interledger_entry)
+      Bookk.InterledgerEntry.new([
+        {"acme", Bookk.JournalEntry.new([
+          debit(fixture_account_head(:cash), Decimal.new(30)),
+          credit(fixture_account_head(:deposits), Decimal.new(30))
+        ])}
+      ])
+
+  """
+  def balanced!(%InterledgerEntry{} = entry) do
+    case InterledgerEntry.balanced?(entry) do
+      true -> entry
+      false -> raise(Bookk.UnbalancedError, message: "The interledger entry is unbalanced!")
+    end
+  end
+
+  @doc ~S"""
   Compacts the interledger entry by merging all journal entries that
   target the same ledger into a single journal entry.
 
