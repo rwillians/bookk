@@ -148,7 +148,7 @@ defmodule Bookk.Notation do
       iex>     credit account(:deposits), Decimal.new(50)
       iex>   end
       iex> end
-      ** (Bookk.UnbalancedError) `journalize!/2` produced an unbalanced journal entry
+      ** (Bookk.UnbalancedError) The interledger entry is unbalanced!
 
   """
 
@@ -157,21 +157,7 @@ defmodule Bookk.Notation do
 
     interledger_entry = to_interledger_journal_entry(__CALLER__, coa, block)
 
-    {:if, [context: __CALLER__, imports: [{2, Kernel}]],
-     [
-       {{:., [], [{:__aliases__, [alias: false], [Bookk, InterledgerEntry]}, :balanced?]}, [], [interledger_entry]},
-       [
-         do: interledger_entry,
-         else:
-           {:raise, [context: __CALLER__, imports: [{1, Kernel}, {2, Kernel}]],
-            [
-              {:__aliases__, [alias: false], [Bookk, UnbalancedError]},
-              [
-                message: "`journalize!/2` produced an unbalanced journal entry"
-              ]
-            ]}
-       ]
-     ]}
+    {{:., [context: __CALLER__], [{:__aliases__, [alias: false], [Bookk, InterledgerEntry]}, :balanced!]}, [], [interledger_entry]}
   end
 
   #
