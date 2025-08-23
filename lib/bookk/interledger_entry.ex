@@ -1,3 +1,7 @@
+# credo:disable-for-this-file Credo.Check.Refactor.ABCSize
+#
+#   NOTE: C'est la vie
+#
 defmodule Bookk.InterledgerEntry do
   @moduledoc ~S"""
   An interledger entry is a collection of journal entries affecting
