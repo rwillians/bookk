@@ -1,8 +1,7 @@
 locals_without_parens = [
   credit: 2,
   debit: 2,
-  journalize: 2,
-  journalize!: 2
+  journalize: 2
 ]
 
 [
