@@ -132,9 +132,9 @@ defmodule Bookk.Ledger do
 
   def diff(%Ledger{} = a, %Ledger{} = b) do
     account_heads =
-      []
-      |> Enum.concat(Enum.map(a.accounts_by_name, fn {_, account} -> account.head end))
-      |> Enum.concat(Enum.map(b.accounts_by_name, fn {_, account} -> account.head end))
+      [a.accounts_by_name, b.accounts_by_name]
+      |> Enum.flat_map(&Map.values/1)
+      |> Enum.map(& &1.head)
       |> Enum.uniq()
       |> Enum.sort_by(& &1.name)
 
