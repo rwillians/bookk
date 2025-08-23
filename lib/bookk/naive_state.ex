@@ -342,7 +342,7 @@ defmodule Bookk.NaiveState do
       iex> deposited_amount = Decimal.new(500)
       iex>
       iex> journal_entry =
-      iex>   journalize! using: DummyChartOfAccounts do
+      iex>   journalize using: DummyChartOfAccounts do
       iex>     on ledger(:acme) do
       iex>       debit account(:cash), deposited_amount
       iex>       credit account({:unspent_cash, {:user, user_id}}), deposited_amount

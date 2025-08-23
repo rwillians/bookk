@@ -62,11 +62,8 @@ defmodule Bookk.Account do
       iex> Bookk.Account.merge([a, b, c])
       Bookk.Account.new(fixture_account_head(:cash), Decimal.new(50))
 
-  It raises if an empty list is given:
-
-      iex> Bookk.Account.merge([])
-      ** (FunctionClauseError) no function clause matching in Bookk.Account.merge/1
-
+  If you try to merge an empty list of accounts, an error will be
+  raised.
   """
   @spec merge([t, ...]) :: t
 
