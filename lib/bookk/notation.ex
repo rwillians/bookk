@@ -16,13 +16,23 @@ defmodule Bookk.Notation do
 
   defmacro __using__(_) do
     quote do
-      import unquote(__MODULE__), only: [journalize: 2, journalize!: 2]
+      import unquote(__MODULE__), only: [journalize: 2]
     end
   end
 
   @doc ~S"""
   DSL notation for describing an interledger entries
   (`Bookk.InterledgerEntry`).
+
+  ## Options
+
+  - `using` (required): your chart of accounts module;
+  - `compact`: whether the resulting interledger entry should be
+    compacted, where postings to the same account are merged,
+    guaranteeing a single post per account. Defaults to `false`.
+  - `on_unbalanced`: either `:nothing` or `:raise`, controls the
+    desired behaviour for when `journalize/2` produces a unbalanced
+    interledger entry. Defaults to `:nothing`.
 
   ## Examples
 
@@ -108,114 +118,120 @@ defmodule Bookk.Notation do
         ])}
       ])
 
-  """
-
-  defmacro journalize([{:using, chart_of_accounts_mod} | _], do: block) do
-    coa = {:__aliases__, [], [Macro.expand(chart_of_accounts_mod, __CALLER__)]}
-
-    to_interledger_journal_entry(__CALLER__, coa, block)
-  end
-
-  @doc ~S"""
-  Same as `journalize/2` but it raises an error if the resulting
-  interledger journal entry is unbalanced.
-
-  ## Examples
-
-  Returns a balanced interledger journal entry:
+  You can compact multiple postings to the same ledger into a single
+  post:
 
       iex> use Bookk.Notation
       iex>
-      iex> %Bookk.InterledgerEntry{} = journal_entry =
-      iex>   journalize! using: DummyChartOfAccounts do
-      iex>     on ledger(:acme) do
-      iex>       debit account(:cash), Decimal.new(150)
-      iex>       credit account(:deposits), Decimal.new(150)
-      iex>     end
+      iex> journalize using: DummyChartOfAccounts, compact: true do
+      iex>   on ledger(:acme) do
+      iex>     debit account(:cash), 50
+      iex>     credit account(:deposits), 50
       iex>   end
       iex>
-      iex> assert not Bookk.InterledgerEntry.empty?(journal_entry)
-      iex> assert Bookk.InterledgerEntry.balanced?(journal_entry)
+      iex>   on ledger(:acme) do
+      iex>     debit account(:cash), 100
+      iex>     credit account(:deposits), 100
+      iex>   end
+      iex> end
+      Bookk.InterledgerEntry.new([
+        {"acme", Bookk.JournalEntry.new([
+          debit(fixture_account_head(:cash), Decimal.new(150)),
+          credit(fixture_account_head(:deposits), Decimal.new(150))
+        ])}
+      ])
 
-  Raises an error when an unbalanced interledger journal entry is
-  produced:
+  You can define the behaviour for when your `journalize/2` produces
+  a unbalanced interledger entry. The default is doing `:nothing`, but
+  your can set it to `:raise`:
 
       iex> use Bookk.Notation
       iex>
-      iex> journalize! using: DummyChartOfAccounts do
+      iex> journalize using: DummyChartOfAccounts, on_unbalanced: :raise do
       iex>   on ledger(:acme) do
-      iex>     debit account(:cash), Decimal.new(150)
-      iex>     credit account(:deposits), Decimal.new(50)
+      iex>     debit account(:cash), 50
       iex>   end
       iex> end
       ** (Bookk.UnbalancedError) The interledger entry is unbalanced!
 
   """
 
-  defmacro journalize!([{:using, chart_of_accounts_mod} | _], do: block) do
-    coa = {:__aliases__, [], [Macro.expand(chart_of_accounts_mod, __CALLER__)]}
+  defmacro journalize([{:using, chart_of_accounts} | opts], do: block) do
+    coa = Macro.expand(chart_of_accounts, __CALLER__)
+    opts = Keyword.put_new(opts, :on_unbalanced, :nothing)
 
-    interledger_entry = to_interledger_journal_entry(__CALLER__, coa, block)
-
-    {{:., [context: __CALLER__], [{:__aliases__, [alias: false], [Bookk, InterledgerEntry]}, :balanced!]}, [], [interledger_entry]}
+    to_interledger_entry(__CALLER__, coa, block)
+    |> apply_opts(opts)
   end
 
   #
   #   PRIVATE
   #
 
-  defp to_interledger_journal_entry(caller, coa, block) do
-    statements =
-      case block do
-        {:__block__, _, statements} -> statements
-        {:on, _, _} = statement -> [statement]
-      end
+  defp to_statements({:__block__, _, statements}), do: statements
+  defp to_statements({:on, _, _} = statement), do: [statement]
+  defp to_statements({:debit, _, _} = statement), do: [statement]
+  defp to_statements({:credit, _, _} = statement), do: [statement]
 
-    entries_by_ledger_id = Enum.map(statements, &to_journal_entry(caller, coa, &1))
-
-    {{:., [context: caller], [{:__aliases__, [alias: false], [Bookk, InterledgerEntry]}, :new]}, [], [entries_by_ledger_id]}
+  defp to_interledger_entry(caller, coa, block) do
+    {{:., [context: caller], [{:__aliases__, [alias: false], [Bookk, InterledgerEntry]}, :new]}, [],
+     [
+       block
+       |> to_statements()
+       |> Enum.map(&to_journal_entry(caller, coa, &1))
+     ]}
   end
 
-  defp to_journal_entry(caller, coa, {:on, meta_a, [{:ledger, meta_b, [name]}, [do: block]]}) do
-    statements =
-      case block do
-        {:__block__, _, statements} -> statements
-        {direction, _, _} when direction in [:credit, :debit] -> [block]
-      end
-
+  defp to_journal_entry(caller, coa, {:on, meta_a, [{:ledger, meta_b, [ledger_code]}, [do: block]]}) do
     {
-      {{:., [context: caller], [coa, :ledger_id]}, meta_b, [name]},
+      {{:., [context: caller], [coa, :ledger_id]}, meta_b, [ledger_code]},
       {{:., [context: caller], [{:__aliases__, [alias: false], [Bookk, JournalEntry]}, :new]}, meta_a,
        [
-         Enum.map(statements, &to_operation(caller, coa, &1))
+         block
+         |> to_statements()
+         |> Enum.map(&to_operation(caller, coa, &1))
        ]}
     }
   end
 
-  defp to_operation(caller, coa, {direction, meta_a, [{:account, meta_b, [name]}, amount]})
+  defp to_operation(caller, coa, {direction, meta_a, [{:account, meta_b, [account_code]}, amount_expr]})
        when direction in [:credit, :debit] do
-    {{:., [context: caller], [{:__aliases__, [alias: false], [Bookk, Operation]}, direction]}, meta_a,
-     [{{:., [context: caller], [coa, :account]}, meta_b, [name]}, to_amount_expr(amount)]}
+    {{:., [context: caller], [{:__aliases__, [alias: false], [Bookk, Operation]}, direction]}, meta_a, [
+      {{:., [context: caller], [coa, :account]}, meta_b, [account_code]},
+      to_amount(amount_expr)
+    ]}
   end
 
-  defp to_amount_expr({:+, meta, [a, b]}),
-    do: {{:., meta, [{:__aliases__, meta, [:Decimal]}, :add]}, meta, [to_amount_expr(a), to_amount_expr(b)]}
+  defp to_amount({:+, meta, [a, b]}), do: {{:., [], [{:__aliases__, [], [Decimal]}, :add]}, meta, [to_amount(a), to_amount(b)]}
+  defp to_amount({:-, meta, [a, b]}), do: {{:., [], [{:__aliases__, [], [Decimal]}, :sub]}, meta, [to_amount(a), to_amount(b)]}
+  defp to_amount({:*, meta, [a, b]}), do: {{:., [], [{:__aliases__, [], [Decimal]}, :mult]}, meta, [to_amount(a), to_amount(b)]}
+  defp to_amount({:/, meta, [a, b]}), do: {{:., [], [{:__aliases__, [], [Decimal]}, :div]}, meta, [to_amount(a), to_amount(b)]}
+  defp to_amount(value) when is_integer(value), do: {{:., [], [{:__aliases__, [], [Decimal]}, :new]}, [], [value]}
+  defp to_amount(value) when is_float(value), do: {{:., [], [{:__aliases__, [], [Decimal]}, :from_float]}, [], [value]}
+  defp to_amount(var), do: {{:., [], [{:__aliases__, [], [Bookk.Utils]}, :to_decimal]}, [], [var]}
 
-  defp to_amount_expr({:-, meta, [a, b]}),
-    do: {{:., meta, [{:__aliases__, meta, [:Decimal]}, :sub]}, meta, [to_amount_expr(a), to_amount_expr(b)]}
+  defp apply_opts(expr, []),
+    do: expr
 
-  defp to_amount_expr({:*, meta, [a, b]}),
-    do: {{:., meta, [{:__aliases__, meta, [:Decimal]}, :mult]}, meta, [to_amount_expr(a), to_amount_expr(b)]}
+  defp apply_opts(expr, [{:compact, true} | tail]) do
+    {{:., [], [{:__aliases__, [], [Bookk.InterledgerEntry]}, :compact]}, [], [expr]}
+    |> apply_opts(tail)
+  end
 
-  defp to_amount_expr({:/, meta, [a, b]}),
-    do: {{:., meta, [{:__aliases__, meta, [:Decimal]}, :div]}, meta, [to_amount_expr(a), to_amount_expr(b)]}
+  defp apply_opts(expr, [{:compact, false} | tail]),
+    do: apply_opts(expr, tail)
 
-  defp to_amount_expr(amount) when is_integer(amount),
-    do: {{:., [], [{:__aliases__, [], [:Decimal]}, :new]}, [], [amount]}
+  defp apply_opts(expr, [{:on_unbalanced, :raise} | tail]) do
+    {{:., [], [{:__aliases__, [], [Bookk.InterledgerEntry]}, :balanced!]}, [], [expr]}
+    |> apply_opts(tail)
+  end
 
-  defp to_amount_expr(amount) when is_float(amount),
-    do: {{:., [], [{:__aliases__, [], [:Decimal]}, :from_float]}, [], [amount]}
+  defp apply_opts(expr, [{:on_unbalanced, :nothing} | tail]),
+    do: apply_opts(expr, tail)
 
-  defp to_amount_expr(amount),
-    do: {{:., [], [{:__aliases__, [], [Bookk.Utils]}, :to_decimal]}, [], [amount]}
+  defp apply_opts(_, [{:on_unbalanced, value} | _]),
+    do: raise(ArgumentError, "unsupported value #{inspect(value)} for option :on_unbalanced")
+
+  defp apply_opts(_, [{key, _} | _]),
+    do: raise(ArgumentError, "unsupported option #{inspect(key)}")
 end

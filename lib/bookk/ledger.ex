@@ -253,10 +253,8 @@ defmodule Bookk.Ledger do
         Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(50))
       ])
 
-  It will raise if the list is empty:
-
-      iex> Bookk.Ledger.merge([])
-      ** (FunctionClauseError) no function clause matching in Bookk.Ledger.merge/1
+  If you try to merge an empty list of ledgers, an error will be
+  raised.
 
   """
   @spec merge([t, ...]) :: t

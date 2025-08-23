@@ -197,16 +197,13 @@ defmodule Bookk.Operation do
         amount: Decimal.new(600)
       }
 
-  If an empty list is provided, then an error will be raised:
-
-      iex> Bookk.Operation.merge([])
-      ** (FunctionClauseError) no function clause matching in Bookk.Operation.merge/1
-
+  If you try to merge an empty list of operations, an error will be
+  raised.
   """
   @spec merge([t, ...]) :: t
 
   def merge([%Op{} = op]), do: op
-  def merge([first, second | tail]), do: merge([merge(first, second) | tail])
+  def merge([%Op{} = head | tail]), do: merge(head, merge(tail))
 
   @doc ~S"""
   Combines two operation against the same account into one operation.
