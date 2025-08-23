@@ -156,11 +156,15 @@ defmodule Bookk.Notation do
 
   """
 
-  defmacro journalize([{:using, chart_of_accounts} | opts], do: block) do
-    coa = Macro.expand(chart_of_accounts, __CALLER__)
-    opts = Keyword.put_new(opts, :on_unbalanced, :nothing)
+  defmacro journalize([{_, _} | _] = opts, do: block) do
+    {chart_of_accounts, opts} =
+      opts
+      |> Keyword.put_new(:compact, false)
+      |> Keyword.put_new(:on_unbalanced, :nothing)
+      |> Keyword.pop!(:using)
 
-    to_interledger_entry(__CALLER__, coa, block)
+    __CALLER__
+    |> to_interledger_entry(Macro.expand(chart_of_accounts, __CALLER__), block)
     |> apply_opts(opts)
   end
 
