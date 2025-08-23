@@ -105,6 +105,8 @@ defmodule Bookk.InterledgerEntry do
       ])
 
   """
+  @spec balanced!(t) :: t
+
   def balanced!(%InterledgerEntry{} = entry) do
     case InterledgerEntry.balanced?(entry) do
       true -> entry
@@ -297,6 +299,8 @@ defmodule Bookk.InterledgerEntry do
       []
 
   """
+  @spec get_journal_entries(t, ledger_id :: String.t()) :: [Bookk.JournalEntry.t()]
+
   def get_journal_entries(%InterledgerEntry{} = entry, <<ledger_id::binary>>),
     do: Map.get(entry.entries_by_ledger_id, ledger_id, [])
 

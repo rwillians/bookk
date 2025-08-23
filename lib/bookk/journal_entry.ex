@@ -202,6 +202,8 @@ defmodule Bookk.JournalEntry do
       }
 
   """
+  @spec get_op(t, Bookk.AccountHead.t()) :: Bookk.Operation.t()
+
   def get_op(%JournalEntry{} = entry, %AccountHead{} = account_head) do
     case Enum.find(entry.operations, &(&1.account_head == account_head)) do
       %Op{} = op -> op
