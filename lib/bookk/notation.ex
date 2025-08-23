@@ -200,10 +200,11 @@ defmodule Bookk.Notation do
 
   defp to_operation(caller, coa, {direction, meta_a, [{:account, meta_b, [account_code]}, amount_expr]})
        when direction in [:credit, :debit] do
-    {{:., [context: caller], [{:__aliases__, [alias: false], [Bookk, Operation]}, direction]}, meta_a, [
-      {{:., [context: caller], [coa, :account]}, meta_b, [account_code]},
-      to_amount(amount_expr)
-    ]}
+    {{:., [context: caller], [{:__aliases__, [alias: false], [Bookk, Operation]}, direction]}, meta_a,
+     [
+       {{:., [context: caller], [coa, :account]}, meta_b, [account_code]},
+       to_amount(amount_expr)
+     ]}
   end
 
   defp to_amount({:+, meta, [a, b]}), do: {{:., [], [{:__aliases__, [], [Decimal]}, :add]}, meta, [to_amount(a), to_amount(b)]}
