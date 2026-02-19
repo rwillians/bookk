@@ -57,7 +57,7 @@ defmodule Bookk.MixProject do
 
   def aliases do
     [
-      "test.perf": ["test test/perf.exs"]
+      precommit: ["compile --force --no-deps-check --all-warnings --warning-as-errors --return-errors", "deps.unlock --unused", "format", "test"]
     ]
   end
 
@@ -69,7 +69,7 @@ defmodule Bookk.MixProject do
 
   def cli do
     [
-      preferred_envs: ["test.perf": :test]
+      preferred_envs: [precommit: :test]
     ]
   end
 
