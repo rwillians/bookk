@@ -5,15 +5,19 @@ defmodule Bookk.MixProject do
   @github "https://github.com/rwillians/bookk"
 
   @description """
-  Bookk is a simple library that provides building blocks for operating journal
-  entries and manipulating double-entry bookkeeping accounting ledgers.
+  Bookk is a simple library that provides building blocks for
+  operating journal entries and manipulating double-entry bookkeeping
+  accounting ledgers.
   """
 
   def project do
     [
       app: :bookk,
       version: @version,
-      description: @description,
+      description:
+        @description
+        |> String.replace("\n", " ")
+        |> String.trim(),
       source_url: @github,
       homepage_url: @github,
       elixir: ">= 1.14.0",
@@ -38,6 +42,19 @@ defmodule Bookk.MixProject do
     ]
   end
 
+  defp package do
+    [
+      files: ~w(lib mix.exs .formatter.exs README.md LICENSE),
+      maintainers: ["Rafael Willians"],
+      contributors: ["Rafael Willians"],
+      licenses: ["MIT"],
+      links: %{
+        GitHub: @github,
+        Changelog: "#{@github}/releases"
+      }
+    ]
+  end
+
   def aliases do
     [
       "test.perf": ["test test/perf.exs"]
@@ -58,10 +75,6 @@ defmodule Bookk.MixProject do
 
   defp deps do
     [
-      # Performance benchmark
-      {:benchee, "~> 1.4", only: :test, runtime: false, optional: true},
-      {:benchee_html, "~> 1.0", only: :test, runtime: false, optional: true},
-
       # Linter
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false, optional: true},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false, optional: true},
@@ -73,17 +86,4 @@ defmodule Bookk.MixProject do
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
-
-  defp package do
-    [
-      files: ~w(lib mix.exs .formatter.exs README.md LICENSE),
-      maintainers: ["Rafael Willians"],
-      contributors: ["Rafael Willians"],
-      licenses: ["MIT"],
-      links: %{
-        GitHub: @github,
-        Changelog: "#{@github}/releases"
-      }
-    ]
-  end
 end
