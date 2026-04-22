@@ -4,8 +4,7 @@
 #
 defmodule Bookk.Notation do
   @moduledoc ~S"""
-  DSL notation for describing an interledger entries
-  (`Bookk.InterledgerEntry`).
+  DSL notation for designing interledger entries (`Bookk.InterledgerEntry`).
 
   ## Related
 
@@ -16,7 +15,7 @@ defmodule Bookk.Notation do
 
   defmacro __using__(_) do
     quote do
-      import unquote(__MODULE__), only: [journalize: 2]
+      import unquote(__MODULE__), only: [journalize: 2, journalize!: 2]
     end
   end
 
@@ -48,7 +47,7 @@ defmodule Bookk.Notation do
       iex>     end
       iex>   end
       iex>
-      iex> assert not Bookk.InterledgerEntry.empty?(journal_entry)
+      iex> refute Bookk.InterledgerEntry.empty?(journal_entry)
       iex> assert Bookk.InterledgerEntry.balanced?(journal_entry)
 
   Returns an unbalanced interledger journal entry:
@@ -63,8 +62,8 @@ defmodule Bookk.Notation do
       iex>     end
       iex>   end
       iex>
-      iex> assert not Bookk.InterledgerEntry.empty?(journal_entry)
-      iex> assert not Bookk.InterledgerEntry.balanced?(journal_entry)
+      iex> refute Bookk.InterledgerEntry.empty?(journal_entry)
+      iex> refute Bookk.InterledgerEntry.balanced?(journal_entry)
 
   You can do basic arithmetic operations with amounts even though they
   are most likely `Decimal` structs. The supported operations are
@@ -155,22 +154,61 @@ defmodule Bookk.Notation do
       ** (Bookk.UnbalancedError) The interledger entry is unbalanced!
 
   """
-
   defmacro journalize([{_, _} | _] = opts, do: block) do
-    {chart_of_accounts, opts} =
-      opts
-      |> Keyword.put_new(:compact, false)
-      |> Keyword.put_new(:on_unbalanced, :nothing)
-      |> Keyword.pop!(:using)
+    opts
+    |> Keyword.put_new(:compact, false)
+    |> Keyword.put_new(:on_unbalanced, :nothing)
+    |> do_journalize(__CALLER__, do: block)
+  end
 
-    __CALLER__
-    |> to_interledger_entry(Macro.expand(chart_of_accounts, __CALLER__), block)
-    |> apply_opts(opts)
+  @doc ~S"""
+  Same as `journalize/2` but `:on_unbalanced` is always set to `:raise`.
+
+  ## Examples
+
+      iex> use Bookk.Notation
+      iex>
+      iex> journalize! using: DummyChartOfAccounts do
+      iex>   on ledger(:acme) do
+      iex>     debit account(:cash), 50
+      iex>   end
+      iex> end
+      ** (Bookk.UnbalancedError) The interledger entry is unbalanced!
+
+  If the option `:on_unbalanced` is given, it will be ignored:
+
+      iex> use Bookk.Notation
+      iex>
+      iex> journalize! using: DummyChartOfAccounts, on_unbalanced: :nothing do
+      iex>   on ledger(:acme) do
+      iex>     debit account(:cash), 50
+      iex>   end
+      iex> end
+      ** (Bookk.UnbalancedError) The interledger entry is unbalanced!
+
+  """
+  defmacro journalize!([{_, _} | _] = opts, do: block) do
+    opts
+    |> Keyword.put_new(:compact, false)
+    |> Keyword.put(:on_unbalanced, :raise)
+    |> do_journalize(__CALLER__, do: block)
   end
 
   #
   #   PRIVATE
   #
+
+  defp do_journalize(opts, caller, do: block) do
+    {opts, others} = Keyword.split(opts, [:using, :compact, :on_unbalanced])
+    {chart_of_accounts, opts} = Keyword.pop!(opts, :using)
+
+    for {key, _} <- others,
+        do: raise(ArgumentError, "unsupported option #{inspect(key)}")
+
+    caller
+    |> to_interledger_entry(Macro.expand(chart_of_accounts, caller), block)
+    |> apply_opts(opts)
+  end
 
   defp to_statements({:__block__, _, statements}), do: statements
   defp to_statements({:on, _, _} = statement), do: [statement]
@@ -209,34 +247,18 @@ defmodule Bookk.Notation do
 
   defp to_amount({:+, meta, [a, b]}), do: {{:., [], [{:__aliases__, [], [Decimal]}, :add]}, meta, [to_amount(a), to_amount(b)]}
   defp to_amount({:-, meta, [a, b]}), do: {{:., [], [{:__aliases__, [], [Decimal]}, :sub]}, meta, [to_amount(a), to_amount(b)]}
+  defp to_amount({:-, meta, [a]}), do: {{:., [], [{:__aliases__, [], [Decimal]}, :negate]}, meta, [to_amount(a)]}
   defp to_amount({:*, meta, [a, b]}), do: {{:., [], [{:__aliases__, [], [Decimal]}, :mult]}, meta, [to_amount(a), to_amount(b)]}
   defp to_amount({:/, meta, [a, b]}), do: {{:., [], [{:__aliases__, [], [Decimal]}, :div]}, meta, [to_amount(a), to_amount(b)]}
   defp to_amount(value) when is_integer(value), do: {{:., [], [{:__aliases__, [], [Decimal]}, :new]}, [], [value]}
   defp to_amount(value) when is_float(value), do: {{:., [], [{:__aliases__, [], [Decimal]}, :from_float]}, [], [value]}
-  defp to_amount(var), do: {{:., [], [{:__aliases__, [], [Bookk.Utils]}, :to_decimal]}, [], [var]}
+  defp to_amount(expr), do: {{:., [], [{:__aliases__, [], [Bookk.Utils]}, :to_decimal]}, [], [expr]}
 
-  defp apply_opts(expr, []),
-    do: expr
-
-  defp apply_opts(expr, [{:compact, true} | tail]) do
-    {{:., [], [{:__aliases__, [], [Bookk.InterledgerEntry]}, :compact]}, [], [expr]}
-    |> apply_opts(tail)
-  end
-
-  defp apply_opts(expr, [{:compact, false} | tail]),
-    do: apply_opts(expr, tail)
-
-  defp apply_opts(expr, [{:on_unbalanced, :raise} | tail]) do
-    {{:., [], [{:__aliases__, [], [Bookk.InterledgerEntry]}, :balanced!]}, [], [expr]}
-    |> apply_opts(tail)
-  end
-
-  defp apply_opts(expr, [{:on_unbalanced, :nothing} | tail]),
-    do: apply_opts(expr, tail)
-
-  defp apply_opts(_, [{:on_unbalanced, value} | _]),
-    do: raise(ArgumentError, "unsupported value #{inspect(value)} for option :on_unbalanced")
-
-  defp apply_opts(_, [{key, _} | _]),
-    do: raise(ArgumentError, "unsupported option #{inspect(key)}")
+  defp apply_opts(expr, []), do: expr
+  defp apply_opts(expr, [{:compact, true} | tail]), do: apply_opts({{:., [], [{:__aliases__, [], [Bookk.InterledgerEntry]}, :compact]}, [], [expr]}, tail)
+  defp apply_opts(expr, [{:compact, false} | tail]), do: apply_opts(expr, tail)
+  defp apply_opts(_, [{:compact, value} | _]), do: raise(ArgumentError, "option :compact must be either true or false, got #{inspect(value)}")
+  defp apply_opts(expr, [{:on_unbalanced, :raise} | tail]), do: apply_opts({{:., [], [{:__aliases__, [], [Bookk.InterledgerEntry]}, :balanced!]}, [], [expr]}, tail)
+  defp apply_opts(expr, [{:on_unbalanced, :nothing} | tail]), do: apply_opts(expr, tail)
+  defp apply_opts(_, [{:on_unbalanced, value} | _]), do: raise(ArgumentError, "option :on_unbalanced must be either :nothing or :raise, got #{inspect(value)}")
 end

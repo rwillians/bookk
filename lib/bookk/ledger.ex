@@ -1,7 +1,3 @@
-# credo:disable-for-this-file Credo.Check.Refactor.ABCSize
-#
-#   NOTE: C'est la vie
-#
 defmodule Bookk.Ledger do
   @moduledoc ~S"""
   A ledger is a book that holds accounts. Traditionally, ledgers would
@@ -31,7 +27,7 @@ defmodule Bookk.Ledger do
 
   - `id`: the id of the ledger;
   - `accounts_by_name`: a map of the accounts known by the ledger,
-    grouped by their name.
+    indexed by their name.
   """
   @type t :: %Bookk.Ledger{
           id: String.t(),
@@ -46,7 +42,7 @@ defmodule Bookk.Ledger do
   A ledger is considered balance when the sum of balance from its
   debit accounts is equal the sum of balance from its credit accounts.
   You know if an account is a "debit account" or a "credit account" by
-  the natural balance of its class.
+  the natural balance of their class.
 
   See `Bookk.AccountClass` for more information on natural balance.
 
@@ -65,8 +61,8 @@ defmodule Bookk.Ledger do
       iex>
       iex> journal_entry = %Bookk.JournalEntry{
       iex>   operations: [
-      iex>     debit(fixture_account_head(:cash), Decimal.new(50)),
-      iex>     credit(fixture_account_head(:deposits), Decimal.new(50))
+      iex>     Bookk.Operation.debit(fixture_account_head(:cash), Decimal.new(50)),
+      iex>     Bookk.Operation.credit(fixture_account_head(:deposits), Decimal.new(50))
       iex>   ]
       iex> }
       iex>
@@ -74,14 +70,15 @@ defmodule Bookk.Ledger do
       iex> |> Bookk.Ledger.balanced?()
       true
 
-  Is unbalanced when the sum of debit accounts balances isn't equal
+  Is unbalanced when the sum of debit accounts balances is NOT equal
   the sum of credit accounts balances:
 
       iex> ledger = Bookk.Ledger.new("acme")
       iex>
       iex> journal_entry = %Bookk.JournalEntry{
       iex>   operations: [
-      iex>     debit(fixture_account_head(:cash), Decimal.new(50))
+      iex>     Bookk.Operation.debit(fixture_account_head(:cash), Decimal.new(50)),
+      iex>     Bookk.Operation.credit(fixture_account_head(:deposits), Decimal.new(25))
       iex>   ]
       iex> }
       iex>
@@ -140,8 +137,8 @@ defmodule Bookk.Ledger do
 
     operations =
       for %AccountHead{} = account_head <- account_heads do
-        account_a = Ledger.get_account(a, account_head)
-        account_b = Ledger.get_account(b, account_head)
+        account_a = get_account(a, account_head)
+        account_b = get_account(b, account_head)
         diff_amount = Decimal.sub(account_b.balance, account_a.balance)
 
         Op.new(account_head.class.natural_balance, account_head, diff_amount)
@@ -193,26 +190,17 @@ defmodule Bookk.Ledger do
   Returns the account when it exists in the ledger:
 
       iex> ledger = Bookk.Ledger.new("acme", [
-      iex>   %Bookk.Account{
-      iex>     head: fixture_account_head(:cash),
-      iex>     balance: Decimal.new(25)
-      iex>   }
+      iex>   Bookk.Account.new(fixture_account_head(:cash), Decimal.new(25))
       iex> ])
       iex>
       iex> Bookk.Ledger.get_account(ledger, fixture_account_head(:cash))
-      %Bookk.Account{
-        head: fixture_account_head(:cash),
-        balance: Decimal.new(25)
-      }
+      Bookk.Account.new(fixture_account_head(:cash), Decimal.new(25))
 
-  Returns an empty account when the it doesn't exist in the ledger:
+  Returns an empty account when it doesn't exist in the ledger:
 
       iex> Bookk.Ledger.new("acme")
       iex> |> Bookk.Ledger.get_account(fixture_account_head(:cash))
-      %Bookk.Account{
-        head: fixture_account_head(:cash),
-        balance: Decimal.new(0)
-      }
+      Bookk.Account.new(fixture_account_head(:cash), Decimal.new(0))
 
   """
   @spec get_account(t, Bookk.AccountHead.t()) :: Bookk.Account.t()
