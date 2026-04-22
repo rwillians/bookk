@@ -47,8 +47,8 @@ defmodule Bookk.NaiveState do
 
       iex> state = Bookk.NaiveState.new([
       iex>   Bookk.Ledger.new("acme", [
-      iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(25)),
-      iex>     Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(25))
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(25)),
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account(:deposits), Decimal.new(25))
       iex>   ])
       iex> ])
       iex>
@@ -59,8 +59,8 @@ defmodule Bookk.NaiveState do
 
       iex> state = Bookk.NaiveState.new([
       iex>   Bookk.Ledger.new("acme", [
-      iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(25)),
-      iex>     Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(10))
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(25)),
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account(:deposits), Decimal.new(10))
       iex>   ])
       iex> ])
       iex>
@@ -85,32 +85,32 @@ defmodule Bookk.NaiveState do
 
       iex> a = Bookk.NaiveState.new([
       iex>   Bookk.Ledger.new("acme", [
-      iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(25)),
-      iex>     Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(25))
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(25)),
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account(:deposits), Decimal.new(25))
       iex>   ])
       iex> ])
       iex>
       iex> b = Bookk.NaiveState.new([
       iex>   Bookk.Ledger.new("acme", [
-      iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(100)),
-      iex>     Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(25)),
-      iex>     Bookk.Account.new(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(75))
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(100)),
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account(:deposits), Decimal.new(25)),
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account({:unspent_cash, {:user, "12345"}}), Decimal.new(75))
       iex>   ]),
       iex>   Bookk.Ledger.new("foo", [
-      iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(75)),
-      iex>     Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(75))
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(75)),
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account(:deposits), Decimal.new(75))
       iex>   ])
       iex> ])
       iex>
       iex> Bookk.NaiveState.diff(a, b)
       Bookk.InterledgerEntry.new([
         {"acme", Bookk.JournalEntry.new([
-          debit(fixture_account_head(:cash), Decimal.new(75)),
-          credit(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(75))
+          Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(75)),
+          Bookk.Operation.credit(ACME.ChartOfAccounts.account({:unspent_cash, {:user, "12345"}}), Decimal.new(75))
         ])},
         {"foo", Bookk.JournalEntry.new([
-          debit(fixture_account_head(:cash), Decimal.new(75)),
-          credit(fixture_account_head(:deposits), Decimal.new(75))
+          Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(75)),
+          Bookk.Operation.credit(ACME.ChartOfAccounts.account(:deposits), Decimal.new(75))
         ])}
       ])
 
@@ -147,8 +147,8 @@ defmodule Bookk.NaiveState do
 
       iex> state = Bookk.NaiveState.new([
       iex>   Bookk.Ledger.new("acme", [
-      iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(0)),
-      iex>     Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(0))
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(0)),
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account(:deposits), Decimal.new(0))
       iex>   ])
       iex> ])
       iex>
@@ -157,8 +157,8 @@ defmodule Bookk.NaiveState do
 
       iex> state = Bookk.NaiveState.new([
       iex>   Bookk.Ledger.new("acme", [
-      iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(10)),
-      iex>     Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(10))
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(10)),
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account(:deposits), Decimal.new(10))
       iex>   ])
       iex> ])
       iex>
@@ -190,13 +190,13 @@ defmodule Bookk.NaiveState do
 
       iex> state = Bookk.NaiveState.new([
       iex>   Bookk.Ledger.new("foo", [
-      iex>     Bookk.Account.new(fixture_account_head(:cash))
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account(:cash))
       iex>   ])
       iex> ])
       iex>
       iex> Bookk.NaiveState.get_ledger(state, "foo")
       Bookk.Ledger.new("foo", [
-        Bookk.Account.new(fixture_account_head(:cash))
+        Bookk.Account.new(ACME.ChartOfAccounts.account(:cash))
       ])
 
   """
@@ -219,40 +219,40 @@ defmodule Bookk.NaiveState do
 
       iex> a = Bookk.NaiveState.new([
       iex>   Bookk.Ledger.new("acme", [
-      iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(5))
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(5))
       iex>   ])
       iex> ])
       iex>
       iex> b = Bookk.NaiveState.new([
       iex>   Bookk.Ledger.new("acme", [
-      iex>     Bookk.Account.new(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(5))
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account({:unspent_cash, {:user, "12345"}}), Decimal.new(5))
       iex>   ]),
       iex>   Bookk.Ledger.new("user(12345)", [
-      iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(5)),
-      iex>     Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(5)),
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(5)),
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account(:deposits), Decimal.new(5)),
       iex>   ])
       iex> ])
       iex>
       iex> c = Bookk.NaiveState.new([
       iex>   Bookk.Ledger.new("foo", [
-      iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(25)),
-      iex>     Bookk.Account.new(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(25))
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(25)),
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account({:unspent_cash, {:user, "12345"}}), Decimal.new(25))
       iex>   ])
       iex> ])
       iex>
       iex> Bookk.NaiveState.merge([a, b, c])
       Bookk.NaiveState.new([
         Bookk.Ledger.new("acme", [
-          Bookk.Account.new(fixture_account_head(:cash), Decimal.new(5)),
-          Bookk.Account.new(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(5))
+          Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(5)),
+          Bookk.Account.new(ACME.ChartOfAccounts.account({:unspent_cash, {:user, "12345"}}), Decimal.new(5))
         ]),
         Bookk.Ledger.new("foo", [
-          Bookk.Account.new(fixture_account_head(:cash), Decimal.new(25)),
-          Bookk.Account.new(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(25))
+          Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(25)),
+          Bookk.Account.new(ACME.ChartOfAccounts.account({:unspent_cash, {:user, "12345"}}), Decimal.new(25))
         ]),
         Bookk.Ledger.new("user(12345)", [
-          Bookk.Account.new(fixture_account_head(:cash), Decimal.new(5)),
-          Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(5)),
+          Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(5)),
+          Bookk.Account.new(ACME.ChartOfAccounts.account(:deposits), Decimal.new(5)),
         ])
       ])
 
@@ -270,29 +270,29 @@ defmodule Bookk.NaiveState do
 
       iex> a = Bookk.NaiveState.new([
       iex>   Bookk.Ledger.new("acme", [
-      iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(5))
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(5))
       iex>   ])
       iex> ])
       iex>
       iex> b = Bookk.NaiveState.new([
       iex>   Bookk.Ledger.new("acme", [
-      iex>     Bookk.Account.new(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(5))
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account({:unspent_cash, {:user, "12345"}}), Decimal.new(5))
       iex>   ]),
       iex>   Bookk.Ledger.new("user(12345)", [
-      iex>     Bookk.Account.new(fixture_account_head(:cash), Decimal.new(5)),
-      iex>     Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(5)),
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(5)),
+      iex>     Bookk.Account.new(ACME.ChartOfAccounts.account(:deposits), Decimal.new(5)),
       iex>   ])
       iex> ])
       iex>
       iex> Bookk.NaiveState.merge(a, b)
       Bookk.NaiveState.new([
         Bookk.Ledger.new("acme", [
-          Bookk.Account.new(fixture_account_head(:cash), Decimal.new(5)),
-          Bookk.Account.new(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(5))
+          Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(5)),
+          Bookk.Account.new(ACME.ChartOfAccounts.account({:unspent_cash, {:user, "12345"}}), Decimal.new(5))
         ]),
         Bookk.Ledger.new("user(12345)", [
-          Bookk.Account.new(fixture_account_head(:cash), Decimal.new(5)),
-          Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(5)),
+          Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(5)),
+          Bookk.Account.new(ACME.ChartOfAccounts.account(:deposits), Decimal.new(5)),
         ])
       ])
 
@@ -342,7 +342,7 @@ defmodule Bookk.NaiveState do
       iex> deposited_amount = Decimal.new(500)
       iex>
       iex> journal_entry =
-      iex>   journalize using: DummyChartOfAccounts do
+      iex>   journalize using: ACME.ChartOfAccounts do
       iex>     on ledger(:acme) do
       iex>       debit account(:cash), deposited_amount
       iex>       credit account({:unspent_cash, {:user, user_id}}), deposited_amount
@@ -358,12 +358,12 @@ defmodule Bookk.NaiveState do
       iex> |> Bookk.NaiveState.post(journal_entry)
       Bookk.NaiveState.new([
         Bookk.Ledger.new("acme", [
-          Bookk.Account.new(fixture_account_head(:cash), Decimal.new(500)),
-          Bookk.Account.new(fixture_account_head({:unspent_cash, {:user, "123"}}), Decimal.new(500))
+          Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(500)),
+          Bookk.Account.new(ACME.ChartOfAccounts.account({:unspent_cash, {:user, "123"}}), Decimal.new(500))
         ]),
         Bookk.Ledger.new("user(123)", [
-          Bookk.Account.new(fixture_account_head(:cash), Decimal.new(500)),
-          Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(500))
+          Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(500)),
+          Bookk.Account.new(ACME.ChartOfAccounts.account(:deposits), Decimal.new(500))
         ])
       ])
 

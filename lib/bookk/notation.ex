@@ -40,7 +40,7 @@ defmodule Bookk.Notation do
       iex> use Bookk.Notation
       iex>
       iex> %Bookk.InterledgerEntry{} = journal_entry =
-      iex>   journalize using: DummyChartOfAccounts do
+      iex>   journalize using: ACME.ChartOfAccounts do
       iex>     on ledger(:acme) do
       iex>       debit account(:cash), Decimal.new(150)
       iex>       credit account(:deposits), Decimal.new(150)
@@ -55,7 +55,7 @@ defmodule Bookk.Notation do
       iex> use Bookk.Notation
       iex>
       iex> %Bookk.InterledgerEntry{} = journal_entry =
-      iex>   journalize using: DummyChartOfAccounts do
+      iex>   journalize using: ACME.ChartOfAccounts do
       iex>     on ledger(:acme) do
       iex>       debit account(:cash), Decimal.new(150)
       iex>       credit account(:deposits), Decimal.new(50)
@@ -77,7 +77,7 @@ defmodule Bookk.Notation do
       iex>
       iex> foo = %{amount: 50}
       iex>
-      iex> journalize using: DummyChartOfAccounts do
+      iex> journalize using: ACME.ChartOfAccounts do
       iex>   on ledger(:acme) do
       iex>     debit account(:cash), ((%Decimal{exp: 0, sign: 1, coef: 100} + Decimal.new(100) - foo.amount) * 2) / 2
       iex>     credit account(:deposits), ((Decimal.new(100) + foo.amount) * Decimal.new(2)) / Decimal.new(2)
@@ -85,8 +85,8 @@ defmodule Bookk.Notation do
       iex> end
       Bookk.InterledgerEntry.new([
         {"acme", Bookk.JournalEntry.new([
-          debit(fixture_account_head(:cash), Decimal.new(150)),
-          credit(fixture_account_head(:deposits), Decimal.new(150))
+          Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(150)),
+          Bookk.Operation.credit(ACME.ChartOfAccounts.account(:deposits), Decimal.new(150))
         ])}
       ])
 
@@ -95,7 +95,7 @@ defmodule Bookk.Notation do
 
       iex> use Bookk.Notation
       iex>
-      iex> journalize using: DummyChartOfAccounts do
+      iex> journalize using: ACME.ChartOfAccounts do
       iex>   on ledger(:acme) do
       iex>     debit account(:cash), 50
       iex>     credit account(:deposits), 50
@@ -108,12 +108,12 @@ defmodule Bookk.Notation do
       iex> end
       Bookk.InterledgerEntry.new([
         {"acme", Bookk.JournalEntry.new([
-          debit(fixture_account_head(:cash), Decimal.new(50)),
-          credit(fixture_account_head(:deposits), Decimal.new(50))
+          Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(50)),
+          Bookk.Operation.credit(ACME.ChartOfAccounts.account(:deposits), Decimal.new(50))
         ])},
         {"acme", Bookk.JournalEntry.new([
-          debit(fixture_account_head(:cash), Decimal.new(100)),
-          credit(fixture_account_head(:deposits), Decimal.new(100))
+          Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(100)),
+          Bookk.Operation.credit(ACME.ChartOfAccounts.account(:deposits), Decimal.new(100))
         ])}
       ])
 
@@ -122,7 +122,7 @@ defmodule Bookk.Notation do
 
       iex> use Bookk.Notation
       iex>
-      iex> journalize using: DummyChartOfAccounts, compact: true do
+      iex> journalize using: ACME.ChartOfAccounts, compact: true do
       iex>   on ledger(:acme) do
       iex>     debit account(:cash), 50
       iex>     credit account(:deposits), 50
@@ -135,8 +135,8 @@ defmodule Bookk.Notation do
       iex> end
       Bookk.InterledgerEntry.new([
         {"acme", Bookk.JournalEntry.new([
-          debit(fixture_account_head(:cash), Decimal.new(150)),
-          credit(fixture_account_head(:deposits), Decimal.new(150))
+          Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(150)),
+          Bookk.Operation.credit(ACME.ChartOfAccounts.account(:deposits), Decimal.new(150))
         ])}
       ])
 
@@ -146,7 +146,7 @@ defmodule Bookk.Notation do
 
       iex> use Bookk.Notation
       iex>
-      iex> journalize using: DummyChartOfAccounts, on_unbalanced: :raise do
+      iex> journalize using: ACME.ChartOfAccounts, on_unbalanced: :raise do
       iex>   on ledger(:acme) do
       iex>     debit account(:cash), 50
       iex>   end
@@ -168,7 +168,7 @@ defmodule Bookk.Notation do
 
       iex> use Bookk.Notation
       iex>
-      iex> journalize! using: DummyChartOfAccounts do
+      iex> journalize! using: ACME.ChartOfAccounts do
       iex>   on ledger(:acme) do
       iex>     debit account(:cash), 50
       iex>   end
@@ -179,7 +179,7 @@ defmodule Bookk.Notation do
 
       iex> use Bookk.Notation
       iex>
-      iex> journalize! using: DummyChartOfAccounts, on_unbalanced: :nothing do
+      iex> journalize! using: ACME.ChartOfAccounts, on_unbalanced: :nothing do
       iex>   on ledger(:acme) do
       iex>     debit account(:cash), 50
       iex>   end

@@ -5,17 +5,17 @@ defmodule Bookk.ChartOfAccounts do
   hard-coding them, you define patterns for accounts and ledgers
   supported by your application using functions and pattern matching.
 
-  For example, if your application allows ledgers to have an account
-  for expenses related to paying salary to an employee, you could
-  define a function with a signature the like the one below:
+  For example, let's say a SaaS application needs to track payment
+  processing expense whenever a user makes a payment. You could define
+  a `account/1` function with a signature the like the one below:
 
-      def account({:salary, {:employee, employee_id}})
+      def account({:payments_expenses, payment_provider_id})
 
   And if your application, following the previous example, allows for
-  every employee to have their own ledger, you could define a function
-  with a signature like the one below:
+  each user to have their own ledger, you could define a `ledger_id/1`
+  function with a signature like the one below:
 
-      def ledger_id({:employee, employee_id})
+      def ledger_id({:user, user_id})
 
   ## Related
 
@@ -27,16 +27,17 @@ defmodule Bookk.ChartOfAccounts do
   @doc ~S"""
   Get a `Bookk.AccountClass` definition by its id.
 
-  You are free to choose how and where you define your account classes, but you
-  need to provide an implementation for this function so that your classes
-  definitions are accessible to other modules.
+  This function maps all allowed account classes in your application.
 
   ## Example
 
       @impl Bookk.ChartOfAccounts
-      def class("A"), do: %Bookk.AccountClass{id: "A", parent_id: nil, name: "Assets", natural_balance: :debit},
+      def class("A"), do: %Bookk.AccountClass{id: "A", parent_id: nil, name: "Assets", natural_balance: :debit}
       def class("CA"), do: %Bookk.AccountClass{id: "CA", parent_id: "A", name: "Current Assets", natural_balance: :debit}
 
+  ## Related
+
+  - See `Bookk.AccountClass` for commonly used account classes.
   """
   @callback class(id :: String.t()) :: Bookk.AccountClass.t() | nil
 

@@ -1,7 +1,7 @@
 defmodule Bookk.AccountHead do
   @moduledoc ~S"""
   An Account head is a struct contained all the values necessary to
-  either fetch or create a `Bookk.Account` from/into a `Bookk.Ledger`.
+  either fetch or create an account in a ledger.
 
   ## Related
 
@@ -17,12 +17,11 @@ defmodule Bookk.AccountHead do
   ## Fields
 
   An account head is composed of:
-  - `name`: the accounts name (unique within a ledger);
+  - `name`: the account's name (unique within a ledger);
   - `class`: a `Bookk.AccountClass` struct that describes the class to
     which the account belongs;
   - `meta`: a map of metadata for whatever information you find useful
-    to hold there for when you need to fetch, create or "hydrate" a
-    persisted account.
+    to hold.
   """
   @type t :: %Bookk.AccountHead{
           name: String.t(),

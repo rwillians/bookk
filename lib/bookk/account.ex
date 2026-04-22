@@ -1,13 +1,12 @@
 defmodule Bookk.Account do
   @moduledoc ~S"""
-  An Account is pretty much like a bucked. It has a single purpose:
-  holding a measurable amount of something, in this case it's
-  currency.
+  An Account is pretty much like a bucket. It has a single purpose:
+  holding a measurable amount of something, in this case it's monetary
+  amount.
 
   ## Related
 
   - `Bookk.AccountHead`;
-  - `Bookk.Operation`;
   - `Bookk.Ledger`.
   """
 
@@ -22,8 +21,8 @@ defmodule Bookk.Account do
 
   An account is composed of:
   - `head`: the `Bookk.AccountHead` that identifies the account;
-  - `balance`: the amount of currency held by the account, in cents or
-    the smallest fraction supported by the currency you're using.
+  - `balance`: the monetary amount held by the account, in `Decimal`
+    for high precision arithmetic.
   """
   @type t :: %Bookk.Account{
           head: Bookk.AccountHead.t(),
@@ -37,11 +36,13 @@ defmodule Bookk.Account do
 
   ## Examples
 
-      iex> Bookk.Account.new(fixture_account_head(:cash), Decimal.new(0))
+      iex> ACME.ChartOfAccounts.account(:cash)
+      iex> |> Bookk.Account.new(Decimal.new(0))
       iex> |> Bookk.Account.empty?()
       true
 
-      iex> Bookk.Account.new(fixture_account_head(:cash), Decimal.new(10))
+      iex> ACME.ChartOfAccounts.account(:cash)
+      iex> |> Bookk.Account.new(Decimal.new(10))
       iex> |> Bookk.Account.empty?()
       false
 
@@ -51,16 +52,18 @@ defmodule Bookk.Account do
   def empty?(%Account{} = account), do: Decimal.eq?(account.balance, 0)
 
   @doc ~S"""
-  Merges a non-empty set of accounts into one (account head MUST be
-  the same).
+  Merges a non-empty set of accounts into one, where all accounts must
+  have the same account head.
 
   ## Examples
 
-      iex> a = Bookk.Account.new(fixture_account_head(:cash), Decimal.new(5))
-      iex> b = Bookk.Account.new(fixture_account_head(:cash), Decimal.new(15))
-      iex> c = Bookk.Account.new(fixture_account_head(:cash), Decimal.new(30))
+      iex> a = Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(5))
+      iex> b = Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(15))
+      iex> c = Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(30))
+      iex>
       iex> Bookk.Account.merge([a, b, c])
-      Bookk.Account.new(fixture_account_head(:cash), Decimal.new(50))
+      ACME.ChartOfAccounts.account(:cash)
+      |> Bookk.Account.new(Decimal.new(50))
 
   If you try to merge an empty list of accounts, an error will be
   raised.
@@ -71,19 +74,20 @@ defmodule Bookk.Account do
   def merge([%Account{} = head | tail]), do: merge(head, merge(tail))
 
   @doc ~S"""
-  Merges two accounts into one (account head MUST be the same).
+  Merges two accounts into one, where both accounts must have the same
+  account head.
 
   ## Examples
 
-      iex> a = Bookk.Account.new(fixture_account_head(:cash), Decimal.new(5))
-      iex> b = Bookk.Account.new(fixture_account_head(:cash), Decimal.new(15))
+      iex> a = Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(5))
+      iex> b = Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(15))
       iex> Bookk.Account.merge(a, b)
-      Bookk.Account.new(fixture_account_head(:cash), Decimal.new(20))
+      Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(20))
 
-  It raises if the account head is different:
+  It raises if one account head is different from the other:
 
-      iex> a = Bookk.Account.new(fixture_account_head(:cash), Decimal.new(5))
-      iex> b = Bookk.Account.new(fixture_account_head(:deposits), Decimal.new(15))
+      iex> a = Bookk.Account.new(ACME.ChartOfAccounts.account(:cash), Decimal.new(5))
+      iex> b = Bookk.Account.new(ACME.ChartOfAccounts.account(:deposits), Decimal.new(15))
       iex> Bookk.Account.merge(a, b)
       ** (FunctionClauseError) no function clause matching in Bookk.Account.merge/2
 
@@ -105,20 +109,20 @@ defmodule Bookk.Account do
   If no initial balance is provided in the second argument, then balance will be
   set to zero:
 
-      iex> head = fixture_account_head(:cash)
+      iex> head = ACME.ChartOfAccounts.account(:cash)
       iex> Bookk.Account.new(head)
       %Bookk.Account{
-        head: fixture_account_head(:cash),
+        head: ACME.ChartOfAccounts.account(:cash),
         balance: Decimal.new(0)
       }
 
   If an initial balance is provided in the second argument, then balance will be
   set to it:
 
-      iex> head = fixture_account_head(:cash)
+      iex> head = ACME.ChartOfAccounts.account(:cash)
       iex> Bookk.Account.new(head, Decimal.new(50))
       %Bookk.Account{
-        head: fixture_account_head(:cash),
+        head: ACME.ChartOfAccounts.account(:cash),
         balance: Decimal.new(50)
       }
 
@@ -132,21 +136,20 @@ defmodule Bookk.Account do
     do: %Account{head: head, balance: balance}
 
   @doc ~S"""
-  Calculates de delta amount for the operation then adds it the account's
-  balance. See `Bookk.Operation.to_delta_amount/1` for more information on
-  delta amount.
+  Calculates de delta amount of the given operation, then adds it the
+  account's balance. See `Bookk.Operation.to_delta_amount/1` for more
+  information on delta amount.
 
   ## Examples
 
-      iex> class = %Bookk.AccountClass{natural_balance: :debit}
-      iex> head = %Bookk.AccountHead{class: class}
+      iex> head = ACME.ChartOfAccounts.account(:cash)
       iex> account = Bookk.Account.new(head)
       iex>
-      iex> op = debit(head, Decimal.new(25))
+      iex> op = Bookk.Operation.debit(head, Decimal.new(25))
       iex>
       iex> Bookk.Account.post(account, op)
       %Bookk.Account{
-        head: %Bookk.AccountHead{class: %Bookk.AccountClass{natural_balance: :debit}},
+        head: ACME.ChartOfAccounts.account(:cash),
         balance: Decimal.new(25)
       }
 
@@ -157,7 +160,7 @@ defmodule Bookk.Account do
       iex> head_b = %Bookk.AccountHead{name: "b"}
       iex>
       iex> account = Bookk.Account.new(head_a)
-      iex> op = debit(head_b, Decimal.new(25))
+      iex> op = Bookk.Operation.debit(head_b, Decimal.new(25))
       iex>
       iex> Bookk.Account.post(account, op)
       ** (FunctionClauseError) no function clause matching in Bookk.Account.post/2

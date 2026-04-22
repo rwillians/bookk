@@ -1,4 +1,4 @@
-defmodule DummyChartOfAccounts do
+defmodule ACME.ChartOfAccounts do
   use Bookk.ChartOfAccounts
 
   alias Bookk.AccountClass, as: C

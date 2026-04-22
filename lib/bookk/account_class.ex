@@ -35,12 +35,11 @@ defmodule Bookk.AccountClass do
 
   An account class in composed of:
   - **`id`**: it's recomended that, instead of using it with an
-    arbitrary value, you assign it to the class' name abbreviation;
+    arbitrary value, you set it to the class' name abbreviation;
   - **`parent_id`**: If the class is a subclass, then `parent_id`
-    should be set to the parent class' abbreviation. For example,
-    Current Assets is a subclass of Assets, therefore its `parent_id`
-    should be set to `"A"` (where `"A"` is the abbreviation of
-    Assets);
+    should be set to the parent class' id. For example, Current Assets
+    is a subclass of Assets, therefore its `parent_id` should be set
+    to `"A"` (where `"A"` is the abbreviation of Assets);
   - **`name`**: The human readable name of the account class;
   - **`natural_balance`** (either `:debit` or `:credit`): specifies
     the direction in which accounts of this class grows their balance.

@@ -43,17 +43,17 @@ defmodule Bookk.JournalEntry do
   Balanced:
 
       iex> journal_entry = Bookk.JournalEntry.new([
-      iex>   debit(fixture_account_head(:cash), Decimal.new(10)),
-      iex>   credit(fixture_account_head(:deposits), Decimal.new(10))
+      iex>   Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(10)),
+      iex>   Bookk.Operation.credit(ACME.ChartOfAccounts.account(:deposits), Decimal.new(10))
       iex> ])
       iex>
       iex> Bookk.JournalEntry.balanced?(journal_entry)
       true
 
       iex> journal_entry = Bookk.JournalEntry.new([
-      iex>   debit(fixture_account_head(:cash), Decimal.new(10)),
-      iex>   credit(fixture_account_head(:deposits), Decimal.new(7)),
-      iex>   credit(fixture_account_head(:deposits), Decimal.new(3))
+      iex>   Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(10)),
+      iex>   Bookk.Operation.credit(ACME.ChartOfAccounts.account(:deposits), Decimal.new(7)),
+      iex>   Bookk.Operation.credit(ACME.ChartOfAccounts.account(:deposits), Decimal.new(3))
       iex> ])
       iex>
       iex> Bookk.JournalEntry.balanced?(journal_entry)
@@ -62,16 +62,16 @@ defmodule Bookk.JournalEntry do
   Unbalanced:
 
       iex> journal_entry = Bookk.JournalEntry.new([
-      iex>   debit(fixture_account_head(:cash), Decimal.new(10))
+      iex>   Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(10))
       iex> ])
       iex>
       iex> Bookk.JournalEntry.balanced?(journal_entry)
       false
 
       iex> journal_entry = Bookk.JournalEntry.new([
-      iex>   debit(fixture_account_head(:cash), Decimal.new(10)),
-      iex>   credit(fixture_account_head(:deposits), Decimal.new(7)),
-      iex>   credit(fixture_account_head(:deposits), Decimal.new(5))
+      iex>   Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(10)),
+      iex>   Bookk.Operation.credit(ACME.ChartOfAccounts.account(:deposits), Decimal.new(7)),
+      iex>   Bookk.Operation.credit(ACME.ChartOfAccounts.account(:deposits), Decimal.new(5))
       iex> ])
       iex>
       iex> Bookk.JournalEntry.balanced?(journal_entry)
@@ -98,18 +98,18 @@ defmodule Bookk.JournalEntry do
   ## Examples
 
       iex> a = Bookk.JournalEntry.new([
-      iex>   Bookk.Operation.debit(fixture_account_head(:cash), Decimal.new(25))
+      iex>   Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(25))
       iex> ])
       iex>
       iex> b = Bookk.JournalEntry.new([
-      iex>   Bookk.Operation.debit(fixture_account_head(:cash), Decimal.new(100)),
-      iex>   Bookk.Operation.credit(fixture_account_head(:deposits), Decimal.new(100)),
+      iex>   Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(100)),
+      iex>   Bookk.Operation.credit(ACME.ChartOfAccounts.account(:deposits), Decimal.new(100)),
       iex> ])
       iex>
       iex> Bookk.JournalEntry.diff(a, b)
       Bookk.JournalEntry.new([
-        Bookk.Operation.debit(fixture_account_head(:cash), Decimal.new(75)),
-        Bookk.Operation.credit(fixture_account_head(:deposits), Decimal.new(100))
+        Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(75)),
+        Bookk.Operation.credit(ACME.ChartOfAccounts.account(:deposits), Decimal.new(100))
       ])
 
   """
@@ -148,8 +148,8 @@ defmodule Bookk.JournalEntry do
   Is empty when all operations in the journal entry are empty:
 
       iex> journal_entry = Bookk.JournalEntry.new([
-      iex>   debit(fixture_account_head(:cash), Decimal.new(0)),
-      iex>   credit(fixture_account_head(:deposits), Decimal.new(0)),
+      iex>   Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(0)),
+      iex>   Bookk.Operation.credit(ACME.ChartOfAccounts.account(:deposits), Decimal.new(0)),
       iex> ])
       iex>
       iex> Bookk.JournalEntry.empty?(journal_entry)
@@ -159,7 +159,7 @@ defmodule Bookk.JournalEntry do
   empty:
 
       iex> journal_entry = Bookk.JournalEntry.new([
-      iex>   debit(fixture_account_head(:cash), Decimal.new(10)),
+      iex>   Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(10)),
       iex> ])
       iex>
       iex> Bookk.JournalEntry.empty?(journal_entry)
@@ -180,13 +180,13 @@ defmodule Bookk.JournalEntry do
   When exists an operation for the given account head, it is returned:
 
       iex> journal_entry = Bookk.JournalEntry.new([
-      iex>   debit(fixture_account_head(:cash), Decimal.new(25))
+      iex>   Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(25))
       iex> ])
       iex>
-      iex> Bookk.JournalEntry.get_op(journal_entry, fixture_account_head(:cash))
+      iex> Bookk.JournalEntry.get_op(journal_entry, ACME.ChartOfAccounts.account(:cash))
       %Bookk.Operation{
         direction: :debit,
-        account_head: fixture_account_head(:cash),
+        account_head: ACME.ChartOfAccounts.account(:cash),
         amount: Decimal.new(25)
       }
 
@@ -194,10 +194,10 @@ defmodule Bookk.JournalEntry do
   empty operation is returned:
 
       iex> Bookk.JournalEntry.new([])
-      iex> |> Bookk.JournalEntry.get_op(fixture_account_head(:cash))
+      iex> |> Bookk.JournalEntry.get_op(ACME.ChartOfAccounts.account(:cash))
       %Bookk.Operation{
         direction: :debit,
-        account_head: fixture_account_head(:cash),
+        account_head: ACME.ChartOfAccounts.account(:cash),
         amount: Decimal.new(0)
       }
 
@@ -216,25 +216,25 @@ defmodule Bookk.JournalEntry do
 
   ## Examples
 
-      iex> cash = fixture_account_head(:cash)
-      iex> deposits = fixture_account_head(:deposits)
+      iex> cash = ACME.ChartOfAccounts.account(:cash)
+      iex> deposits = ACME.ChartOfAccounts.account(:deposits)
       iex>
       iex> a = Bookk.JournalEntry.new([
-      iex>   debit(cash, Decimal.new(80)),
-      iex>   debit(cash, Decimal.new(20)),
-      iex>   credit(deposits, Decimal.new(100))
+      iex>   Bookk.Operation.debit(cash, Decimal.new(80)),
+      iex>   Bookk.Operation.debit(cash, Decimal.new(20)),
+      iex>   Bookk.Operation.credit(deposits, Decimal.new(100))
       iex> ])
       iex>
       iex> b = Bookk.JournalEntry.new([
-      iex>   debit(cash, Decimal.new(80)),
-      iex>   debit(cash, Decimal.new(20)),
-      iex>   credit(deposits, Decimal.new(100))
+      iex>   Bookk.Operation.debit(cash, Decimal.new(80)),
+      iex>   Bookk.Operation.debit(cash, Decimal.new(20)),
+      iex>   Bookk.Operation.credit(deposits, Decimal.new(100))
       iex> ])
       iex>
       iex> Bookk.JournalEntry.merge([a, b])
       Bookk.JournalEntry.new([
-        debit(fixture_account_head(:cash), Decimal.new(200)),
-        credit(fixture_account_head(:deposits), Decimal.new(200))
+        Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(200)),
+        Bookk.Operation.credit(ACME.ChartOfAccounts.account(:deposits), Decimal.new(200))
       ])
 
   """
@@ -250,22 +250,22 @@ defmodule Bookk.JournalEntry do
   ## Examples
 
       iex> a = Bookk.JournalEntry.new([
-      iex>   debit(fixture_account_head(:cash), Decimal.new(80)),
-      iex>   debit(fixture_account_head(:cash), Decimal.new(20)),
-      iex>   credit(fixture_account_head(:deposits), Decimal.new(100))
+      iex>   Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(80)),
+      iex>   Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(20)),
+      iex>   Bookk.Operation.credit(ACME.ChartOfAccounts.account(:deposits), Decimal.new(100))
       iex> ])
       iex>
       iex> b = Bookk.JournalEntry.new([
-      iex>   debit(fixture_account_head(:cash), Decimal.new(80)),
-      iex>   debit(fixture_account_head(:cash), Decimal.new(20)),
-      iex>   credit(fixture_account_head(:deposits), Decimal.new(100))
+      iex>   Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(80)),
+      iex>   Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(20)),
+      iex>   Bookk.Operation.credit(ACME.ChartOfAccounts.account(:deposits), Decimal.new(100))
       iex> ])
       iex>
       iex> Bookk.JournalEntry.merge(a, b)
       %Bookk.JournalEntry{
         operations: [
-          debit(fixture_account_head(:cash), Decimal.new(200)),
-          credit(fixture_account_head(:deposits), Decimal.new(200))
+          Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(200)),
+          Bookk.Operation.credit(ACME.ChartOfAccounts.account(:deposits), Decimal.new(200))
         ]
       }
 
@@ -289,29 +289,29 @@ defmodule Bookk.JournalEntry do
   be merged into a single operation:
 
       iex> Bookk.JournalEntry.new([
-      iex>   debit(fixture_account_head(:cash), Decimal.new(80)),
-      iex>   debit(fixture_account_head(:cash), Decimal.new(20)),
-      iex>   credit(fixture_account_head(:deposits), Decimal.new(100))
+      iex>   Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(80)),
+      iex>   Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(20)),
+      iex>   Bookk.Operation.credit(ACME.ChartOfAccounts.account(:deposits), Decimal.new(100))
       iex> ])
       %Bookk.JournalEntry{
         operations: [
-          debit(fixture_account_head(:cash), Decimal.new(100)),
-          credit(fixture_account_head(:deposits), Decimal.new(100))
+          Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(100)),
+          Bookk.Operation.credit(ACME.ChartOfAccounts.account(:deposits), Decimal.new(100))
         ]
       }
 
   Empty operations will be dropped:
 
       iex> Bookk.JournalEntry.new([
-      iex>   debit(fixture_account_head(:cash), Decimal.new(80)),
-      iex>   debit(fixture_account_head(:cash), Decimal.new(20)),
-      iex>   credit(fixture_account_head(:deposits), Decimal.new(100)),
-      iex>   credit(fixture_account_head({:unspent_cash, {:user, "12345"}}), Decimal.new(0))
+      iex>   Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(80)),
+      iex>   Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(20)),
+      iex>   Bookk.Operation.credit(ACME.ChartOfAccounts.account(:deposits), Decimal.new(100)),
+      iex>   Bookk.Operation.credit(ACME.ChartOfAccounts.account({:unspent_cash, {:user, "12345"}}), Decimal.new(0))
       iex> ])
       %Bookk.JournalEntry{
         operations: [
-          debit(fixture_account_head(:cash), Decimal.new(100)),
-          credit(fixture_account_head(:deposits), Decimal.new(100))
+          Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(100)),
+          Bookk.Operation.credit(ACME.ChartOfAccounts.account(:deposits), Decimal.new(100))
         ]
       }
 
@@ -338,14 +338,14 @@ defmodule Bookk.JournalEntry do
   Reverses all operations in the journal entry:
 
       iex> journal_entry = Bookk.JournalEntry.new([
-      iex>   debit(fixture_account_head(:cash), Decimal.new(10)),
-      iex>   credit(fixture_account_head(:deposits), Decimal.new(10))
+      iex>   Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(10)),
+      iex>   Bookk.Operation.credit(ACME.ChartOfAccounts.account(:deposits), Decimal.new(10))
       iex> ])
       iex>
       iex> Bookk.JournalEntry.reverse(journal_entry)
       Bookk.JournalEntry.new([
-        debit(fixture_account_head(:deposits), Decimal.new(10)),
-        credit(fixture_account_head(:cash), Decimal.new(10))
+        Bookk.Operation.debit(ACME.ChartOfAccounts.account(:deposits), Decimal.new(10)),
+        Bookk.Operation.credit(ACME.ChartOfAccounts.account(:cash), Decimal.new(10))
       ])
 
   """
@@ -362,14 +362,14 @@ defmodule Bookk.JournalEntry do
   Returns the journal entry's list of operations:
 
       iex> journal_entry = Bookk.JournalEntry.new([
-      iex>   debit(fixture_account_head(:cash), Decimal.new(50)),
-      iex>   credit(fixture_account_head(:deposits), Decimal.new(50))
+      iex>   Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(50)),
+      iex>   Bookk.Operation.credit(ACME.ChartOfAccounts.account(:deposits), Decimal.new(50))
       iex> ])
       iex>
       iex> Bookk.JournalEntry.to_operations(journal_entry)
       [
-        debit(fixture_account_head(:cash), Decimal.new(50)),
-        credit(fixture_account_head(:deposits), Decimal.new(50))
+        Bookk.Operation.debit(ACME.ChartOfAccounts.account(:cash), Decimal.new(50)),
+        Bookk.Operation.credit(ACME.ChartOfAccounts.account(:deposits), Decimal.new(50))
       ]
 
   """
